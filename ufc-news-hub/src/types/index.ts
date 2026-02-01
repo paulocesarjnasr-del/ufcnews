@@ -10,6 +10,11 @@ export interface Lutador {
   ativo: boolean;
   created_at: Date;
   updated_at: Date;
+  // Optional stats (included when fetched with fight data)
+  pais?: string | null;
+  vitorias?: number;
+  derrotas?: number;
+  empates?: number;
 }
 
 export interface Noticia {
@@ -75,7 +80,7 @@ export interface ClassificationResult {
 
 export interface DeduplicationResult {
   isDuplicate: boolean;
-  reason?: 'hash_exato' | 'mesmo_evento';
+  reason?: 'hash_exato' | 'mesmo_evento' | 'titulo_similar';
   hash: string;
 }
 

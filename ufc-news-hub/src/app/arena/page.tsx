@@ -56,12 +56,16 @@ export default function ArenaPage() {
   }
 
   // Imagem de background (poster do evento ou fallback)
+  // Prioridade: poster_url > imagem_url > fallback genérico
   const backgroundImage = proximoEvento?.poster_url || proximoEvento?.imagem_url;
+
+  // Fallback: se não tiver imagem, usa um gradient vermelho/escuro temático
+  const hasBackgroundImage = !!backgroundImage;
 
   return (
     <div className="min-h-screen bg-dark-bg relative">
       {/* Background do evento */}
-      {backgroundImage && (
+      {hasBackgroundImage ? (
         <div className="absolute inset-0 z-0">
           <Image
             src={backgroundImage}
@@ -69,9 +73,20 @@ export default function ArenaPage() {
             fill
             className="object-cover object-top"
             priority
+            onError={(e) => {
+              // Se a imagem falhar ao carregar, esconde ela
+              console.log('[ARENA] Erro ao carregar poster, usando fallback');
+              (e.target as HTMLImageElement).style.display = 'none';
+            }}
           />
           {/* Overlay gradiente para legibilidade */}
           <div className="absolute inset-0 bg-gradient-to-b from-dark-bg/70 via-dark-bg/85 to-dark-bg" />
+        </div>
+      ) : (
+        // Fallback: gradient temático quando não há poster
+        <div className="absolute inset-0 z-0">
+          <div className="absolute inset-0 bg-gradient-to-br from-ufc-red/20 via-dark-bg to-dark-bg" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-ufc-red/10 via-transparent to-transparent" />
         </div>
       )}
 

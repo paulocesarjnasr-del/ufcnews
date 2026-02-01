@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { query, queryOne } from '@/lib/db';
 import * as cheerio from 'cheerio';
+import type { Element } from 'domhandler';
 import { processarEventoFinalizado } from '@/lib/arena/pontuacao';
 
 const UFC_EVENTS_URL = 'https://www.ufc.com/events';
@@ -170,15 +171,112 @@ interface FightResult {
   tempo_final?: string;
 }
 
-// Parsear detalhes de um evento (lutas)
-function parseEventDetails(html: string): {
+// URL de fallback para poster genérico do UFC
+const UFC_FALLBACK_POSTER = 'https://www.ufc.com/themes/custom/ufc/assets/img/ufc-logo-white.svg';
+
+// Parsear detalhes de um evento (lutas + poster)
+function parseEventDetails(html: string, eventName?: string): {
   fights: FightResult[];
   horario_main_card: string | null;
   horario_prelims: string | null;
   horario_early_prelims: string | null;
+  poster_url: string | null;
+  poster_debug: string;
 } {
   const $ = cheerio.load(html);
   const fights: FightResult[] = [];
+
+  // Extrair poster do evento (múltiplos seletores possíveis)
+  let poster_url: string | null = null;
+  let poster_debug = '';
+
+  // Lista de seletores priorizados (do mais específico ao mais genérico)
+  // Baseado na estrutura atual do UFC.com (Janeiro 2026)
+  const posterSelectors = [
+    // Seletores mais específicos para página de evento
+    '.c-hero--full picture source[type="image/webp"]',
+    '.c-hero--full picture img',
+    '.c-hero--full img',
+    '.c-hero__image picture source',
+    '.c-hero__image img',
+    // Seletores de evento
+    '.c-hero--event picture source',
+    '.c-hero--event img',
+    '.hero-event-image img',
+    // Seletores de broadcast/poster
+    '.c-event-fight-card-broadcaster__image img',
+    '.c-hero picture source',
+    '.c-hero picture img',
+    '.c-hero img',
+    // Seletores genéricos
+    '.event-hero img',
+    '.l-page-hero__image img',
+    // Atributos específicos
+    'img[alt*="poster" i]',
+    'img[alt*="event" i]',
+    'img[data-src*="event"]',
+  ];
+
+  for (const selector of posterSelectors) {
+    const imgEl = $(selector).first();
+
+    // Tentar vários atributos de imagem
+    let src = imgEl.attr('src') ||
+              imgEl.attr('srcset')?.split(',')[0]?.trim().split(' ')[0] ||
+              imgEl.attr('data-src') ||
+              imgEl.attr('data-lazy-src');
+
+    if (src && (src.startsWith('http') || src.startsWith('//'))) {
+      poster_url = src.startsWith('//') ? `https:${src}` : src;
+      poster_debug = `Encontrado via: ${selector}`;
+      break;
+    }
+  }
+
+  // Fallback: buscar qualquer imagem que pareça ser do evento
+  if (!poster_url) {
+    const allImages: string[] = [];
+
+    $('img').each((_, el) => {
+      const $img = $(el);
+      const src = $img.attr('src') || $img.attr('data-src') || '';
+      const alt = $img.attr('alt')?.toLowerCase() || '';
+      const className = $img.attr('class')?.toLowerCase() || '';
+
+      // Coletar para debug
+      if (src.includes('ufc')) {
+        allImages.push(`${src.substring(0, 80)}... (alt: ${alt.substring(0, 30)})`);
+      }
+
+      // Procurar imagens que parecem ser posters de eventos
+      if (!poster_url && src && (src.startsWith('http') || src.startsWith('//'))) {
+        const isEventImage =
+          src.includes('/styles/event') ||
+          src.includes('/event_') ||
+          src.includes('event-hero') ||
+          src.includes('poster') ||
+          alt.includes('ufc ') ||
+          alt.includes('fight night') ||
+          className.includes('hero');
+
+        if (isEventImage) {
+          poster_url = src.startsWith('//') ? `https:${src}` : src;
+          poster_debug = `Encontrado via fallback (alt: ${alt})`;
+        }
+      }
+    });
+
+    if (!poster_url && allImages.length > 0) {
+      poster_debug = `Nenhum poster encontrado. Imagens UFC na página: ${allImages.length}`;
+    }
+  }
+
+  // Log detalhado para debug
+  if (poster_url) {
+    console.log(`  [POSTER] ${eventName || 'Evento'}: ${poster_url.substring(0, 80)}... (${poster_debug})`);
+  } else {
+    console.log(`  [POSTER] ${eventName || 'Evento'}: NÃO ENCONTRADO. ${poster_debug}`);
+  }
 
   const cleanName = (name: string): string => name.replace(/\s+/g, ' ').trim().substring(0, 100);
 
@@ -217,7 +315,7 @@ function parseEventDetails(html: string): {
   };
 
   const parseFight = (
-    $fight: cheerio.Cheerio<cheerio.Element>,
+    $fight: cheerio.Cheerio<Element>,
     section: 'main_card' | 'prelims' | 'early_prelims',
     index: number
   ): FightResult | null => {
@@ -339,6 +437,8 @@ function parseEventDetails(html: string): {
     horario_main_card: formatTs(mainCardTs),
     horario_prelims: formatTs(prelimsTs),
     horario_early_prelims: formatTs(earlyTs),
+    poster_url,
+    poster_debug,
   };
 }
 
@@ -460,11 +560,12 @@ async function findOrCreateFighter(nome: string): Promise<string | null> {
   ]);
 
   // Criar novo lutador with initialized records
+  // Usamos as colunas corretas do schema: nocautes, finalizacoes, decisoes
   const result = await query<{ id: string }>(
     `INSERT INTO lutadores (
       nome, ativo, imagem_url,
       vitorias, derrotas, empates,
-      vitorias_ko, vitorias_sub, vitorias_dec
+      nocautes, finalizacoes, decisoes
     ) VALUES ($1, true, $2, $3, $4, $5, 0, 0, 0)
     RETURNING id`,
     [
@@ -532,17 +633,23 @@ async function updateFighterRecords(
       [perdedorId]
     );
 
-    // Se foi KO/TKO ou Submission, atualizar stats específicos se existirem
+    // Atualizar stats específicos por método de vitória
+    // Usando as colunas corretas do schema: nocautes, finalizacoes, decisoes
     if (metodo === 'KO/TKO') {
       await query(
-        `UPDATE lutadores SET vitorias_ko = COALESCE(vitorias_ko, 0) + 1 WHERE id = $1`,
+        `UPDATE lutadores SET nocautes = COALESCE(nocautes, 0) + 1 WHERE id = $1`,
         [vencedorId]
-      ).catch(() => {}); // Ignore if column doesn't exist
+      ).catch((err) => console.log('Erro ao atualizar nocautes:', err.message));
     } else if (metodo === 'Submission') {
       await query(
-        `UPDATE lutadores SET vitorias_sub = COALESCE(vitorias_sub, 0) + 1 WHERE id = $1`,
+        `UPDATE lutadores SET finalizacoes = COALESCE(finalizacoes, 0) + 1 WHERE id = $1`,
         [vencedorId]
-      ).catch(() => {}); // Ignore if column doesn't exist
+      ).catch((err) => console.log('Erro ao atualizar finalizacoes:', err.message));
+    } else if (metodo?.includes('Decision')) {
+      await query(
+        `UPDATE lutadores SET decisoes = COALESCE(decisoes, 0) + 1 WHERE id = $1`,
+        [vencedorId]
+      ).catch((err) => console.log('Erro ao atualizar decisoes:', err.message));
     }
 
     // Try to mark this fight as having records updated (if column exists)
@@ -599,9 +706,11 @@ async function syncEvents(): Promise<SyncResult> {
 
     for (const event of eventsToProcess) {
       try {
+        console.log(`\n[SYNC] Processando evento: ${event.nome} (${event.ufc_slug})`);
+
         // Buscar detalhes do evento
         const eventHtml = await fetchWithRetry(event.event_url);
-        const details = parseEventDetails(eventHtml);
+        const details = parseEventDetails(eventHtml, event.nome);
 
         // Verificar se evento existe
         const existing = await query<{ id: string }>(
@@ -614,39 +723,62 @@ async function syncEvents(): Promise<SyncResult> {
         if (existing.length > 0) {
           eventoId = existing[0].id;
 
-          // Atualizar evento
+          // Atualizar evento (incluindo poster_url se disponível)
           await query(
             `UPDATE eventos SET
               nome = $1, status = $2,
               horario_main_card = COALESCE($3, horario_main_card),
               horario_prelims = COALESCE($4, horario_prelims),
               horario_early_prelims = COALESCE($5, horario_early_prelims),
+              poster_url = COALESCE($6, poster_url),
               last_scraped_at = NOW()
-            WHERE id = $6`,
+            WHERE id = $7`,
             [
               event.nome, event.status,
               details.horario_main_card, details.horario_prelims, details.horario_early_prelims,
+              details.poster_url,
               eventoId
             ]
           );
+          console.log(`  -> Evento atualizado: ${event.nome}${details.poster_url ? ' (poster atualizado)' : ''}`);
           eventosAtualizados++;
         } else {
-          // Criar evento
-          const slug = event.nome.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+          // Criar evento - gerar slug único incluindo data para evitar duplicatas
+          let baseSlug = event.nome.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 
+          // Adicionar data ao slug para garantir unicidade (especialmente para eventos "TBD vs TBD")
+          if (event.data_evento) {
+            const dateStr = event.data_evento.toISOString().split('T')[0]; // YYYY-MM-DD
+            baseSlug = `${baseSlug}-${dateStr}`;
+          }
+
+          // Usar UPSERT para evitar erros de duplicação
           const insertResult = await query<{ id: string }>(
             `INSERT INTO eventos (
               nome, slug, ufc_slug, data_evento, local_evento, cidade, pais,
-              tipo, status, horario_main_card, horario_prelims, horario_early_prelims, last_scraped_at
-            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, NOW())
+              tipo, status, horario_main_card, horario_prelims, horario_early_prelims, poster_url, last_scraped_at
+            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, NOW())
+            ON CONFLICT (slug) DO UPDATE SET
+              nome = EXCLUDED.nome,
+              data_evento = COALESCE(EXCLUDED.data_evento, eventos.data_evento),
+              local_evento = COALESCE(EXCLUDED.local_evento, eventos.local_evento),
+              cidade = COALESCE(EXCLUDED.cidade, eventos.cidade),
+              pais = COALESCE(EXCLUDED.pais, eventos.pais),
+              horario_main_card = COALESCE(EXCLUDED.horario_main_card, eventos.horario_main_card),
+              horario_prelims = COALESCE(EXCLUDED.horario_prelims, eventos.horario_prelims),
+              horario_early_prelims = COALESCE(EXCLUDED.horario_early_prelims, eventos.horario_early_prelims),
+              poster_url = COALESCE(EXCLUDED.poster_url, eventos.poster_url),
+              last_scraped_at = NOW()
             RETURNING id`,
             [
-              event.nome, slug, event.ufc_slug, event.data_evento,
+              event.nome, baseSlug, event.ufc_slug, event.data_evento,
               event.local_evento, event.cidade, event.pais, event.tipo, event.status,
-              details.horario_main_card, details.horario_prelims, details.horario_early_prelims
+              details.horario_main_card, details.horario_prelims, details.horario_early_prelims,
+              details.poster_url
             ]
           );
           eventoId = insertResult[0].id;
+          console.log(`  -> Novo evento criado: ${event.nome}${details.poster_url ? ' (com poster)' : ''}`);
           eventosNovos++;
         }
 
@@ -674,11 +806,6 @@ async function syncEvents(): Promise<SyncResult> {
           const key1 = `${nome1.toLowerCase().trim()}-${nome2.toLowerCase().trim()}`;
           const key2 = `${nome2.toLowerCase().trim()}-${nome1.toLowerCase().trim()}`;
           return existingFightsMap.get(key1)?.id || existingFightsMap.get(key2)?.id || null;
-        };
-
-        // Helper to check if fight exists (in either order)
-        const fightExists = (nome1: string, nome2: string): boolean => {
-          return getExistingFightId(nome1, nome2) !== null;
         };
 
         // Create set of new fight keys (both orderings) for removal detection

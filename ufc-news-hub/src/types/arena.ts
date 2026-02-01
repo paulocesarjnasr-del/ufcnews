@@ -415,6 +415,7 @@ export const PONTUACAO_CONFIG = {
   XP_ACERTO: 25,
   XP_CARD_COMPLETO: 50,
   XP_CONQUISTA: 200,
+  XP_DUELO_VENCIDO: 100,
 
   // Multiplicadores de confiança
   // pontos_confianca / 100 = multiplicador

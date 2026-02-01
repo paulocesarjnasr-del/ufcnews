@@ -1,13 +1,22 @@
 export const RSS_FEED_URL =
   process.env.RSS_FEED_URL || 'https://www.mmamania.com/rss/current.xml';
 
+// Múltiplas fontes RSS para ter mais conteúdo
+export const RSS_FEED_URLS: string[] = [
+  'https://www.mmamania.com/rss/current.xml',
+  'https://www.mmafighting.com/rss/current.xml',
+  'https://www.bloodyelbow.com/rss/current.xml',
+  'https://www.mmanews.com/feed/',
+];
+
 export const SYNC_INTERVAL_MINUTES = parseInt(
   process.env.SYNC_INTERVAL_MINUTES || '15',
   10
 );
 
+// Aumentado para 168 horas (7 dias) para permitir mais notícias retroativas
 export const NEWS_MAX_AGE_HOURS = parseInt(
-  process.env.NEWS_MAX_AGE_HOURS || '24',
+  process.env.NEWS_MAX_AGE_HOURS || '168',
   10
 );
 

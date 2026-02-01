@@ -1,6 +1,6 @@
 import Parser from 'rss-parser';
 import { RSSItem } from '@/types';
-import { RSS_FEED_URL, NEWS_MAX_AGE_HOURS } from './constants';
+import { RSS_FEED_URL, RSS_FEED_URLS, NEWS_MAX_AGE_HOURS } from './constants';
 
 const parser = new Parser({
   customFields: {
@@ -162,6 +162,73 @@ export async function fetchRSSFeed(): Promise<RSSItem[]> {
     console.error('Erro ao buscar RSS feed:', error);
     throw error;
   }
+}
+
+/**
+ * Busca notícias de múltiplas fontes RSS
+ * Útil para popular o banco com mais conteúdo inicial
+ */
+export async function fetchMultipleRSSFeeds(): Promise<RSSItem[]> {
+  const allItems: RSSItem[] = [];
+  const seenUrls = new Set<string>();
+
+  console.log(`Buscando de ${RSS_FEED_URLS.length} fontes RSS...`);
+
+  for (const feedUrl of RSS_FEED_URLS) {
+    try {
+      console.log(`  -> Buscando: ${feedUrl}`);
+      const feed = await parser.parseURL(feedUrl);
+
+      if (!feed.items || feed.items.length === 0) {
+        console.log(`     Feed vazio: ${feedUrl}`);
+        continue;
+      }
+
+      let addedFromFeed = 0;
+      for (const item of feed.items as RSSFeedItem[]) {
+        if (!item.title || !item.link || !item.pubDate) {
+          continue;
+        }
+
+        // Evitar duplicatas por URL
+        if (seenUrls.has(item.link)) {
+          continue;
+        }
+        seenUrls.add(item.link);
+
+        const imageUrl = extractImageUrl(item);
+
+        allItems.push({
+          title: decodeHtmlEntities(item.title.trim()),
+          description: cleanDescription(item.contentSnippet || item.content),
+          link: item.link,
+          pubDate: item.pubDate,
+          enclosure: imageUrl
+            ? {
+                url: imageUrl,
+                type: item.enclosure?.type,
+                length: item.enclosure?.length,
+              }
+            : undefined,
+          content: item.content,
+          contentSnippet: item.contentSnippet,
+        });
+        addedFromFeed++;
+      }
+
+      console.log(`     ${addedFromFeed} itens adicionados de ${feedUrl}`);
+    } catch (error) {
+      console.error(`     Erro ao buscar ${feedUrl}:`, error);
+      // Continua com os outros feeds mesmo se um falhar
+    }
+  }
+
+  // Ordenar por data (mais recentes primeiro)
+  allItems.sort((a, b) => new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime());
+
+  console.log(`Total: ${allItems.length} itens de todas as fontes`);
+
+  return allItems;
 }
 
 export async function testRSSFeed(): Promise<void> {

@@ -1,5 +1,6 @@
 import { chromium, Browser, Page } from 'playwright';
 import * as cheerio from 'cheerio';
+import type { Element } from 'domhandler';
 import { Pool } from 'pg';
 
 const pool = new Pool({
@@ -368,7 +369,7 @@ async function scrapeEventDetails(page: Page, eventUrl: string): Promise<{
 
   // Função para parsear uma luta individual
   const parseFight = (
-    $fight: cheerio.Cheerio<cheerio.Element>,
+    $fight: cheerio.Cheerio<Element>,
     cardSection: 'main_card' | 'prelims' | 'early_prelims',
     indexInSection: number
   ) => {

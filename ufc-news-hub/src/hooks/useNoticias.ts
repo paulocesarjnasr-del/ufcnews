@@ -67,9 +67,9 @@ export function useNoticias(options: UseNoticiasOptions = {}): UseNoticiasReturn
   );
 
   // Combinar todas as notícias de todas as páginas e remover duplicatas
-  const allNoticias = data ? data.flatMap((page) => page.noticias) : [];
+  const allNoticias = data ? data.flatMap((page) => page?.noticias || []) : [];
   // Deduplica por ID para evitar erro de chave duplicada no React
-  const noticias = [...new Map(allNoticias.map(n => [n.id, n])).values()];
+  const noticias = [...new Map(allNoticias.filter(n => n?.id).map(n => [n.id, n])).values()];
 
   // Contadores da primeira página
   const contadores = data?.[0]?.contadores;

@@ -1,0 +1,52 @@
+{
+  "name": "ufc-news-hub",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev -p 3010",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "db:init": "tsx scripts/init-db.ts",
+    "db:arena": "tsx scripts/add-arena-tables.ts",
+    "db:seed": "tsx scripts/seed-lutadores.ts",
+    "db:seed-eventos": "tsx scripts/seed-eventos.ts",
+    "db:migrate-calendario": "tsx scripts/migrate-eventos-calendario.ts",
+    "sync": "tsx scripts/sync-rss.ts",
+    "auto-sync": "tsx scripts/auto-sync.ts",
+    "scrape:eventos": "tsx scripts/scrape-ufc-events.ts",
+    "scrape:records": "tsx scripts/scrape-fighter-records.ts",
+    "auto-sync:eventos": "tsx scripts/auto-sync-eventos.ts"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.32.1",
+    "cheerio": "^1.0.0",
+    "clsx": "^2.1.1",
+    "date-fns": "^4.1.0",
+    "date-fns-tz": "^3.2.0",
+    "dotenv": "^17.2.3",
+    "next": "^15.1.0",
+    "node-cron": "^3.0.3",
+    "pg": "^8.13.1",
+    "playwright": "^1.57.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "rss-parser": "^3.13.0",
+    "swr": "^2.2.5",
+    "tailwind-merge": "^2.6.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "@types/node-cron": "^3.0.11",
+    "@types/pg": "^8.11.10",
+    "@types/react": "^19.0.2",
+    "@types/react-dom": "^19.0.2",
+    "autoprefixer": "^10.4.20",
+    "eslint": "^9.17.0",
+    "eslint-config-next": "^15.1.0",
+    "postcss": "^8.4.49",
+    "tailwindcss": "^3.4.17",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  }
+}

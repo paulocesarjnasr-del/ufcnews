@@ -1,0 +1,166 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    @apply border-dark-border;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-dark-bg text-dark-text antialiased;
+    font-feature-settings: 'rlig' 1, 'calt' 1;
+  }
+
+  /* Scrollbar customizada */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-dark-bg;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply rounded-full bg-dark-border;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-ufc-red;
+  }
+
+  /* Firefox */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: theme('colors.dark.border') theme('colors.dark.bg');
+  }
+
+  /* Seleção de texto */
+  ::selection {
+    @apply bg-ufc-red/30 text-dark-text;
+  }
+}
+
+@layer components {
+  /* Card com hover */
+  .card-hover {
+    @apply transition-all duration-300 ease-out;
+    @apply hover:scale-[1.02] hover:shadow-2xl hover:shadow-ufc-red/10;
+    @apply hover:border-ufc-red/30;
+  }
+
+  /* Badges de categoria */
+  .badge-category {
+    @apply px-2 py-1 rounded text-xs font-bold uppercase tracking-wider;
+  }
+
+  .badge-lutadores {
+    @apply bg-category-lutadores/20 text-category-lutadores;
+  }
+
+  .badge-lutas {
+    @apply bg-category-lutas/20 text-category-lutas;
+  }
+
+  .badge-backstage {
+    @apply bg-category-backstage/20 text-category-backstage;
+  }
+
+  /* Títulos estilo UFC */
+  .title-display {
+    @apply font-display text-3xl md:text-4xl lg:text-5xl uppercase leading-tight;
+  }
+
+  /* Efeito de glow vermelho */
+  .glow-red {
+    text-shadow: 0 0 20px rgba(210, 10, 10, 0.5);
+  }
+
+  /* Container centralizado */
+  .container {
+    @apply max-w-7xl mx-auto;
+  }
+
+  /* Link underline animado */
+  .link-underline {
+    @apply relative;
+  }
+
+  .link-underline::after {
+    @apply absolute bottom-0 left-0 h-0.5 w-0 bg-ufc-red transition-all duration-300;
+    content: '';
+  }
+
+  .link-underline:hover::after {
+    @apply w-full;
+  }
+}
+
+@layer utilities {
+  /* Text balance para títulos */
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  /* Gradiente de texto UFC */
+  .text-gradient-ufc {
+    @apply bg-gradient-to-r from-ufc-red to-ufc-gold bg-clip-text text-transparent;
+  }
+
+  /* Aspect ratios customizados */
+  .aspect-21-9 {
+    aspect-ratio: 21 / 9;
+  }
+
+  /* Line clamp customizado */
+  .line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* Animação de entrada */
+  .animate-in {
+    animation: animate-in 0.3s ease-out;
+  }
+
+  @keyframes animate-in {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Pulse customizado para badge NOVO */
+  .pulse-glow {
+    animation: pulse-glow 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse-glow {
+    0%, 100% {
+      box-shadow: 0 0 5px rgba(210, 10, 10, 0.5);
+    }
+    50% {
+      box-shadow: 0 0 20px rgba(210, 10, 10, 0.8);
+    }
+  }
+}
+
+/* Estilos para imagens de fallback */
+.img-fallback {
+  @apply bg-dark-card flex items-center justify-center;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23404040' stroke-width='1'%3E%3Crect x='3' y='3' width='18' height='18' rx='2'/%3E%3Ccircle cx='8.5' cy='8.5' r='1.5'/%3E%3Cpath d='M21 15l-5-5L5 21'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 30%;
+}

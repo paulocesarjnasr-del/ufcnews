@@ -39,7 +39,8 @@
       "Bash(PGPASSWORD=ufcnews123 psql:*)",
       "Bash(npm ls:*)",
       "Bash(ls:*)",
-      "Bash(PGPASSWORD=\"$DATABASE_PASSWORD:-\" psql:*)"
+      "Bash(PGPASSWORD=\"$DATABASE_PASSWORD:-\" psql:*)",
+      "mcp__ide__getDiagnostics"
     ]
   }
 }

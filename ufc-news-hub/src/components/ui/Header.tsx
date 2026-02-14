@@ -12,6 +12,7 @@ interface SyncStatus {
 
 const mainNav = [
   { href: '/', label: 'Noticias', icon: '📰' },
+  { href: '/analises', label: 'Análises', icon: '📊' },
   { href: '/arena', label: 'Arena', icon: '🎯' },
   { href: '/calendario', label: 'Calendario', icon: '📅' },
   { href: '/arena/ranking', label: 'Ranking', icon: '🏆' },

@@ -5,6 +5,7 @@ import { MainLayout } from '@/components/layout/MainLayout';
 import { NewsGrid } from '@/components/ui/NewsGrid';
 import { NewsGridSkeleton } from '@/components/ui/LoadingSkeleton';
 import { useNoticias } from '@/hooks/useNoticias';
+import { LatestAnalysisBanner } from '@/components/analise/LatestAnalysisBanner';
 
 export default function HomePage() {
   const {
@@ -18,6 +19,9 @@ export default function HomePage() {
 
   return (
     <MainLayout contadores={contadores}>
+      {/* Dynamic Latest Analysis Banner */}
+      <LatestAnalysisBanner />
+
       {/* Lightweight Contenders Featured Banner */}
       <Link href="/lightweight-contenders" className="group mb-4 block">
         <div className="relative overflow-hidden rounded-xl border border-orange-400/30 bg-gradient-to-r from-dark-card via-orange-400/5 to-dark-card p-6 transition-all duration-300 hover:border-orange-400/60 hover:shadow-lg hover:shadow-orange-400/10 md:p-8">

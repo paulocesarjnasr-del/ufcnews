@@ -44,6 +44,24 @@ async function runSync(baseUrl: string) {
     results.errors.push(`Eventos: ${errorMsg}`);
   }
 
+  // 3. Weekly analysis generation (only on Tuesdays)
+  const today = new Date();
+  if (today.getUTCDay() === 2) { // Tuesday
+    console.log('[CRON] Tuesday detected — checking if analysis generation needed...');
+    try {
+      const analysisResponse = await fetch(`${baseUrl}/api/analises/generate?secret=${process.env.CRON_SECRET || 'ufc-news-cron-secret'}`, {
+        method: 'POST',
+      });
+      const analysisResult = await analysisResponse.json();
+      (results as Record<string, unknown>).analise = analysisResult;
+      console.log('[CRON] Analysis result:', analysisResult);
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : 'Erro desconhecido';
+      console.error('[CRON] Erro ao gerar análise:', errorMsg);
+      results.errors.push(`Análise: ${errorMsg}`);
+    }
+  }
+
   console.log(`[CRON] Sincronização completa finalizada - ${new Date().toISOString()}`);
 
   return results;

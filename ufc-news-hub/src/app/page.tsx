@@ -90,7 +90,7 @@ export default function HomePage() {
               </div>
               <span className="font-display text-lg text-dark-textMuted">VS</span>
               <div className="text-center">
-                <p className="font-display text-xl text-dark-text">12-2</p>
+                <p className="font-display text-xl text-dark-text">15-2</p>
                 <p className="text-xs text-dark-textMuted">#5 MW</p>
               </div>
             </div>

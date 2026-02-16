@@ -2,6 +2,25 @@ import Parser from 'rss-parser';
 import { RSSItem } from '@/types';
 import { RSS_FEED_URL, RSS_FEED_URLS, NEWS_MAX_AGE_HOURS } from './constants';
 
+// Map feed URLs to display names
+const SOURCE_NAMES: Record<string, string> = {
+  'mmamania.com': 'MMA Mania',
+  'mmafighting.com': 'MMA Fighting',
+  'espn.com': 'ESPN',
+  'mmanews.com': 'MMA News',
+  'lowkickmma.com': 'LowKick MMA',
+  'themaclife.com': 'TheMacLife',
+  'ufc.com': 'UFC',
+  'bloodyelbow.com': 'Bloody Elbow',
+};
+
+function getSourceName(feedUrl: string): string {
+  for (const [domain, name] of Object.entries(SOURCE_NAMES)) {
+    if (feedUrl.includes(domain)) return name;
+  }
+  return 'Unknown';
+}
+
 const parser = new Parser({
   customFields: {
     item: [
@@ -184,6 +203,7 @@ export async function fetchMultipleRSSFeeds(): Promise<RSSItem[]> {
         continue;
       }
 
+      const sourceName = getSourceName(feedUrl);
       let addedFromFeed = 0;
       for (const item of feed.items as RSSFeedItem[]) {
         if (!item.title || !item.link || !item.pubDate) {
@@ -212,6 +232,7 @@ export async function fetchMultipleRSSFeeds(): Promise<RSSItem[]> {
             : undefined,
           content: item.content,
           contentSnippet: item.contentSnippet,
+          sourceName,
         });
         addedFromFeed++;
       }

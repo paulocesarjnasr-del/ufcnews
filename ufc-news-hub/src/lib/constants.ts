@@ -1,12 +1,19 @@
 export const RSS_FEED_URL =
   process.env.RSS_FEED_URL || 'https://www.mmamania.com/rss/current.xml';
 
-// Múltiplas fontes RSS para ter mais conteúdo
+// Múltiplas fontes RSS — todas testadas e funcionando (fev/2026)
 export const RSS_FEED_URLS: string[] = [
+  // Vox Media (SB Nation) — alto volume, boa cobertura
   'https://www.mmamania.com/rss/current.xml',
   'https://www.mmafighting.com/rss/current.xml',
-  'https://www.bloodyelbow.com/rss/current.xml',
+  // ESPN — qualidade alta, menos volume
+  'https://www.espn.com/espn/rss/mma/news',
+  // Independentes
   'https://www.mmanews.com/feed/',
+  'https://www.lowkickmma.com/feed/',
+  'https://themaclife.com/feed/',
+  // UFC oficial
+  'https://www.ufc.com/rss/news',
 ];
 
 export const SYNC_INTERVAL_MINUTES = parseInt(

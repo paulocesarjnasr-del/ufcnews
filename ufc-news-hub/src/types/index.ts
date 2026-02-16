@@ -69,6 +69,7 @@ export interface RSSItem {
   };
   content?: string;
   contentSnippet?: string;
+  sourceName?: string;
 }
 
 export interface ClassificationResult {

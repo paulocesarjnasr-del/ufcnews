@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { Pool } from 'pg';
-import { fetchRSSFeed } from '@/lib/rss-parser';
+import { fetchMultipleRSSFeeds } from '@/lib/rss-parser';
 import { classifyNews } from '@/lib/keyword-classifier';
 import { checkDuplicate, checkDuplicateByUrl } from '@/lib/deduplication';
 import { SyncResult, Lutador } from '@/types';
@@ -61,6 +61,7 @@ async function saveNoticia(data: {
   conteudo_completo: string;
   imagem_url: string | null;
   fonte_url: string;
+  fonte_nome: string;
   categoria: string;
   hash_deduplicacao: string;
   publicado_em: Date;
@@ -73,10 +74,11 @@ async function saveNoticia(data: {
       conteudo_completo,
       imagem_url,
       fonte_url,
+      fonte_nome,
       categoria,
       hash_deduplicacao,
       publicado_em
-    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
     RETURNING id
   `,
     [
@@ -85,6 +87,7 @@ async function saveNoticia(data: {
       data.conteudo_completo,
       data.imagem_url,
       data.fonte_url,
+      data.fonte_nome,
       data.categoria,
       data.hash_deduplicacao,
       data.publicado_em,
@@ -117,10 +120,10 @@ export async function POST(): Promise<NextResponse<SyncResult>> {
   let processadas = 0;
 
   try {
-    // 1. Buscar RSS
-    console.log('Buscando feed RSS...');
-    const rssItems = await fetchRSSFeed();
-    console.log(`${rssItems.length} itens encontrados\n`);
+    // 1. Buscar RSS de TODAS as fontes
+    console.log('Buscando feeds RSS de múltiplas fontes...');
+    const rssItems = await fetchMultipleRSSFeeds();
+    console.log(`${rssItems.length} itens encontrados de todas as fontes\n`);
 
     if (rssItems.length === 0) {
       await updateSyncLog(syncLogId, {
@@ -201,6 +204,7 @@ export async function POST(): Promise<NextResponse<SyncResult>> {
           conteudo_completo: item.description,
           imagem_url: item.enclosure?.url || null,
           fonte_url: item.link,
+          fonte_nome: item.sourceName || 'Unknown',
           categoria: classification.categoria,
           hash_deduplicacao: dedup.hash,
           publicado_em: new Date(item.pubDate),

@@ -72,9 +72,9 @@ export default function HoustonPage() {
               </div>
             </div>
             <div className="mt-4 space-y-2">
-              <StatBar label="Sig. Strikes/min" value={5.62} max={8} color="red" />
-              <StatBar label="Strike Accuracy" value={47} max={100} suffix="%" color="red" />
-              <StatBar label="Strike Defense" value={62} max={100} suffix="%" color="red" />
+              <StatBar label="Sig. Strikes/min" value={5.95} max={8} color="red" />
+              <StatBar label="Strike Accuracy" value={42} max={100} suffix="%" color="red" />
+              <StatBar label="Strike Defense" value={60} max={100} suffix="%" color="red" />
               <StatBar label="TD Defense" value={76} max={100} suffix="%" color="red" />
             </div>
             <div className="mt-4 rounded bg-dark-bg p-3">
@@ -110,7 +110,7 @@ export default function HoustonPage() {
             </div>
             <div className="grid grid-cols-3 gap-4 text-center">
               <div>
-                <p className="font-display text-2xl text-dark-text">12-2</p>
+                <p className="font-display text-2xl text-dark-text">15-2</p>
                 <p className="text-xs text-dark-textMuted">Record (UFC)</p>
               </div>
               <div>
@@ -123,10 +123,10 @@ export default function HoustonPage() {
               </div>
             </div>
             <div className="mt-4 space-y-2">
-              <StatBar label="Sig. Strikes/min" value={3.89} max={8} color="blue" />
-              <StatBar label="Strike Accuracy" value={44} max={100} suffix="%" color="blue" />
-              <StatBar label="Strike Defense" value={55} max={100} suffix="%" color="blue" />
-              <StatBar label="TD Accuracy" value={42} max={100} suffix="%" color="blue" />
+              <StatBar label="Sig. Strikes/min" value={4.59} max={8} color="blue" />
+              <StatBar label="Strike Accuracy" value={62} max={100} suffix="%" color="blue" />
+              <StatBar label="Strike Defense" value={49} max={100} suffix="%" color="blue" />
+              <StatBar label="TD Average/15min" value={6.46} max={10} color="blue" />
             </div>
             <div className="mt-4 rounded bg-dark-bg p-3">
               <p className="text-xs text-dark-textMuted mb-1">Ultimas 5 Lutas</p>
@@ -175,7 +175,7 @@ export default function HoustonPage() {
               de uma vitória dominante para se manter na conversa por uma terceira luta pelo título.
             </p>
             <p>
-              Do outro lado, Hernandez (12-2 no UFC) está vivendo o melhor momento de sua carreira. Com 8 vitórias 
+              Do outro lado, Hernandez (15-2 no UFC) está vivendo o melhor momento de sua carreira. Com 8 vitórias 
               consecutivas, incluindo finalizações sobre Roman Dolidze e Roman Kopylov, e um impressionante TKO sobre 
               Michel Pereira no quinto round, "Fluffy" provou que pertence ao topo da divisão. Sua vitória por decisão 
               unânime sobre Brendan Allen em fevereiro de 2025 foi particularmente significativa, mostrando que pode 
@@ -239,7 +239,7 @@ export default function HoustonPage() {
                 <div className="mt-4 grid grid-cols-2 gap-4">
                   <div className="rounded bg-dark-bg p-3 text-center">
                     <p className="font-display text-xl text-dark-text">Alex Pereira</p>
-                    <p className="text-sm text-dark-textMuted">🇧🇷 12-2 (UFC)</p>
+                    <p className="text-sm text-dark-textMuted">🇧🇷 15-2 (UFC)</p>
                     <p className="text-xs text-ufc-gold">Campeão LHW</p>
                   </div>
                   <div className="rounded bg-dark-bg p-3 text-center">

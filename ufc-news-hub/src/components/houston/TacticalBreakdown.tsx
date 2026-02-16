@@ -1,16 +1,16 @@
 'use client';
 
 export function TacticalBreakdown() {
+  // Real stats from ufcstats.com (scraped Feb 2026)
   const stats = [
-    { label: 'Sig. Strikes/min', strickland: 5.62, hernandez: 3.89, advantage: 'strickland' },
-    { label: 'Strike Accuracy', strickland: 47, hernandez: 44, advantage: 'strickland', suffix: '%' },
-    { label: 'Strike Defense', strickland: 62, hernandez: 55, advantage: 'strickland', suffix: '%' },
-    { label: 'TD Average/15min', strickland: 0.81, hernandez: 1.52, advantage: 'hernandez' },
-    { label: 'TD Accuracy', strickland: 35, hernandez: 42, advantage: 'hernandez', suffix: '%' },
-    { label: 'TD Defense', strickland: 76, hernandez: 64, advantage: 'strickland', suffix: '%' },
-    { label: 'Sub Attempts/15min', strickland: 0.2, hernandez: 1.3, advantage: 'hernandez' },
-    { label: 'Win Streak', strickland: 0, hernandez: 8, advantage: 'hernandez' },
-    { label: 'Finish Rate', strickland: 38, hernandez: 75, advantage: 'hernandez', suffix: '%' },
+    { label: 'Sig. Strikes/min', strickland: 5.95, hernandez: 4.59, advantage: 'strickland' },
+    { label: 'Strike Accuracy', strickland: 42, hernandez: 62, advantage: 'hernandez', suffix: '%' },
+    { label: 'Str. Absorbed/min', strickland: 4.57, hernandez: 2.53, advantage: 'hernandez' },
+    { label: 'Strike Defense', strickland: 60, hernandez: 49, advantage: 'strickland', suffix: '%' },
+    { label: 'TD Average/15min', strickland: 0.73, hernandez: 6.46, advantage: 'hernandez' },
+    { label: 'TD Accuracy', strickland: 64, hernandez: 48, advantage: 'strickland', suffix: '%' },
+    { label: 'TD Defense', strickland: 76, hernandez: 68, advantage: 'strickland', suffix: '%' },
+    { label: 'Sub Attempts/15min', strickland: 0.2, hernandez: 1.8, advantage: 'hernandez' },
   ];
 
   const radarData = [

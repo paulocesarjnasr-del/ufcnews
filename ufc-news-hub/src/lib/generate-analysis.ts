@@ -1,4 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk';
+import { getFighterStatsByName, UFCFighterStats } from './ufcstats-scraper';
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -180,16 +181,36 @@ Return ONLY valid JSON with this exact structure:
   }
 }
 
+## REAL STATS FROM UFCSTATS.COM (USE THESE EXACT NUMBERS)
+{real_stats_block}
+
 IMPORTANT:
 - All probabilities for fighter1 + fighter2 scenarios should sum to ~97% (leave 3% for draw/NC)
-- Generate realistic UFC statistics based on known fighter data
+- USE THE EXACT REAL STATS PROVIDED ABOVE for sigStrikesPerMin, strikeAccuracy, strikeDefense, tdDefense, tdAvg, tdAcc, subAvg — DO NOT INVENT OR ESTIMATE THESE
 - Generate at least 3-4 scenarios per fighter and 5-7 key factors
 - Generate 3-4 paths to victory per fighter
 - Write the article and all text in Brazilian Portuguese
 - Make the analysis insightful and data-driven
-- Use actual UFC fighter statistics where known, estimate realistically where not
+- The radar chart (radarData) values are subjective 0-100 ratings you generate based on the real stats
 
 RESPOND WITH ONLY THE JSON, NO ADDITIONAL TEXT.`;
+
+function formatRealStats(name: string, label: string, stats: UFCFighterStats | null): string {
+  if (!stats) return `${label}: Stats not available for "${name}" — estimate based on known info.`;
+  return `${label} (${stats.name} — ${stats.record}):
+  - SLpM (Sig. Strikes/min): ${stats.slpm ?? 'N/A'}
+  - Str. Accuracy: ${stats.strAcc ?? 'N/A'}%
+  - SApM (Absorbed/min): ${stats.sapm ?? 'N/A'}
+  - Str. Defense: ${stats.strDef ?? 'N/A'}%
+  - TD Avg (per 15min): ${stats.tdAvg ?? 'N/A'}
+  - TD Accuracy: ${stats.tdAcc ?? 'N/A'}%
+  - TD Defense: ${stats.tdDef ?? 'N/A'}%
+  - Sub. Avg (per 15min): ${stats.subAvg ?? 'N/A'}
+  - Height: ${stats.height ?? 'N/A'}
+  - Reach: ${stats.reach ?? 'N/A'}
+  - Stance: ${stats.stance ?? 'N/A'}
+  - DOB: ${stats.dob ?? 'N/A'}`;
+}
 
 export async function generateFightAnalysis(
   event: EventData,
@@ -198,7 +219,22 @@ export async function generateFightAnalysis(
   const f1 = fight.lutador1;
   const f2 = fight.lutador2;
 
+  // Scrape real stats from ufcstats.com
+  console.log(`[ANALYSIS] Scraping stats for ${f1.nome} and ${f2.nome}...`);
+  const [f1Stats, f2Stats] = await Promise.all([
+    getFighterStatsByName(f1.nome),
+    getFighterStatsByName(f2.nome),
+  ]);
+  console.log(`[ANALYSIS] Stats scraped — F1: ${f1Stats ? 'OK' : 'NOT FOUND'}, F2: ${f2Stats ? 'OK' : 'NOT FOUND'}`);
+
+  const realStatsBlock = [
+    formatRealStats(f1.nome, 'FIGHTER 1 REAL STATS', f1Stats),
+    '',
+    formatRealStats(f2.nome, 'FIGHTER 2 REAL STATS', f2Stats),
+  ].join('\n');
+
   const prompt = ANALYSIS_PROMPT
+    .replace('{real_stats_block}', realStatsBlock)
     .replace('{evento_nome}', event.nome)
     .replace('{evento_data}', event.data_evento)
     .replace('{evento_local}', `${event.local_evento || ''}, ${event.cidade || ''}, ${event.pais || ''}`)

@@ -33,6 +33,7 @@ const NON_UFC_KEYWORDS = [
   'one fc',
   'pfl ',
   ' pfl',
+  'pfl:',
   'professional fighters league',
   'rizin',
   'ksw',
@@ -43,6 +44,7 @@ const NON_UFC_KEYWORDS = [
   'ares fc',
   'brave cf',
   'eagle fc',
+  'senshi',
 
   // Boxing (including Zuffa Boxing)
   'boxing',
@@ -56,12 +58,20 @@ const NON_UFC_KEYWORDS = [
   'boxing match',
   'boxing fight',
   'pugilismo',
+  'boxing promoter',
+  'eddie hearn',
+  'oscar de la hoya',
+  'shakur stevenson',
+  'canelo',
+  'tyson fury',
 
   // BJJ / Grappling competitions
   'ibjjf',
   'jiu jitsu world',
   'jiu-jitsu world',
   'bjj world',
+  'ufc bjj',
+  'musumeci',
   'adcc',
   'gordon ryan',
   'who\'s number one',
@@ -89,6 +99,11 @@ const NON_UFC_KEYWORDS = [
   'wrestling championship',
   'olympic wrestling',
   'collegiate wrestling',
+
+  // UFC non-fight content (marketing, merchandise, etc.)
+  'fragrance',
+  'tattoo care',
+  'name on canvas',
 ];
 
 // =============================================================================
@@ -618,11 +633,27 @@ export function classifyNews(
   // 4. Determine if UFC-related
   let ehUFC = false;
 
-  if (isNonUFC && !hasUFCKeyword) {
+  // Content that is NEVER UFC news regardless of keywords
+  const ALWAYS_REJECT = [
+    'zuffa boxing', 'ufc bjj', 'fragrance', 'tattoo care', 'name on canvas',
+  ];
+  const alwaysReject = ALWAYS_REJECT.some(k =>
+    normalizeText(fullText).includes(normalizeText(k))
+  );
+
+  if (alwaysReject) {
     ehUFC = false;
-  } else if (hasUFCKeyword) {
-    ehUFC = true;
-  } else if (hasFighters) {
+  } else if (isNonUFC && !hasUFCKeyword && !hasFighters) {
+    // Non-UFC keyword found, no UFC keyword, no UFC fighters → reject
+    ehUFC = false;
+  } else if (isNonUFC && !hasFighters) {
+    // Non-UFC keyword found and no UFC fighters mentioned → likely not UFC
+    // Even if "UFC" appears (e.g. "PFL rankings for UFC, Bellator and beyond")
+    ehUFC = false;
+  } else if (hasUFCKeyword || hasFighters) {
+    // Has UFC keyword OR mentions UFC fighters → accept
+    // This keeps articles like "Dana White mocks boxing promoters" (has UFC keyword + Dana White)
+    // and "Shakur wants to fight UFC champion Topuria" (mentions UFC fighter)
     ehUFC = true;
   }
 

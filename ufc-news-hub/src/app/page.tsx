@@ -6,6 +6,7 @@ import { NewsGrid } from '@/components/ui/NewsGrid';
 import { NewsGridSkeleton } from '@/components/ui/LoadingSkeleton';
 import { useNoticias } from '@/hooks/useNoticias';
 import { LatestAnalysisBanner } from '@/components/analise/LatestAnalysisBanner';
+import { ArrowRight } from 'lucide-react';
 
 export default function HomePage() {
   const {
@@ -24,7 +25,7 @@ export default function HomePage() {
 
       {/* UFC Houston Featured Banner */}
       <Link href="/houston" className="group mb-8 block">
-        <div className="relative overflow-hidden rounded-xl border border-ufc-red/30 bg-gradient-to-r from-dark-card via-ufc-red/5 to-dark-card p-6 transition-all duration-300 hover:border-ufc-red/60 hover:shadow-lg hover:shadow-ufc-red/10 md:p-8">
+        <div className="relative overflow-hidden neu-card-hover p-6 md:p-8">
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_right,rgba(210,10,10,0.1),transparent_60%)]" />
           <div className="relative z-10 flex flex-col items-center gap-4 md:flex-row md:justify-between">
             <div className="text-center md:text-left">
@@ -46,18 +47,18 @@ export default function HomePage() {
               </p>
             </div>
             <div className="flex items-center gap-3">
-              <div className="text-center">
+              <div className="text-center neu-inset px-4 py-2">
                 <p className="font-display text-xl text-dark-text">29-7</p>
                 <p className="text-xs text-dark-textMuted">#2 MW</p>
               </div>
               <span className="font-display text-lg text-dark-textMuted">VS</span>
-              <div className="text-center">
+              <div className="text-center neu-inset px-4 py-2">
                 <p className="font-display text-xl text-dark-text">15-2</p>
                 <p className="text-xs text-dark-textMuted">#5 MW</p>
               </div>
             </div>
-            <span className="flex items-center gap-1 rounded-full bg-ufc-red/20 px-4 py-2 text-sm font-bold text-ufc-red transition-colors group-hover:bg-ufc-red group-hover:text-white">
-              Ver Análise Completa →
+            <span className="flex items-center gap-2 neu-button px-4 py-2 text-sm font-bold text-ufc-red transition-colors group-hover:bg-ufc-red group-hover:text-white">
+              Ver Análise Completa <ArrowRight className="w-4 h-4" />
             </span>
           </div>
         </div>

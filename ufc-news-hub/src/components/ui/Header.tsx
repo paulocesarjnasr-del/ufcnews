@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { formatTimeAgo } from '@/lib/utils';
+import { Newspaper, BarChart3, Target, Calendar, Menu, X } from 'lucide-react';
 
 interface SyncStatus {
   status: 'running' | 'completed' | 'error';
@@ -11,11 +12,10 @@ interface SyncStatus {
 }
 
 const mainNav = [
-  { href: '/', label: 'Noticias', icon: '📰' },
-  { href: '/analises', label: 'Análises', icon: '📊' },
-  { href: '/arena', label: 'Arena', icon: '🎯' },
-  { href: '/calendario', label: 'Calendario', icon: '📅' },
-  { href: '/arena/ranking', label: 'Ranking', icon: '🏆' },
+  { href: '/', label: 'Noticias', icon: Newspaper },
+  { href: '/analises', label: 'Análises', icon: BarChart3 },
+  { href: '/arena', label: 'Arena', icon: Target },
+  { href: '/calendario', label: 'Calendario', icon: Calendar },
 ];
 
 export function Header() {
@@ -63,20 +63,23 @@ export function Header() {
 
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center gap-1">
-          {mainNav.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                isActive(item.href)
-                  ? 'bg-ufc-red/10 text-ufc-red'
-                  : 'text-dark-textMuted hover:text-dark-text hover:bg-dark-card'
-              }`}
-            >
-              <span>{item.icon}</span>
-              <span>{item.label}</span>
-            </Link>
-          ))}
+          {mainNav.map((item) => {
+            const Icon = item.icon;
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium transition-all neu-button ${
+                  isActive(item.href)
+                    ? 'bg-ufc-red/10 text-ufc-red'
+                    : 'text-dark-textMuted hover:text-dark-text'
+                }`}
+              >
+                <Icon className="w-4 h-4" />
+                <span>{item.label}</span>
+              </Link>
+            );
+          })}
         </nav>
 
         {/* Right side */}
@@ -101,16 +104,12 @@ export function Header() {
           {/* Mobile menu button */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden p-2 text-dark-textMuted hover:text-dark-text"
+            className="md:hidden p-2 text-dark-textMuted hover:text-dark-text neu-button"
           >
             {mobileMenuOpen ? (
-              <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
+              <X className="h-6 w-6" />
             ) : (
-              <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
+              <Menu className="h-6 w-6" />
             )}
           </button>
         </div>
@@ -118,22 +117,25 @@ export function Header() {
 
       {/* Mobile Navigation */}
       {mobileMenuOpen && (
-        <nav className="md:hidden border-t border-dark-border bg-dark-card">
+        <nav className="md:hidden border-t border-dark-border neu-card">
           <div className="container mx-auto px-4 py-2">
-            {mainNav.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
-                  isActive(item.href)
-                    ? 'bg-ufc-red/10 text-ufc-red'
-                    : 'text-dark-textMuted hover:text-dark-text hover:bg-dark-bg'
-                }`}
-              >
-                <span className="text-lg">{item.icon}</span>
-                <span>{item.label}</span>
-              </Link>
-            ))}
+            {mainNav.map((item) => {
+              const Icon = item.icon;
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
+                    isActive(item.href)
+                      ? 'bg-ufc-red/10 text-ufc-red'
+                      : 'text-dark-textMuted hover:text-dark-text hover:bg-dark-bg'
+                  }`}
+                >
+                  <Icon className="w-5 h-5" />
+                  <span>{item.label}</span>
+                </Link>
+              );
+            })}
           </div>
         </nav>
       )}

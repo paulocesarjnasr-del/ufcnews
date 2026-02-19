@@ -216,47 +216,6 @@ export default function HoustonPage() {
           <FightPrediction />
         </section>
 
-        {/* Pereira vs Ankalaev Sidebar */}
-        <section className="mb-12">
-          <h2 className="mb-6 font-display text-2xl uppercase text-dark-text">
-            📺 Também no <span className="text-ufc-gold">UFC YouTube</span>
-          </h2>
-          <div className="rounded-lg border border-dark-border bg-dark-card p-6">
-            <div className="flex flex-col md:flex-row gap-6">
-              <div className="flex-1">
-                <span className="rounded bg-ufc-gold/20 px-2 py-1 text-xs font-bold uppercase text-ufc-gold">
-                  UFC Classics
-                </span>
-                <h3 className="mt-3 font-display text-2xl uppercase text-dark-text">
-                  Alex Pereira vs Magomed Ankalaev 2
-                </h3>
-                <p className="mt-2 text-dark-textMuted">
-                  O UFC republicou a revanche entre Pereira e Ankalaev — a luta onde "Poatan" perdeu o cinturão dos 
-                  meio-pesados por decisão unânime no UFC 313. Esta repostagem no YouTube sinaliza a construção 
-                  narrativa para a trilogia no UFC 320, onde Pereira recuperou o título com um TKO devastador no 
-                  primeiro round.
-                </p>
-                <div className="mt-4 grid grid-cols-2 gap-4">
-                  <div className="rounded bg-dark-bg p-3 text-center">
-                    <p className="font-display text-xl text-dark-text">Alex Pereira</p>
-                    <p className="text-sm text-dark-textMuted">🇧🇷 15-2 (UFC)</p>
-                    <p className="text-xs text-ufc-gold">Campeão LHW</p>
-                  </div>
-                  <div className="rounded bg-dark-bg p-3 text-center">
-                    <p className="font-display text-xl text-dark-text">Magomed Ankalaev</p>
-                    <p className="text-sm text-dark-textMuted">🇷🇺 20-2-1</p>
-                    <p className="text-xs text-dark-textMuted">#1 LHW</p>
-                  </div>
-                </div>
-                <p className="mt-4 text-sm text-dark-textMuted">
-                  <strong className="text-ufc-red">Narrativa UFC:</strong> Com 602k views em 1 dia, o UFC está 
-                  claramente preparando o terreno para Pereira vs Ankalaev 4. A rivalidade já é uma das maiores 
-                  da história da divisão.
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
       </main>
     </div>
   );

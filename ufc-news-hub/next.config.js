@@ -30,6 +30,34 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'www.mmamania.com',
       },
+      {
+        protocol: 'https',
+        hostname: 'www.youtube.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'i.ytimg.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'img.youtube.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'platform.mmafighting.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'www.mmafighting.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'www.lowkickmma.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'lowkickmma.com',
+      },
     ],
   },
 };

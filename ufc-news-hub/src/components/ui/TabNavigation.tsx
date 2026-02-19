@@ -4,18 +4,20 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { ContadorCategorias } from '@/types';
+import { LayoutGrid, Users, Swords, Clapperboard, LucideIcon } from 'lucide-react';
 
 interface Tab {
   href: string;
   label: string;
   countKey: keyof ContadorCategorias;
+  icon: LucideIcon;
 }
 
 const tabs: Tab[] = [
-  { href: '/', label: 'Todas', countKey: 'todas' },
-  { href: '/lutadores', label: 'Lutadores', countKey: 'lutadores' },
-  { href: '/lutas', label: 'Lutas', countKey: 'lutas' },
-  { href: '/backstage', label: 'Backstage', countKey: 'backstage' },
+  { href: '/', label: 'Todas', countKey: 'todas', icon: LayoutGrid },
+  { href: '/lutadores', label: 'Lutadores', countKey: 'lutadores', icon: Users },
+  { href: '/lutas', label: 'Lutas', countKey: 'lutas', icon: Swords },
+  { href: '/backstage', label: 'Backstage', countKey: 'backstage', icon: Clapperboard },
 ];
 
 interface TabNavigationProps {
@@ -32,6 +34,7 @@ export function TabNavigation({ contadores }: TabNavigationProps) {
           {tabs.map((tab) => {
             const isActive = pathname === tab.href;
             const count = contadores?.[tab.countKey];
+            const Icon = tab.icon;
 
             return (
               <Link
@@ -43,6 +46,7 @@ export function TabNavigation({ contadores }: TabNavigationProps) {
                   isActive ? 'text-dark-text' : 'text-dark-textMuted'
                 )}
               >
+                <Icon className="w-4 h-4" />
                 <span>{tab.label}</span>
                 {count !== undefined && count > 0 && (
                   <span

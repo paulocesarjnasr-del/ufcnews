@@ -7,6 +7,7 @@ import { Noticia } from '@/types';
 import { CategoryBadge } from './CategoryBadge';
 import { TimeAgo } from './TimeAgo';
 import { PLACEHOLDER_IMAGE } from '@/lib/constants';
+import { ChevronRight } from 'lucide-react';
 
 interface NewsCardProps {
   noticia: Noticia;
@@ -20,8 +21,7 @@ export function NewsCard({ noticia, featured = false }: NewsCardProps) {
     <Link
       href={`/noticia/${noticia.id}`}
       className={cn(
-        'group relative flex flex-col overflow-hidden rounded-lg border border-dark-border bg-dark-card transition-all duration-300',
-        'hover:scale-[1.02] hover:border-ufc-red/30 hover:shadow-2xl hover:shadow-ufc-red/10',
+        'group relative flex flex-col overflow-hidden neu-card-hover',
         featured && 'sm:col-span-2 lg:col-span-2'
       )}
     >
@@ -91,20 +91,7 @@ export function NewsCard({ noticia, featured = false }: NewsCardProps) {
 
           {/* Seta indicadora */}
           <span className="text-dark-textMuted transition-transform group-hover:translate-x-1 group-hover:text-ufc-red">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M9 5l7 7-7 7"
-              />
-            </svg>
+            <ChevronRight className="h-5 w-5" />
           </span>
         </div>
       </div>

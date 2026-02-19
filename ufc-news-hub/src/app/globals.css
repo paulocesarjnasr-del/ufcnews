@@ -47,6 +47,52 @@
 }
 
 @layer components {
+  /* Neumorphism Cards */
+  .neu-card {
+    @apply relative rounded-2xl bg-dark-card;
+    box-shadow:
+      8px 8px 16px rgba(0, 0, 0, 0.4),
+      -8px -8px 16px rgba(45, 45, 45, 0.1);
+  }
+
+  .neu-card-hover {
+    @apply neu-card transition-all duration-300 ease-out;
+  }
+
+  .neu-card-hover:hover {
+    box-shadow:
+      12px 12px 24px rgba(0, 0, 0, 0.5),
+      -12px -12px 24px rgba(45, 45, 45, 0.15),
+      0 0 30px rgba(210, 10, 10, 0.1);
+    transform: translateY(-2px);
+  }
+
+  .neu-inset {
+    @apply rounded-xl bg-dark-bg;
+    box-shadow:
+      inset 4px 4px 8px rgba(0, 0, 0, 0.3),
+      inset -4px -4px 8px rgba(45, 45, 45, 0.05);
+  }
+
+  .neu-button {
+    @apply rounded-xl bg-dark-card transition-all duration-200;
+    box-shadow:
+      4px 4px 8px rgba(0, 0, 0, 0.3),
+      -4px -4px 8px rgba(45, 45, 45, 0.08);
+  }
+
+  .neu-button:hover {
+    box-shadow:
+      2px 2px 4px rgba(0, 0, 0, 0.3),
+      -2px -2px 4px rgba(45, 45, 45, 0.08);
+  }
+
+  .neu-button:active {
+    box-shadow:
+      inset 2px 2px 4px rgba(0, 0, 0, 0.3),
+      inset -2px -2px 4px rgba(45, 45, 45, 0.05);
+  }
+
   /* Card com hover */
   .card-hover {
     @apply transition-all duration-300 ease-out;

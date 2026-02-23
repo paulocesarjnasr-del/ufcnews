@@ -1,5 +1,7 @@
 const http = require('http');
 const { Pool } = require('pg');
+const fs = require('fs');
+const path = require('path');
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL || 'postgresql://ufcnews:ufcnews123@localhost:5432/ufc_news_hub',
@@ -111,6 +113,145 @@ async function getDbStats() {
     recentTasks,
     costs,
     nextEvent: nextEvent[0] || null,
+  };
+}
+
+// ── Agent Tools Parsing ──────────────────────────────────────────────
+const AGENTS_INDEX_PATH = path.join(__dirname, '..', 'src', 'lib', 'ai-company', 'agents', 'index.ts');
+const TOOLS_INDEX_PATH = path.join(__dirname, '..', 'src', 'lib', 'ai-company', 'tools', 'index.ts');
+
+function parseAgentToolsFromFile() {
+  try {
+    var content = fs.readFileSync(AGENTS_INDEX_PATH, 'utf-8');
+    var blockMatch = content.match(/const AGENT_TOOLS[^=]*=\s*\{([\s\S]*?)\n\};/);
+    if (!blockMatch) return {};
+    var block = blockMatch[1];
+    var result = {};
+    var agentRe = /['"]?([\w-]+)['"]?\s*:\s*\{([^}]*)\}/g;
+    var m;
+    while ((m = agentRe.exec(block)) !== null) {
+      var agentId = m[1];
+      var toolsBlock = m[2];
+      var toolNames = [];
+      var toolRe = /(\w+)\s*:\s*tools\.\w+/g;
+      var tm;
+      while ((tm = toolRe.exec(toolsBlock)) !== null) {
+        toolNames.push(tm[1]);
+      }
+      if (toolNames.length > 0) {
+        result[agentId] = toolNames;
+      }
+    }
+    return result;
+  } catch (e) {
+    console.error('parseAgentToolsFromFile error:', e.message);
+    return {};
+  }
+}
+
+function parseToolSources() {
+  try {
+    var content = fs.readFileSync(TOOLS_INDEX_PATH, 'utf-8');
+    var result = {};
+    var toolRe = /export const (\w+)\s*=\s*tool\(\{/g;
+    var m;
+    while ((m = toolRe.exec(content)) !== null) {
+      var name = m[1];
+      var startIdx = m.index;
+      var depth = 0;
+      var endIdx = content.indexOf('{', startIdx + m[0].length - 1);
+      for (var i = endIdx; i < content.length; i++) {
+        if (content[i] === '{') depth++;
+        else if (content[i] === '}') {
+          depth--;
+          if (depth === 0) {
+            endIdx = i;
+            break;
+          }
+        }
+      }
+      var closeIdx = content.indexOf(');', endIdx);
+      if (closeIdx === -1) closeIdx = endIdx + 1;
+      else closeIdx += 2;
+      var source = content.substring(startIdx, closeIdx);
+      var descMatch = source.match(/description:\s*['"`]([^'"`]+)['"`]/);
+      var description = descMatch ? descMatch[1] : '';
+      var lineCount = source.split('\n').length;
+      result[name] = { name: name, description: description, source: source, lineCount: lineCount };
+    }
+    return result;
+  } catch (e) {
+    console.error('parseToolSources error:', e.message);
+    return {};
+  }
+}
+
+async function getAgentToolsData() {
+  var agentToolsMap = parseAgentToolsFromFile();
+  var toolSources = parseToolSources();
+  var dbAgents = [];
+  try {
+    var qr = await pool.query('SELECT id, "humanName", codename, icon, model, status FROM agents ORDER BY id');
+    dbAgents = qr.rows;
+  } catch (e) {
+    console.error('getAgentToolsData DB error:', e.message);
+  }
+  var allToolNames = new Set();
+  var agents = [];
+  var allAgentIds = new Set([...Object.keys(agentToolsMap), ...dbAgents.map(function(a) { return a.id; })]);
+  for (var agentId of allAgentIds) {
+    var dbAgent = dbAgents.find(function(a) { return a.id === agentId; });
+    var fileTools = agentToolsMap[agentId] || [];
+    fileTools.forEach(function(t) { allToolNames.add(t); });
+    agents.push({
+      id: agentId,
+      humanName: dbAgent ? dbAgent.humanName : agentId,
+      codename: dbAgent ? dbAgent.codename : agentId,
+      icon: dbAgent ? dbAgent.icon : '🤖',
+      model: dbAgent ? dbAgent.model : 'unknown',
+      status: dbAgent ? dbAgent.status : 'unknown',
+      tools: fileTools,
+      inDatabase: !!dbAgent,
+    });
+  }
+  var allTools = {};
+  for (var tName of allToolNames) {
+    allTools[tName] = toolSources[tName] || { name: tName, description: '', source: '', lineCount: 0 };
+  }
+  return {
+    agents: agents,
+    totalAgents: agents.length,
+    totalUniqueTools: allToolNames.size,
+    allTools: allTools,
+    toolsInDatabase: false,
+  };
+}
+
+async function getAgentDetailData(agentId) {
+  var agentToolsMap = parseAgentToolsFromFile();
+  var toolSources = parseToolSources();
+  var dbAgent = null;
+  try {
+    var qr = await pool.query('SELECT * FROM agents WHERE id = $1', [agentId]);
+    if (qr.rows.length > 0) dbAgent = qr.rows[0];
+  } catch (e) {
+    console.error('getAgentDetailData DB error:', e.message);
+  }
+  var fileTools = agentToolsMap[agentId] || [];
+  var toolDetails = fileTools.map(function(tName) {
+    return toolSources[tName] || { name: tName, description: '', source: '', lineCount: 0 };
+  });
+  return {
+    id: agentId,
+    humanName: dbAgent ? dbAgent.humanName : agentId,
+    codename: dbAgent ? dbAgent.codename : agentId,
+    icon: dbAgent ? dbAgent.icon : '🤖',
+    model: dbAgent ? dbAgent.model : 'unknown',
+    systemPrompt: dbAgent ? dbAgent.systemPrompt : '',
+    status: dbAgent ? dbAgent.status : 'unknown',
+    tools: toolDetails,
+    toolNames: fileTools,
+    inDatabase: !!dbAgent,
   };
 }
 
@@ -307,16 +448,174 @@ const HTML = `<!DOCTYPE html>
   .next-event .ne-name { font-size: 14px; font-weight: 700; color: #fff; }
   .next-event .ne-info { font-size: 11px; color: #888; margin-top: 2px; }
   .next-event .ne-badge { font-size: 11px; color: #d20a0a; font-weight: 600; }
+
+  /* ── Tab Navigation ── */
+  .tab-bar {
+    display: flex; gap: 0; margin-bottom: 20px; border-bottom: 2px solid #1e1e2e;
+    overflow-x: auto; -webkit-overflow-scrolling: touch;
+  }
+  .tab {
+    padding: 10px 20px; font-size: 12px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 1px; color: #555; cursor: pointer; border-bottom: 2px solid transparent;
+    margin-bottom: -2px; transition: all 0.2s; white-space: nowrap; background: none; border-top: none; border-left: none; border-right: none;
+  }
+  .tab:hover { color: #999; }
+  .tab.active { color: #d20a0a; border-bottom-color: #d20a0a; }
+  .view-panel { display: none; }
+  .view-panel.active { display: block; }
+
+  /* ── Tools View ── */
+  .tools-header { margin-bottom: 16px; }
+  .tools-header h2 { font-size: 18px; color: #fff; }
+  .db-warning {
+    background: rgba(250,204,21,0.08); border: 1px solid rgba(250,204,21,0.25);
+    color: #facc15; font-size: 11px; padding: 8px 14px; border-radius: 8px; margin-bottom: 14px;
+  }
+  .tools-summary {
+    display: flex; gap: 16px; margin-bottom: 16px; font-size: 12px; color: #888;
+  }
+  .tools-summary .ts-val { font-size: 22px; font-weight: 700; color: #fff; }
+  .view-toggle { display: flex; gap: 8px; margin-bottom: 16px; }
+  .vbtn {
+    padding: 6px 16px; border-radius: 6px; border: 1px solid #333; background: #12121a;
+    color: #888; font-size: 11px; cursor: pointer; transition: all 0.2s;
+  }
+  .vbtn:hover { border-color: #555; color: #ccc; }
+  .vbtn.active { background: #d20a0a; border-color: #d20a0a; color: #fff; }
+
+  /* Tool Cards */
+  .tools-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 12px; }
+  .tools-agent-card {
+    background: #12121a; border: 1px solid #1e1e2e; border-radius: 10px; padding: 14px;
+  }
+  .tac-header {
+    display: flex; align-items: center; gap: 8px; margin-bottom: 10px;
+  }
+  .tac-icon { font-size: 20px; }
+  .tac-name { font-size: 13px; font-weight: 700; color: #fff; }
+  .tac-id { font-size: 10px; color: #555; }
+  .tac-count { font-size: 11px; color: #d4af37; margin-top: 8px; }
+  .tac-tools { display: flex; flex-wrap: wrap; gap: 4px; }
+  .ttag {
+    font-size: 9px; padding: 2px 8px; border-radius: 4px;
+    transition: all 0.15s; border: 1px solid transparent; display: inline-block;
+  }
+  .ttag.clickable { cursor: pointer; }
+  .ttag.clickable:hover { transform: scale(1.05); filter: brightness(1.3); }
+  .ttag.sec { background: rgba(239,68,68,0.15); color: #f87171; }
+  .ttag.qry { background: rgba(59,130,246,0.15); color: #60a5fa; }
+  .ttag.wrt { background: rgba(250,204,21,0.15); color: #facc15; }
+  .ttag.web { background: rgba(74,222,128,0.15); color: #4ade80; }
+  .ttag.other { background: rgba(148,163,184,0.15); color: #94a3b8; }
+  .summary-card {
+    background: #12121a; border: 1px solid #1e1e2e; border-radius: 10px; padding: 12px 16px; text-align: center;
+  }
+  .summary-card .sv { font-size: 22px; font-weight: 700; color: #fff; }
+  .summary-card .sl { font-size: 10px; color: #666; text-transform: uppercase; }
+  .summary-card.sc-red .sv { color: #f87171; }
+  .summary-card.sc-blue .sv { color: #60a5fa; }
+  .summary-card.sc-yellow .sv { color: #facc15; }
+  .summary-card.sc-green .sv { color: #4ade80; }
+
+  /* Matrix */
+  .matrix-wrap { overflow-x: auto; max-height: 70vh; overflow-y: auto; }
+  .matrix-table { border-collapse: collapse; font-size: 10px; }
+  .matrix-table th { position: sticky; top: 0; background: #0e0e16; padding: 4px 6px; color: #888; z-index: 2; }
+  .matrix-table td { padding: 4px 6px; border: 1px solid #1a1a2a; text-align: center; }
+  .matrix-table .agent-col { position: sticky; left: 0; background: #12121a; color: #ccc; font-weight: 600; text-align: left; z-index: 1; white-space: nowrap; }
+  .matrix-table .has-tool { background: rgba(74,222,128,0.12); color: #4ade80; cursor: pointer; }
+  .matrix-table .has-tool:hover { background: rgba(74,222,128,0.25); }
+  .matrix-table .no-tool { color: #222; }
+
+  /* Code Modal */
+  .code-modal-overlay {
+    display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.7); z-index: 100; justify-content: center; align-items: center;
+  }
+  .code-modal-overlay.show { display: flex; }
+  .code-modal {
+    background: #12121a; border: 1px solid #333; border-radius: 12px;
+    width: 90%; max-width: 800px; max-height: 80vh; display: flex; flex-direction: column;
+  }
+  .code-modal-header {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 14px 18px; border-bottom: 1px solid #1e1e2e;
+  }
+  .code-modal-header h3 { font-size: 14px; color: #fff; }
+  .close-btn {
+    background: none; border: none; color: #888; font-size: 22px; cursor: pointer;
+    padding: 0 6px; line-height: 1;
+  }
+  .close-btn:hover { color: #fff; }
+  .code-modal-desc { padding: 8px 18px; font-size: 11px; color: #888; }
+  .code-modal-body {
+    padding: 14px 18px; overflow: auto; flex: 1;
+    font-family: 'SF Mono', 'Fira Code', monospace; font-size: 11px; line-height: 1.5;
+    color: #ccc; white-space: pre-wrap; background: #0a0a0f; margin: 0 12px 12px; border-radius: 8px;
+  }
+
+  /* Lab */
+  .lab-split { display: grid; grid-template-columns: 260px 1fr; gap: 16px; min-height: 500px; }
+  .lab-agents {
+    background: #12121a; border: 1px solid #1e1e2e; border-radius: 10px; padding: 14px;
+    max-height: 70vh; overflow-y: auto;
+  }
+  .lab-agents h3 { font-size: 12px; color: #888; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
+  .lab-pill {
+    display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 8px;
+    cursor: pointer; transition: all 0.15s; font-size: 11px; color: #888;
+    background: transparent; border: 1px solid transparent;
+  }
+  .lab-pill:hover { background: rgba(255,255,255,0.03); color: #ccc; }
+  .lab-pill.active { background: rgba(210,10,10,0.1); border-color: rgba(210,10,10,0.3); color: #ff4444; }
+  .lab-panel {
+    background: #12121a; border: 1px solid #1e1e2e; border-radius: 10px; padding: 18px;
+    overflow-y: auto; max-height: 70vh;
+  }
+  .lab-prompt {
+    background: #0a0a0f; border: 1px solid #1a1a2a; border-radius: 8px; padding: 12px;
+    font-size: 11px; color: #aaa; max-height: 200px; overflow-y: auto; white-space: pre-wrap; line-height: 1.5;
+  }
+  .lab-tools-list { display: flex; flex-wrap: wrap; gap: 4px; margin: 8px 0; }
+  .lab-tool-btn {
+    font-size: 10px; padding: 4px 10px; border-radius: 4px; border: 1px solid #333;
+    background: #1a1a2a; color: #888; cursor: pointer; transition: all 0.15s;
+  }
+  .lab-tool-btn:hover { border-color: #555; color: #ccc; }
+  .lab-tool-btn.active { background: rgba(59,130,246,0.15); border-color: rgba(59,130,246,0.4); color: #60a5fa; }
+  .lab-scenarios { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .lab-scenario-btn {
+    font-size: 10px; padding: 6px 12px; border-radius: 6px; border: 1px solid #333;
+    background: #12121a; color: #ccc; cursor: pointer; transition: all 0.15s;
+  }
+  .lab-scenario-btn:hover { border-color: #d20a0a; color: #ff4444; }
+  .lab-steps {
+    background: #0a0a0f; border: 1px solid #1a1a2a; border-radius: 8px; padding: 12px;
+    font-size: 11px; min-height: 120px; max-height: 300px; overflow-y: auto;
+  }
+  .sim-step {
+    padding: 6px 0; border-bottom: 1px solid #111; animation: slideIn 0.3s ease;
+  }
+  .sim-step:last-child { border-bottom: none; }
 </style>
 </head>
 <body>
 
 <!-- Header -->
 <div class="header">
-  <h1>🗄️ UFC News Hub <span class="red">Database</span></h1>
-  <div class="sub">31 tabelas · 3 views · 11 enums · 43 FKs · 122 índices</div>
+  <h1>🗄️ UFC News Hub <span class="red">CRM</span></h1>
+  <div class="sub">31 tabelas · 60 tools · 18 agentes · 122 índices</div>
   <div class="live"><span class="dot"></span> LIVE — atualiza a cada 3s · <span id="clock">—</span></div>
 </div>
+
+<!-- Tab Navigation -->
+<div class="tab-bar">
+  <button class="tab active" data-view="overview" onclick="switchTab(this)">📊 Overview</button>
+  <button class="tab" data-view="tools" onclick="switchTab(this)">🛠️ Tools</button>
+</div>
+
+<!-- Overview Panel -->
+<div class="view-panel active" id="view-overview">
 
 <!-- Next Event -->
 <div class="next-event" id="nextEvent" style="display:none"></div>
@@ -396,6 +695,37 @@ const HTML = `<!DOCTYPE html>
     <h2>🏷️ Enums, Views & Checks</h2>
   </div>
   <div class="ref-grid" id="refGrid"></div>
+</div>
+
+</div><!-- /view-overview -->
+
+<!-- Tools View -->
+<div class="view-panel" id="view-tools">
+  <div class="tools-header">
+    <h2>🛠️ Agent Tools Explorer</h2>
+  </div>
+  <div class="db-warning" id="toolsDbWarning">⚠️ Mapeamento lido do código-fonte (agents/index.ts). As tools não estão no CRM/DB — apenas no código.</div>
+  <div class="tools-summary" id="toolsSummary"></div>
+  <div class="view-toggle" id="toolsViewToggle">
+    <button class="vbtn active" onclick="setToolView('cards')">📇 Cards</button>
+    <button class="vbtn" onclick="setToolView('matrix')">📊 Matrix</button>
+    <button class="vbtn" onclick="setToolView('lab')">🧪 Lab</button>
+  </div>
+  <div id="toolsCards"></div>
+  <div id="toolsMatrix" style="display:none"></div>
+  <div id="toolsLab" style="display:none"></div>
+</div>
+
+<!-- Code Modal -->
+<div class="code-modal-overlay" id="codeModalOverlay" onclick="if(event.target===this)closeCodeModal()">
+  <div class="code-modal">
+    <div class="code-modal-header">
+      <h3 id="codeModalTitle">Tool Source</h3>
+      <button class="close-btn" onclick="closeCodeModal()">&times;</button>
+    </div>
+    <div class="code-modal-desc" id="codeModalDesc"></div>
+    <div class="code-modal-body" id="codeModalBody"></div>
+  </div>
 </div>
 
 <div style="text-align:center;color:#333;font-size:10px;margin-top:30px;padding-bottom:20px;">
@@ -545,6 +875,20 @@ const CHECKS = [
 function esc(s) {
   if (!s) return '';
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── Tool Classification ──
+var SECURITY_TOOLS = new Set(['fullSecurityScan','owaspZapStyleScan','bruteForceSimulation','sessionHijackingTest','cookieSecurityAudit','apiFuzzing','cspAnalysis','sslTlsAudit','securityHeadersAudit','authenticationAudit','injectionAudit','exposedDataAudit','rateLimitAudit','fileExposureAudit','corsAndCsrfAudit','npmAuditCheck','checkDependencies','runNpmAuditFix']);
+var WEB_TOOLS = new Set(['searchWeb','fetchWebPage']);
+var WRITE_TOOLS = new Set(['publishArticle','updateFighterData','backfillFighterData','runDatabaseMigration','fixColumnSchema','runNpmAuditFix','moderateComment','createPoll','processEventResults','openArenaPredictions','finalizeDuels','syncEventCards','updateFightResults','checkEventResults']);
+var QUERY_TOOLS = new Set(['queryArticles','queryFighters','queryEvents','queryFights','queryComments','querySyncLogs','queryPredictionAccuracy','queryArenaStats','queryLeagueStandings','queryTopKeywords','queryUpcomingEvents']);
+
+function toolClass(name) {
+  if (SECURITY_TOOLS.has(name)) return 'sec';
+  if (WEB_TOOLS.has(name)) return 'web';
+  if (WRITE_TOOLS.has(name)) return 'wrt';
+  if (QUERY_TOOLS.has(name)) return 'qry';
+  return '';
 }
 
 // ── State ──
@@ -768,9 +1112,333 @@ function renderStatic() {
   ref.innerHTML = html;
 }
 
-renderStatic();
-refresh();
-setInterval(refresh, 3000);
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', function() { renderStatic(); refresh(); setInterval(refresh, 3000); });
+} else {
+  renderStatic(); refresh(); setInterval(refresh, 3000);
+}
+
+// ── Tab Switching ──
+function switchTab(el) {
+  var view = el.getAttribute('data-view');
+  var tabs = document.querySelectorAll('.tab');
+  for (var i = 0; i < tabs.length; i++) tabs[i].classList.remove('active');
+  el.classList.add('active');
+  var panels = document.querySelectorAll('.view-panel');
+  for (var i = 0; i < panels.length; i++) panels[i].classList.remove('active');
+  var target = document.getElementById('view-' + view);
+  if (target) target.classList.add('active');
+  if (view === 'tools' && !toolsDataCache) loadToolsView();
+}
+
+// ── Tools View ──
+var toolsDataCache = null;
+var currentToolView = 'cards';
+var labAgentCache = {};
+var labCurrentAgent = null;
+
+function loadToolsView() {
+  fetch('/api/agent-tools')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      toolsDataCache = data;
+      renderToolsView();
+    })
+    .catch(function(e) { console.error('loadToolsView error:', e); });
+}
+
+function renderToolsView() {
+  var d = toolsDataCache;
+  if (!d) return;
+  // Summary
+  var secCount = 0, qryCount = 0, wrtCount = 0, webCount = 0;
+  var allKeys = Object.keys(d.allTools || {});
+  for (var i = 0; i < allKeys.length; i++) {
+    var tc = toolClass(allKeys[i]);
+    if (tc === 'sec') secCount++;
+    else if (tc === 'qry') qryCount++;
+    else if (tc === 'wrt') wrtCount++;
+    else if (tc === 'web') webCount++;
+  }
+  document.getElementById('toolsSummary').innerHTML =
+    '<div class="summary-card"><div class="sv">' + d.totalAgents + '</div><div class="sl">Agentes</div></div>' +
+    '<div class="summary-card"><div class="sv">' + d.totalUniqueTools + '</div><div class="sl">Tools Únicas</div></div>' +
+    '<div class="summary-card sc-red"><div class="sv">' + secCount + '</div><div class="sl">Security</div></div>' +
+    '<div class="summary-card sc-blue"><div class="sv">' + qryCount + '</div><div class="sl">Query</div></div>' +
+    '<div class="summary-card sc-yellow"><div class="sv">' + wrtCount + '</div><div class="sl">Write</div></div>' +
+    '<div class="summary-card sc-green"><div class="sv">' + webCount + '</div><div class="sl">Web</div></div>';
+  renderToolCards();
+}
+
+function renderToolCards() {
+  var d = toolsDataCache;
+  if (!d) return;
+  var html = '<div class="tools-grid">';
+  for (var i = 0; i < d.agents.length; i++) {
+    var a = d.agents[i];
+    html += '<div class="tools-agent-card">';
+    html += '<div class="tac-header"><span class="tac-icon">' + esc(a.icon || '🤖') + '</span>';
+    html += '<div><div class="tac-name">' + esc(a.humanName) + '</div>';
+    html += '<div class="tac-id">' + esc(a.id) + (a.inDatabase ? '' : ' · ⚠️ not in DB') + '</div></div></div>';
+    html += '<div class="tac-tools">';
+    for (var j = 0; j < a.tools.length; j++) {
+      var t = a.tools[j];
+      var tc = toolClass(t);
+      html += '<span class="ttag ' + tc + ' clickable" onclick="openToolCode(\\'' + esc(t) + '\\')">' + esc(t) + '</span>';
+    }
+    html += '</div>';
+    html += '<div class="tac-count">' + a.tools.length + ' tools</div>';
+    html += '</div>';
+  }
+  html += '</div>';
+  document.getElementById('toolsCards').innerHTML = html;
+}
+
+function renderToolMatrix() {
+  var d = toolsDataCache;
+  if (!d) return;
+  // Collect all unique tools across agents
+  var allToolSet = {};
+  for (var i = 0; i < d.agents.length; i++) {
+    for (var j = 0; j < d.agents[i].tools.length; j++) {
+      allToolSet[d.agents[i].tools[j]] = true;
+    }
+  }
+  var toolNames = Object.keys(allToolSet).sort();
+  var html = '<div class="matrix-wrap"><table class="matrix-table"><thead><tr><th>Agent</th>';
+  for (var i = 0; i < toolNames.length; i++) {
+    var tc = toolClass(toolNames[i]);
+    html += '<th class="rotate"><span class="ttag ' + tc + '" style="font-size:8px">' + esc(toolNames[i]) + '</span></th>';
+  }
+  html += '</tr></thead><tbody>';
+  for (var i = 0; i < d.agents.length; i++) {
+    var a = d.agents[i];
+    var toolSet = {};
+    for (var j = 0; j < a.tools.length; j++) toolSet[a.tools[j]] = true;
+    html += '<tr><td class="agent-name">' + esc(a.icon || '🤖') + ' ' + esc(a.humanName) + '</td>';
+    for (var j = 0; j < toolNames.length; j++) {
+      if (toolSet[toolNames[j]]) {
+        html += '<td class="has-tool" onclick="openToolCode(\\'' + esc(toolNames[j]) + '\\')">✓</td>';
+      } else {
+        html += '<td class="no-tool">·</td>';
+      }
+    }
+    html += '</tr>';
+  }
+  html += '</tbody></table></div>';
+  document.getElementById('toolsMatrix').innerHTML = html;
+}
+
+function setToolView(v) {
+  currentToolView = v;
+  var btns = document.querySelectorAll('#toolsViewToggle .vbtn');
+  for (var i = 0; i < btns.length; i++) btns[i].classList.remove('active');
+  if (v === 'cards') { btns[0].classList.add('active'); }
+  else if (v === 'matrix') { btns[1].classList.add('active'); }
+  else if (v === 'lab') { btns[2].classList.add('active'); }
+  document.getElementById('toolsCards').style.display = v === 'cards' ? '' : 'none';
+  document.getElementById('toolsMatrix').style.display = v === 'matrix' ? '' : 'none';
+  document.getElementById('toolsLab').style.display = v === 'lab' ? '' : 'none';
+  if (v === 'matrix' && !document.getElementById('toolsMatrix').innerHTML) renderToolMatrix();
+  if (v === 'lab' && !document.getElementById('toolsLab').innerHTML) renderLabShell();
+}
+
+// ── Code Modal ──
+function openToolCode(name) {
+  fetch('/api/tool-source/' + encodeURIComponent(name))
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (!data || data.error) {
+        document.getElementById('codeModalTitle').textContent = name;
+        document.getElementById('codeModalDesc').textContent = 'Tool source not found';
+        document.getElementById('codeModalBody').textContent = 'Source code not available.';
+      } else {
+        document.getElementById('codeModalTitle').textContent = data.name + ' (' + data.lineCount + ' lines)';
+        document.getElementById('codeModalDesc').textContent = data.description || 'No description';
+        document.getElementById('codeModalBody').textContent = data.source;
+      }
+      document.getElementById('codeModalOverlay').classList.add('open');
+    })
+    .catch(function(e) { console.error('openToolCode error:', e); });
+}
+
+function closeCodeModal() {
+  document.getElementById('codeModalOverlay').classList.remove('open');
+}
+
+// ── Lab View ──
+var LAB_SCENARIOS = {
+  'ceo': ['Relatório diário', 'Verificar saúde', 'Auditar segurança'],
+  'cso': ['Scan completo', 'Testar autenticação', 'Verificar vulnerabilidades npm'],
+  'content-dir': ['Revisar conteúdo', 'Planejar pauta'],
+  'analytics-dir': ['Análise de dados', 'Previsões'],
+  'ops-dir': ['Status operacional', 'Corrigir erros'],
+  'news-writer': ['Escrever sobre UFC 326', 'Notícia de última hora'],
+  'social-engager': ['Criar enquete', 'Engajar fãs'],
+  'fight-analyst': ['Analisar matchup', 'Prever resultado'],
+  'stats-compiler': ['Atualizar stats', 'Relatório de dados'],
+  'system-health': ['Health check', 'Verificar DB', 'Analisar latência'],
+  'arena-manager': ['Abrir previsões', 'Processar resultados'],
+  'seo-growth': ['Auditoria SEO', 'Gerar meta tags'],
+  'ui-auditor': ['Auditar interface', 'Verificar console']
+};
+
+function renderLabShell() {
+  var d = toolsDataCache;
+  if (!d) return;
+  var html = '<div class="lab-agents" id="labAgentPills">';
+  for (var i = 0; i < d.agents.length; i++) {
+    var a = d.agents[i];
+    html += '<div class="lab-pill" onclick="loadLabView(\\'' + esc(a.id) + '\\')">' + esc(a.icon || '🤖') + ' ' + esc(a.humanName) + '</div>';
+  }
+  html += '</div>';
+  html += '<div class="lab-split">';
+  html += '<div class="lab-panel" id="labLeftPanel"><h4>📋 Prompt do Agente</h4><div class="lab-prompt" id="labPrompt" style="color:#555;">Selecione um agente acima</div></div>';
+  html += '<div class="lab-panel" id="labRightPanel"><h4>🛠️ Tools & Simulador</h4><div id="labToolsList"></div><div class="lab-scenarios" id="labScenarios"></div><div class="lab-steps" id="labSteps"></div></div>';
+  html += '</div>';
+  document.getElementById('toolsLab').innerHTML = html;
+}
+
+function loadLabView(agentId) {
+  labCurrentAgent = agentId;
+  // Highlight pill
+  var pills = document.querySelectorAll('#labAgentPills .lab-pill');
+  for (var i = 0; i < pills.length; i++) pills[i].classList.remove('active');
+  for (var i = 0; i < pills.length; i++) {
+    if (pills[i].textContent.indexOf(agentId) !== -1 || pills[i].getAttribute('onclick').indexOf(agentId) !== -1) {
+      pills[i].classList.add('active');
+    }
+  }
+  document.getElementById('labSteps').innerHTML = '';
+  if (labAgentCache[agentId]) {
+    renderLabContent(labAgentCache[agentId]);
+    return;
+  }
+  fetch('/api/agent-detail/' + encodeURIComponent(agentId))
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      labAgentCache[agentId] = data;
+      renderLabContent(data);
+    })
+    .catch(function(e) { console.error('loadLabView error:', e); });
+}
+
+function renderLabContent(data) {
+  // Left panel: prompt
+  var prompt = data.systemPrompt || 'Sem prompt disponível (agente não está no DB)';
+  if (prompt.length > 2000) prompt = prompt.substring(0, 2000) + '\\n\\n... (truncated)';
+  document.getElementById('labPrompt').textContent = prompt;
+
+  // Right panel: tools
+  var html = '<div class="lab-tools-list">';
+  for (var i = 0; i < data.toolNames.length; i++) {
+    var t = data.toolNames[i];
+    var tc = toolClass(t);
+    html += '<span class="lab-tool-btn" id="lab-tool-' + t + '" data-tool="' + esc(t) + '">' + esc(t) + '</span>';
+  }
+  html += '</div>';
+  document.getElementById('labToolsList').innerHTML = html;
+
+  // Scenarios
+  var scenarios = LAB_SCENARIOS[data.id] || ['Executar tarefa genérica'];
+  var shtml = '<h4 style="margin-top:12px">🎯 Cenários</h4>';
+  for (var i = 0; i < scenarios.length; i++) {
+    shtml += '<button class="lab-scenario-btn" onclick="simulateTask(\\'' + esc(data.id) + '\\', \\'' + esc(scenarios[i]) + '\\')">' + esc(scenarios[i]) + '</button>';
+  }
+  document.getElementById('labScenarios').innerHTML = shtml;
+}
+
+function simulateTask(agentId, taskName) {
+  var data = labAgentCache[agentId];
+  if (!data) return;
+  var stepsEl = document.getElementById('labSteps');
+  stepsEl.innerHTML = '';
+
+  // Reset tool highlights
+  var toolBtns = document.querySelectorAll('.lab-tool-btn');
+  for (var i = 0; i < toolBtns.length; i++) toolBtns[i].classList.remove('highlight');
+
+  // Pick 2-4 tools based on task keywords
+  var toolsToUse = [];
+  var lower = taskName.toLowerCase();
+  for (var i = 0; i < data.toolNames.length; i++) {
+    var t = data.toolNames[i].toLowerCase();
+    // Match heuristic: task keywords overlap with tool name
+    if (lower.indexOf('saúde') !== -1 && t.indexOf('health') !== -1) toolsToUse.push(data.toolNames[i]);
+    else if (lower.indexOf('health') !== -1 && t.indexOf('health') !== -1) toolsToUse.push(data.toolNames[i]);
+    else if (lower.indexOf('segurança') !== -1 && (t.indexOf('security') !== -1 || t.indexOf('audit') !== -1)) toolsToUse.push(data.toolNames[i]);
+    else if (lower.indexOf('scan') !== -1 && (t.indexOf('scan') !== -1 || t.indexOf('audit') !== -1)) toolsToUse.push(data.toolNames[i]);
+    else if (lower.indexOf('autenticação') !== -1 && t.indexOf('auth') !== -1) toolsToUse.push(data.toolNames[i]);
+    else if (lower.indexOf('vulnerabilidades') !== -1 && (t.indexOf('npm') !== -1 || t.indexOf('audit') !== -1)) toolsToUse.push(data.toolNames[i]);
+    else if (lower.indexOf('conteúdo') !== -1 && (t.indexOf('article') !== -1 || t.indexOf('query') !== -1)) toolsToUse.push(data.toolNames[i]);
+    else if (lower.indexOf('pauta') !== -1 && (t.indexOf('web') !== -1 || t.indexOf('article') !== -1)) toolsToUse.push(data.toolNames[i]);
+    else if (lower.indexOf('dados') !== -1 && (t.indexOf('data') !== -1 || t.indexOf('query') !== -1)) toolsToUse.push(data.toolNames[i]);
+    else if (lower.indexOf('previsões') !== -1 && (t.indexOf('prediction') !== -1 || t.indexOf('query') !== -1)) toolsToUse.push(data.toolNames[i]);
+    else if (lower.indexOf('operacional') !== -1 && (t.indexOf('health') !== -1 || t.indexOf('latency') !== -1)) toolsToUse.push(data.toolNames[i]);
+    else if (lower.indexOf('erros') !== -1 && (t.indexOf('error') !== -1 || t.indexOf('fix') !== -1)) toolsToUse.push(data.toolNames[i]);
+    else if (lower.indexOf('escrever') !== -1 && (t.indexOf('article') !== -1 || t.indexOf('publish') !== -1 || t.indexOf('web') !== -1)) toolsToUse.push(data.toolNames[i]);
+    else if (lower.indexOf('notícia') !== -1 && (t.indexOf('article') !== -1 || t.indexOf('publish') !== -1 || t.indexOf('web') !== -1)) toolsToUse.push(data.toolNames[i]);
+    else if (lower.indexOf('enquete') !== -1 && (t.indexOf('poll') !== -1 || t.indexOf('comment') !== -1)) toolsToUse.push(data.toolNames[i]);
+    else if (lower.indexOf('engajar') !== -1 && (t.indexOf('comment') !== -1 || t.indexOf('article') !== -1)) toolsToUse.push(data.toolNames[i]);
+    else if (lower.indexOf('matchup') !== -1 && (t.indexOf('fighter') !== -1 || t.indexOf('fight') !== -1)) toolsToUse.push(data.toolNames[i]);
+    else if (lower.indexOf('resultado') !== -1 && (t.indexOf('prediction') !== -1 || t.indexOf('fight') !== -1 || t.indexOf('result') !== -1)) toolsToUse.push(data.toolNames[i]);
+    else if (lower.indexOf('stats') !== -1 && (t.indexOf('fighter') !== -1 || t.indexOf('data') !== -1)) toolsToUse.push(data.toolNames[i]);
+    else if (lower.indexOf('relatório') !== -1 && (t.indexOf('report') !== -1 || t.indexOf('stats') !== -1 || t.indexOf('health') !== -1)) toolsToUse.push(data.toolNames[i]);
+    else if (lower.indexOf('db') !== -1 && (t.indexOf('db') !== -1 || t.indexOf('health') !== -1 || t.indexOf('pool') !== -1)) toolsToUse.push(data.toolNames[i]);
+    else if (lower.indexOf('latência') !== -1 && (t.indexOf('latency') !== -1 || t.indexOf('endpoint') !== -1)) toolsToUse.push(data.toolNames[i]);
+    else if (lower.indexOf('previsões') !== -1 && (t.indexOf('prediction') !== -1 || t.indexOf('arena') !== -1 || t.indexOf('open') !== -1)) toolsToUse.push(data.toolNames[i]);
+    else if (lower.indexOf('processar') !== -1 && (t.indexOf('process') !== -1 || t.indexOf('result') !== -1)) toolsToUse.push(data.toolNames[i]);
+    else if (lower.indexOf('seo') !== -1 && (t.indexOf('seo') !== -1 || t.indexOf('meta') !== -1 || t.indexOf('keyword') !== -1)) toolsToUse.push(data.toolNames[i]);
+    else if (lower.indexOf('meta') !== -1 && (t.indexOf('meta') !== -1 || t.indexOf('seo') !== -1)) toolsToUse.push(data.toolNames[i]);
+    else if (lower.indexOf('interface') !== -1 && (t.indexOf('page') !== -1 || t.indexOf('component') !== -1 || t.indexOf('console') !== -1)) toolsToUse.push(data.toolNames[i]);
+    else if (lower.indexOf('console') !== -1 && (t.indexOf('console') !== -1 || t.indexOf('error') !== -1)) toolsToUse.push(data.toolNames[i]);
+  }
+  // Deduplicate and limit
+  var seen = {};
+  var unique = [];
+  for (var i = 0; i < toolsToUse.length; i++) {
+    if (!seen[toolsToUse[i]]) { seen[toolsToUse[i]] = true; unique.push(toolsToUse[i]); }
+  }
+  toolsToUse = unique.slice(0, 4);
+  if (toolsToUse.length === 0) {
+    toolsToUse = data.toolNames.slice(0, 2);
+  }
+
+  animateSteps(stepsEl, taskName, toolsToUse);
+}
+
+function animateSteps(container, taskName, tools) {
+  var steps = [];
+  steps.push({ cls: 'think', text: '🤔 Agent recebeu a tarefa: "' + taskName + '"...' });
+  for (var i = 0; i < tools.length; i++) {
+    steps.push({ cls: 'tool-call', text: '🔧 Chamando ' + tools[i] + '...', tool: tools[i] });
+    steps.push({ cls: 'result', text: '✓ ' + tools[i] + ' retornou dados' });
+  }
+  steps.push({ cls: 'done', text: '✅ Tarefa concluída com sucesso!' });
+
+  var delay = 0;
+  for (var i = 0; i < steps.length; i++) {
+    (function(step, idx) {
+      setTimeout(function() {
+        var div = document.createElement('div');
+        div.className = 'lab-step ' + step.cls;
+        div.textContent = step.text;
+        container.appendChild(div);
+        if (step.tool) {
+          var btn = document.getElementById('lab-tool-' + step.tool);
+          if (btn) btn.classList.add('highlight');
+        }
+        container.scrollTop = container.scrollHeight;
+      }, delay);
+    })(steps[i], i);
+    delay += 800 + Math.floor(Math.random() * 400);
+  }
+}
+
+// ── Keyboard shortcut for modal ──
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeCodeModal();
+});
 </script>
 </body>
 </html>`;
@@ -787,6 +1455,45 @@ const server = http.createServer(async (req, res) => {
       res.writeHead(500, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ error: e.message }));
       return;
+    }
+  } else if (req.url === '/api/agent-tools') {
+    try {
+      const data = await getAgentToolsData();
+      res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
+      res.end(JSON.stringify(data));
+    } catch (e) {
+      res.writeHead(500, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
+      res.end(JSON.stringify({ error: e.message }));
+    }
+  } else if (req.url.startsWith('/api/tool-source/')) {
+    try {
+      const toolName = decodeURIComponent(req.url.replace('/api/tool-source/', ''));
+      const sources = parseToolSources();
+      const toolData = sources[toolName] || null;
+      res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
+      res.end(JSON.stringify(toolData ? toolData : { error: 'Tool not found' }));
+    } catch (e) {
+      res.writeHead(500, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
+      res.end(JSON.stringify({ error: e.message }));
+    }
+  } else if (req.url === '/api/tool-sources') {
+    try {
+      const sources = parseToolSources();
+      res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
+      res.end(JSON.stringify(sources));
+    } catch (e) {
+      res.writeHead(500, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
+      res.end(JSON.stringify({ error: e.message }));
+    }
+  } else if (req.url.startsWith('/api/agent-detail/')) {
+    try {
+      const agentId = decodeURIComponent(req.url.replace('/api/agent-detail/', ''));
+      const data = await getAgentDetailData(agentId);
+      res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
+      res.end(JSON.stringify(data));
+    } catch (e) {
+      res.writeHead(500, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
+      res.end(JSON.stringify({ error: e.message }));
     }
   } else {
     res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });

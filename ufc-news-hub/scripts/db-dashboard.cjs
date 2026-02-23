@@ -597,6 +597,35 @@ const HTML = `<!DOCTYPE html>
     padding: 6px 0; border-bottom: 1px solid #111; animation: slideIn 0.3s ease;
   }
   .sim-step:last-child { border-bottom: none; }
+
+  /* ── Data Browsing Tables ── */
+  .table-controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 14px; }
+  .search-input { background: #12121a; border: 1px solid #333; border-radius: 6px; padding: 8px 12px; color: #ccc; font-size: 12px; width: 250px; }
+  .search-input:focus { border-color: #d20a0a; outline: none; }
+  .filter-pills { display: flex; gap: 4px; }
+  .fpill { padding: 4px 10px; border-radius: 12px; border: 1px solid #333; background: #12121a; color: #888; font-size: 10px; cursor: pointer; }
+  .fpill:hover, .fpill.active { border-color: #d20a0a; color: #d20a0a; }
+  .table-wrap { overflow-x: auto; }
+  .data-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+  .data-table th { position: sticky; top: 0; background: #0e0e16; padding: 8px 10px; color: #888; text-align: left; cursor: pointer; border-bottom: 2px solid #1e1e2e; white-space: nowrap; font-size: 10px; text-transform: uppercase; }
+  .data-table th:hover { color: #ccc; }
+  .data-table td { padding: 6px 10px; border-bottom: 1px solid #1a1a2a; color: #ccc; max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .data-table tr:hover { background: rgba(255,255,255,0.02); }
+  .data-table tr { cursor: pointer; }
+  .pagination { display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 14px; font-size: 12px; color: #888; }
+  .page-btn { padding: 4px 12px; border-radius: 4px; border: 1px solid #333; background: #12121a; color: #888; cursor: pointer; font-size: 11px; }
+  .page-btn:hover { border-color: #d20a0a; color: #ccc; }
+  .page-btn.active { background: #d20a0a; border-color: #d20a0a; color: #fff; }
+  .detail-sidebar { position: fixed; right: 0; top: 0; width: 420px; height: 100vh; background: #12121a; border-left: 2px solid #d20a0a; z-index: 50; transform: translateX(100%); transition: transform 0.25s ease; overflow-y: auto; padding: 20px; }
+  .detail-sidebar.open { transform: translateX(0); }
+  .detail-sidebar .ds-close { position: absolute; top: 10px; right: 14px; background: none; border: none; color: #888; font-size: 20px; cursor: pointer; }
+  .detail-sidebar .ds-title { font-size: 16px; font-weight: 700; color: #fff; margin-bottom: 16px; padding-right: 30px; }
+  .detail-sidebar .ds-field { margin-bottom: 10px; }
+  .detail-sidebar .ds-label { font-size: 10px; color: #666; text-transform: uppercase; }
+  .detail-sidebar .ds-value { font-size: 12px; color: #ccc; margin-top: 2px; word-break: break-all; }
+  .detail-sidebar .ds-value.empty { color: #f87171; font-style: italic; }
+  .detail-sidebar .ds-value img { max-width: 200px; border-radius: 8px; margin-top: 4px; }
+  .ds-edit-btn { font-size: 9px; color: #60a5fa; cursor: pointer; margin-left: 8px; }
 </style>
 </head>
 <body>
@@ -612,6 +641,11 @@ const HTML = `<!DOCTYPE html>
 <div class="tab-bar">
   <button class="tab active" data-view="overview" onclick="switchTab(this)">📊 Overview</button>
   <button class="tab" data-view="tools" onclick="switchTab(this)">🛠️ Tools</button>
+  <button class="tab" data-view="lutadores" onclick="switchTab(this)">🥊 Lutadores</button>
+  <button class="tab" data-view="noticias" onclick="switchTab(this)">📰 Notícias</button>
+  <button class="tab" data-view="eventos" onclick="switchTab(this)">📅 Eventos</button>
+  <button class="tab" data-view="agentes" onclick="switchTab(this)">🤖 Agentes</button>
+  <button class="tab" data-view="tasks" onclick="switchTab(this)">📋 Tasks</button>
 </div>
 
 <!-- Overview Panel -->
@@ -714,6 +748,75 @@ const HTML = `<!DOCTYPE html>
   <div id="toolsCards"></div>
   <div id="toolsMatrix" style="display:none"></div>
   <div id="toolsLab" style="display:none"></div>
+</div>
+
+<!-- Lutadores View -->
+<div class="view-panel" id="view-lutadores">
+  <div class="table-controls">
+    <input type="text" class="search-input" id="search-lutadores" placeholder="Buscar lutador..." onkeyup="debounceSearch('lutadores')">
+    <div class="filter-pills">
+      <button class="fpill" onclick="filterTable('lutadores','')">Todos</button>
+      <button class="fpill" onclick="filterTable('lutadores','sem_foto')">📷 Sem foto</button>
+      <button class="fpill" onclick="filterTable('lutadores','sem_stats')">📊 Sem stats</button>
+    </div>
+    <div class="sort-info" id="sort-lutadores"></div>
+  </div>
+  <div class="table-wrap" id="table-lutadores"></div>
+  <div class="pagination" id="page-lutadores"></div>
+</div>
+
+<!-- Noticias View -->
+<div class="view-panel" id="view-noticias">
+  <div class="table-controls">
+    <input type="text" class="search-input" id="search-noticias" placeholder="Buscar noticia..." onkeyup="debounceSearch('noticias')">
+    <div class="filter-pills">
+      <button class="fpill" onclick="filterTable('noticias','')">Todos</button>
+    </div>
+    <div class="sort-info" id="sort-noticias"></div>
+  </div>
+  <div class="table-wrap" id="table-noticias"></div>
+  <div class="pagination" id="page-noticias"></div>
+</div>
+
+<!-- Eventos View -->
+<div class="view-panel" id="view-eventos">
+  <div class="table-controls">
+    <input type="text" class="search-input" id="search-eventos" placeholder="Buscar evento..." onkeyup="debounceSearch('eventos')">
+    <div class="filter-pills">
+      <button class="fpill" onclick="filterTable('eventos','')">Todos</button>
+    </div>
+    <div class="sort-info" id="sort-eventos"></div>
+  </div>
+  <div class="table-wrap" id="table-eventos"></div>
+  <div class="pagination" id="page-eventos"></div>
+</div>
+
+<!-- Agentes View -->
+<div class="view-panel" id="view-agentes">
+  <div class="table-controls">
+    <input type="text" class="search-input" id="search-agents" placeholder="Buscar agente..." onkeyup="debounceSearch('agents')">
+    <div class="filter-pills">
+      <button class="fpill" onclick="filterTable('agents','')">Todos</button>
+    </div>
+    <div class="sort-info" id="sort-agents"></div>
+  </div>
+  <div class="table-wrap" id="table-agents"></div>
+  <div class="pagination" id="page-agents"></div>
+</div>
+
+<!-- Tasks View -->
+<div class="view-panel" id="view-tasks">
+  <div class="table-controls">
+    <input type="text" class="search-input" id="search-agent_tasks" placeholder="Buscar task..." onkeyup="debounceSearch('agent_tasks')">
+    <div class="filter-pills">
+      <button class="fpill" onclick="filterTable('agent_tasks','')">Todos</button>
+      <button class="fpill" onclick="filterTable('agent_tasks','failed')">❌ Failed</button>
+      <button class="fpill" onclick="filterTable('agent_tasks','pending')">⏳ Pending</button>
+    </div>
+    <div class="sort-info" id="sort-agent_tasks"></div>
+  </div>
+  <div class="table-wrap" id="table-agent_tasks"></div>
+  <div class="pagination" id="page-agent_tasks"></div>
 </div>
 
 <!-- Code Modal -->
@@ -1129,6 +1232,8 @@ function switchTab(el) {
   var target = document.getElementById('view-' + view);
   if (target) target.classList.add('active');
   if (view === 'tools' && !toolsDataCache) loadToolsView();
+  var dataTabMap = { lutadores: 'lutadores', noticias: 'noticias', eventos: 'eventos', agentes: 'agents', tasks: 'agent_tasks' };
+  if (dataTabMap[view]) loadTable(dataTabMap[view]);
 }
 
 // ── Tools View ──
@@ -1437,62 +1542,361 @@ function animateSteps(container, taskName, tools) {
 
 // ── Keyboard shortcut for modal ──
 document.addEventListener('keydown', function(e) {
-  if (e.key === 'Escape') closeCodeModal();
+  if (e.key === 'Escape') { closeCodeModal(); closeSidebar(); }
 });
+
+// ── Data Browsing ──
+var tableState = {};
+var TABLE_DISPLAY = {
+  lutadores: { defaultSort: 'nome', columns: ['nome','categoria_peso','pais','vitorias','derrotas','imagem_url'] },
+  noticias: { defaultSort: 'publicado_em', columns: ['titulo','fonte_nome','categoria','publicado_em'] },
+  eventos: { defaultSort: 'data_evento', columns: ['nome','data_evento','local_evento','status'] },
+  agents: { defaultSort: 'humanName', order: 'asc', columns: ['icon','humanName','role','status','level','xp'] },
+  agent_tasks: { defaultSort: 'createdAt', columns: ['type','status','createdAt','agentId'] },
+};
+
+function getTableState(table) {
+  if (!tableState[table]) {
+    var cfg = TABLE_DISPLAY[table] || {};
+    tableState[table] = { page: 1, search: '', sort: cfg.defaultSort || 'id', order: cfg.order || 'desc', filter: '' };
+  }
+  return tableState[table];
+}
+
+var searchTimers = {};
+function debounceSearch(table) {
+  if (searchTimers[table]) clearTimeout(searchTimers[table]);
+  searchTimers[table] = setTimeout(function() { searchTable(table); }, 300);
+}
+
+function searchTable(table) {
+  var st = getTableState(table);
+  var el = document.getElementById('search-' + table);
+  if (el) st.search = el.value;
+  st.page = 1;
+  loadTable(table);
+}
+
+function filterTable(table, filter) {
+  var st = getTableState(table);
+  st.filter = filter;
+  st.page = 1;
+  loadTable(table);
+}
+
+function sortTable(table, col) {
+  var st = getTableState(table);
+  if (st.sort === col) { st.order = st.order === 'asc' ? 'desc' : 'asc'; }
+  else { st.sort = col; st.order = 'desc'; }
+  loadTable(table);
+}
+
+function goPage(table, page) {
+  var st = getTableState(table);
+  st.page = page;
+  loadTable(table);
+}
+
+async function loadTable(table) {
+  var st = getTableState(table);
+  var url = '/api/table/' + encodeURIComponent(table) + '?page=' + st.page + '&sort=' + st.sort + '&order=' + st.order;
+  if (st.search) url += '&search=' + encodeURIComponent(st.search);
+  if (st.filter) url += '&filter=' + encodeURIComponent(st.filter);
+  try {
+    var resp = await fetch(url);
+    var data = await resp.json();
+    var config = TABLE_DISPLAY[table] || {};
+    var displayCols = config.columns || Object.keys(data.rows[0] || {}).slice(0, 8);
+    var html = '<table class="data-table"><thead><tr>';
+    displayCols.forEach(function(col) {
+      var arrow = st.sort === col ? (st.order === 'asc' ? ' ↑' : ' ↓') : '';
+      html += '<th onclick="sortTable(\x27' + table + '\x27,\x27' + col + '\x27)">' + col + arrow + '</th>';
+    });
+    html += '</tr></thead><tbody>';
+    data.rows.forEach(function(row) {
+      html += '<tr onclick="openSidebar(\x27' + table + '\x27,\x27' + row.id + '\x27)">';
+      displayCols.forEach(function(col) {
+        var val = row[col];
+        if (col === 'imagem_url' && val) {
+          html += '<td><img src="' + esc(val) + '" style="height:30px;border-radius:4px;" onerror="this.style.display=\x27none\x27"></td>';
+        } else if (val === null || val === undefined) {
+          html += '<td style="color:#333;">—</td>';
+        } else if (typeof val === 'string' && val.length > 50) {
+          html += '<td title="' + esc(val) + '">' + esc(val.substring(0, 50)) + '...</td>';
+        } else {
+          html += '<td>' + esc(String(val)) + '</td>';
+        }
+      });
+      html += '</tr>';
+    });
+    html += '</tbody></table>';
+    document.getElementById('table-' + table).innerHTML = html;
+    var pageHtml = '';
+    if (data.pages > 1) {
+      if (data.page > 1) pageHtml += '<button class="page-btn" onclick="goPage(\x27' + table + '\x27,' + (data.page - 1) + ')">←</button>';
+      pageHtml += '<span>' + data.page + ' / ' + data.pages + ' (' + data.total + ' registros)</span>';
+      if (data.page < data.pages) pageHtml += '<button class="page-btn" onclick="goPage(\x27' + table + '\x27,' + (data.page + 1) + ')">→</button>';
+    } else {
+      pageHtml = '<span>' + data.total + ' registros</span>';
+    }
+    document.getElementById('page-' + table).innerHTML = pageHtml;
+  } catch(e) {
+    console.error('loadTable error:', e);
+    document.getElementById('table-' + table).innerHTML = '<div style="color:#f87171;padding:20px;">Erro ao carregar: ' + e.message + '</div>';
+  }
+}
+
+async function openSidebar(table, id) {
+  try {
+    var resp = await fetch('/api/record/' + encodeURIComponent(table) + '/' + encodeURIComponent(id));
+    var record = await resp.json();
+    var sidebar = document.getElementById('detailSidebar');
+    var html = '<button class="ds-close" onclick="closeSidebar()">&times;</button>';
+    html += '<div class="ds-title">' + (record.nome || record.humanName || record.titulo || record.type || 'Record') + '</div>';
+    Object.keys(record).forEach(function(key) {
+      var val = record[key];
+      var isEmpty = val === null || val === undefined || val === '';
+      html += '<div class="ds-field">';
+      html += '<div class="ds-label">' + esc(key) + ' <span class="ds-edit-btn" onclick="editField(\x27' + table + '\x27,\x27' + id + '\x27,\x27' + key + '\x27)">✏️</span></div>';
+      if (key === 'imagem_url' && val) {
+        html += '<div class="ds-value"><img src="' + esc(val) + '" onerror="this.style.display=\x27none\x27"></div>';
+      } else if (isEmpty) {
+        html += '<div class="ds-value empty">— vazio —</div>';
+      } else if (typeof val === 'string' && val.length > 200) {
+        html += '<div class="ds-value" style="white-space:pre-wrap;max-height:150px;overflow-y:auto;">' + esc(val) + '</div>';
+      } else {
+        html += '<div class="ds-value">' + esc(String(val)) + '</div>';
+      }
+      html += '</div>';
+    });
+    sidebar.innerHTML = html;
+    sidebar.classList.add('open');
+  } catch(e) {
+    console.error('openSidebar error:', e);
+  }
+}
+
+function closeSidebar() {
+  document.getElementById('detailSidebar').classList.remove('open');
+}
+
+function editField(table, id, field) {
+  var newVal = prompt('Novo valor para ' + field + ':');
+  if (newVal === null) return;
+  fetch('/api/record/' + encodeURIComponent(table) + '/' + encodeURIComponent(id), {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ column: field, value: newVal || null })
+  }).then(function(r) { return r.json(); }).then(function() {
+    openSidebar(table, id);
+    loadTable(table);
+  });
+}
 </script>
+
+<div class="detail-sidebar" id="detailSidebar"></div>
 </body>
 </html>`;
 
+// ── Security & Data Browsing ─────────────────────────────────────────
+const ALLOWED_TABLES = new Set([
+  'noticias','noticia_entidades','comentarios','comentarios_rate_limit','sync_logs',
+  'lutadores','eventos','lutas','analises',
+  'usuarios_arena','previsoes','evento_pontuacao','conquistas',
+  'ligas','liga_membros','liga_temporadas','liga_chat','previsoes_liga',
+  'duelos','amizades','atividades','notificacoes',
+  'agents','agent_tasks','agent_logs','agent_cost_logs','agent_events',
+  'approvals','company_prompts','performance_reviews','remediation_plans',
+]);
+
+const PK_MAP = {};
+for (const t of ALLOWED_TABLES) PK_MAP[t] = 'id';
+
+const schemaCache = {};
+async function getTableColumns(tableName) {
+  if (schemaCache[tableName]) return schemaCache[tableName];
+  const { rows } = await pool.query(
+    "SELECT column_name, data_type, is_nullable FROM information_schema.columns WHERE table_schema = 'public' AND table_name = $1 ORDER BY ordinal_position",
+    [tableName]
+  );
+  schemaCache[tableName] = rows;
+  return rows;
+}
+
+async function getTableData(tableName, query) {
+  var page = parseInt(query.page) || 1;
+  var limit = Math.min(parseInt(query.limit) || 50, 200);
+  var offset = (page - 1) * limit;
+  var search = query.search || '';
+  var sort = query.sort || 'id';
+  var order = query.order === 'asc' ? 'ASC' : 'DESC';
+  var filter = query.filter || '';
+  var cols = await getTableColumns(tableName);
+  var colNames = cols.map(function(c) { return c.column_name; });
+  if (colNames.indexOf(sort) === -1) sort = 'id';
+  var conditions = [];
+  var params = [];
+  var paramIdx = 1;
+  if (search) {
+    var textCols = cols.filter(function(c) { return c.data_type === 'text' || c.data_type === 'character varying'; });
+    if (textCols.length > 0) {
+      var searchConds = textCols.map(function(c) { return '"' + c.column_name + '"::text ILIKE $' + paramIdx; });
+      conditions.push('(' + searchConds.join(' OR ') + ')');
+      params.push('%' + search + '%');
+      paramIdx++;
+    }
+  }
+  if (filter === 'sem_foto' && tableName === 'lutadores') {
+    conditions.push("(imagem_url IS NULL OR imagem_url = '')");
+  } else if (filter === 'sem_stats' && tableName === 'lutadores') {
+    conditions.push("(slpm IS NULL OR slpm = 0)");
+  } else if (filter === 'failed' && tableName === 'agent_tasks') {
+    conditions.push("status = 'failed'");
+  } else if (filter === 'pending' && tableName === 'agent_tasks') {
+    conditions.push("status = 'pending'");
+  }
+  var where = conditions.length > 0 ? ' WHERE ' + conditions.join(' AND ') : '';
+  var countResult = await pool.query('SELECT COUNT(*)::int as total FROM "' + tableName + '"' + where, params);
+  var total = countResult.rows[0].total;
+  var dataResult = await pool.query(
+    'SELECT * FROM "' + tableName + '"' + where + ' ORDER BY "' + sort + '" ' + order + ' LIMIT $' + paramIdx + ' OFFSET $' + (paramIdx + 1),
+    params.concat([limit, offset])
+  );
+  return { rows: dataResult.rows, total: total, page: page, limit: limit, pages: Math.ceil(total / limit) };
+}
+
+async function getRecord(tableName, id) {
+  var result = await pool.query('SELECT * FROM "' + tableName + '" WHERE id = $1', [id]);
+  return result.rows[0] || null;
+}
+
+async function updateRecord(tableName, id, column, value) {
+  var cols = await getTableColumns(tableName);
+  if (!cols.some(function(c) { return c.column_name === column; })) throw new Error('Invalid column');
+  var result = await pool.query('UPDATE "' + tableName + '" SET "' + column + '" = $1 WHERE id = $2 RETURNING *', [value, id]);
+  return result.rows[0] || null;
+}
+
+function parseBody(req) {
+  return new Promise(function(resolve, reject) {
+    var body = '';
+    req.on('data', function(chunk) { body += chunk; if (body.length > 1e6) reject(new Error('Too large')); });
+    req.on('end', function() { try { resolve(JSON.parse(body)); } catch(e) { reject(e); } });
+  });
+}
+
 // ── Server ───────────────────────────────────────────────────────────
+const jsonHeaders = { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' };
 const server = http.createServer(async (req, res) => {
-  if (req.url === '/api/db-stats') {
-    res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
+  var parsedUrl = new URL(req.url, 'http://localhost');
+  var pathname = parsedUrl.pathname;
+  var query = Object.fromEntries(parsedUrl.searchParams);
+
+  // CORS preflight
+  if (req.method === 'OPTIONS') {
+    res.writeHead(200, { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'GET, PATCH, OPTIONS', 'Access-Control-Allow-Headers': 'Content-Type' });
+    res.end(); return;
+  }
+
+  // GET /api/table/:name
+  var tableMatch = pathname.match(/^\/api\/table\/([^/]+)$/);
+  if (tableMatch && req.method === 'GET') {
+    var tbl = decodeURIComponent(tableMatch[1]);
+    if (!ALLOWED_TABLES.has(tbl)) { res.writeHead(403, jsonHeaders); res.end(JSON.stringify({error:'forbidden'})); return; }
+    try {
+      var data = await getTableData(tbl, query);
+      res.writeHead(200, jsonHeaders); res.end(JSON.stringify(data));
+    } catch(e) { res.writeHead(500, jsonHeaders); res.end(JSON.stringify({error:e.message})); }
+    return;
+  }
+
+  // GET /api/table/:name/columns
+  var colMatch = pathname.match(/^\/api\/table\/([^/]+)\/columns$/);
+  if (colMatch && req.method === 'GET') {
+    var tbl = decodeURIComponent(colMatch[1]);
+    if (!ALLOWED_TABLES.has(tbl)) { res.writeHead(403, jsonHeaders); res.end(JSON.stringify({error:'forbidden'})); return; }
+    try {
+      var cols = await getTableColumns(tbl);
+      res.writeHead(200, jsonHeaders); res.end(JSON.stringify(cols));
+    } catch(e) { res.writeHead(500, jsonHeaders); res.end(JSON.stringify({error:e.message})); }
+    return;
+  }
+
+  // GET /api/record/:table/:id
+  var recMatch = pathname.match(/^\/api\/record\/([^/]+)\/([^/]+)$/);
+  if (recMatch && req.method === 'GET') {
+    var tbl = decodeURIComponent(recMatch[1]);
+    var rid = decodeURIComponent(recMatch[2]);
+    if (!ALLOWED_TABLES.has(tbl)) { res.writeHead(403, jsonHeaders); res.end(JSON.stringify({error:'forbidden'})); return; }
+    try {
+      var rec = await getRecord(tbl, rid);
+      if (!rec) { res.writeHead(404, jsonHeaders); res.end(JSON.stringify({error:'not found'})); return; }
+      res.writeHead(200, jsonHeaders); res.end(JSON.stringify(rec));
+    } catch(e) { res.writeHead(500, jsonHeaders); res.end(JSON.stringify({error:e.message})); }
+    return;
+  }
+
+  // PATCH /api/record/:table/:id
+  if (recMatch && req.method === 'PATCH') {
+    var tbl = decodeURIComponent(recMatch[1]);
+    var rid = decodeURIComponent(recMatch[2]);
+    if (!ALLOWED_TABLES.has(tbl)) { res.writeHead(403, jsonHeaders); res.end(JSON.stringify({error:'forbidden'})); return; }
+    try {
+      var body = await parseBody(req);
+      var updated = await updateRecord(tbl, rid, body.column, body.value);
+      res.writeHead(200, jsonHeaders); res.end(JSON.stringify(updated));
+    } catch(e) { res.writeHead(500, jsonHeaders); res.end(JSON.stringify({error:e.message})); }
+    return;
+  }
+
+  if (pathname === '/api/db-stats') {
+    res.writeHead(200, jsonHeaders);
     try {
       const stats = await getDbStats();
       res.end(JSON.stringify(stats));
     } catch (e) {
       console.error('DB error:', e.message);
-      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.writeHead(500, jsonHeaders);
       res.end(JSON.stringify({ error: e.message }));
       return;
     }
-  } else if (req.url === '/api/agent-tools') {
+  } else if (pathname === '/api/agent-tools') {
     try {
       const data = await getAgentToolsData();
-      res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
+      res.writeHead(200, jsonHeaders);
       res.end(JSON.stringify(data));
     } catch (e) {
-      res.writeHead(500, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
+      res.writeHead(500, jsonHeaders);
       res.end(JSON.stringify({ error: e.message }));
     }
-  } else if (req.url.startsWith('/api/tool-source/')) {
+  } else if (pathname.startsWith('/api/tool-source/')) {
     try {
-      const toolName = decodeURIComponent(req.url.replace('/api/tool-source/', ''));
+      const toolName = decodeURIComponent(pathname.replace('/api/tool-source/', ''));
       const sources = parseToolSources();
       const toolData = sources[toolName] || null;
-      res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
+      res.writeHead(200, jsonHeaders);
       res.end(JSON.stringify(toolData ? toolData : { error: 'Tool not found' }));
     } catch (e) {
-      res.writeHead(500, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
+      res.writeHead(500, jsonHeaders);
       res.end(JSON.stringify({ error: e.message }));
     }
-  } else if (req.url === '/api/tool-sources') {
+  } else if (pathname === '/api/tool-sources') {
     try {
       const sources = parseToolSources();
-      res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
+      res.writeHead(200, jsonHeaders);
       res.end(JSON.stringify(sources));
     } catch (e) {
-      res.writeHead(500, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
+      res.writeHead(500, jsonHeaders);
       res.end(JSON.stringify({ error: e.message }));
     }
-  } else if (req.url.startsWith('/api/agent-detail/')) {
+  } else if (pathname.startsWith('/api/agent-detail/')) {
     try {
-      const agentId = decodeURIComponent(req.url.replace('/api/agent-detail/', ''));
+      const agentId = decodeURIComponent(pathname.replace('/api/agent-detail/', ''));
       const data = await getAgentDetailData(agentId);
-      res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
+      res.writeHead(200, jsonHeaders);
       res.end(JSON.stringify(data));
     } catch (e) {
-      res.writeHead(500, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
+      res.writeHead(500, jsonHeaders);
       res.end(JSON.stringify({ error: e.message }));
     }
   } else {

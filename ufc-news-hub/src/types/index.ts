@@ -83,6 +83,7 @@ export interface DeduplicationResult {
   isDuplicate: boolean;
   reason?: 'hash_exato' | 'mesmo_evento' | 'titulo_similar';
   hash: string;
+  replaceId?: string;
 }
 
 export interface SyncResult {

@@ -31,7 +31,8 @@ export default function EventoCardEnhanced({
   showCountdown = false,
   variant = 'default',
 }: EventoCardEnhancedProps) {
-  const eventDate = new Date(evento.data_evento);
+  const rawDate = new Date(evento.data_evento);
+  const eventDate = isNaN(rawDate.getTime()) ? new Date() : rawDate;
   const isEventPast = isPast(eventDate) || evento.status === 'finalizado';
   const isLive = evento.status === 'ao_vivo';
   const isEventToday = isToday(eventDate);
@@ -94,7 +95,7 @@ export default function EventoCardEnhanced({
               src={imageUrl}
               alt={evento.nome}
               fill
-              className="object-cover"
+              className="object-cover object-top"
               sizes="48px"
             />
           ) : (

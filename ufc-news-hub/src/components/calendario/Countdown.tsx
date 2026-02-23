@@ -22,7 +22,8 @@ export function Countdown({ targetDate, compact = false }: CountdownProps) {
     setMounted(true);
 
     const calculateTimeLeft = () => {
-      const difference = new Date(targetDate).getTime() - new Date().getTime();
+      const parsed = targetDate ? new Date(targetDate) : null;
+      const difference = parsed && !isNaN(parsed.getTime()) ? parsed.getTime() - new Date().getTime() : 0;
 
       if (difference > 0) {
         return {

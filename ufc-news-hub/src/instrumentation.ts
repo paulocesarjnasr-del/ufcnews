@@ -25,7 +25,7 @@ async function runNewsSync(): Promise<void> {
   console.log(`📰 [${formatTime(now)}] Sync de NOTÍCIAS iniciando...`);
   console.log('═'.repeat(50));
 
-  const port = process.env.PORT || '3000';
+  const port = process.env.PORT || '3010';
   const url = `http://localhost:${port}/api/sync`;
 
   try {
@@ -63,7 +63,7 @@ async function runEventsSync(): Promise<void> {
   console.log(`🥊 [${formatTime(now)}] Sync de EVENTOS iniciando...`);
   console.log('═'.repeat(50));
 
-  const port = process.env.PORT || '3000';
+  const port = process.env.PORT || '3010';
   const url = `http://localhost:${port}/api/sync-eventos`;
 
   try {
@@ -103,7 +103,7 @@ async function runEventsSync(): Promise<void> {
 
 export async function register() {
   if (process.env.NEXT_RUNTIME === 'nodejs') {
-    const port = process.env.PORT || '3000';
+    const port = process.env.PORT || '3010';
     console.log('\n╔════════════════════════════════════════════════════════╗');
     console.log('║           🔄 AUTO-SYNC ATIVADO (REAL-TIME)             ║');
     console.log('╠════════════════════════════════════════════════════════╣');

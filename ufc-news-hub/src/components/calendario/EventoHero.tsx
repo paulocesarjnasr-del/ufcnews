@@ -46,7 +46,8 @@ interface EventoHeroProps {
 }
 
 export default function EventoHero({ evento, main_event }: EventoHeroProps) {
-  const eventDate = new Date(evento.data_evento);
+  const rawDate = new Date(evento.data_evento);
+  const eventDate = isNaN(rawDate.getTime()) ? new Date() : rawDate;
   const isLive = evento.status === 'ao_vivo';
   const isPast = evento.status === 'finalizado' || eventDate < new Date();
 

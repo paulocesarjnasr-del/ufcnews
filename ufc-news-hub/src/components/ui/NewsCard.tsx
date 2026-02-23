@@ -7,7 +7,7 @@ import { Noticia } from '@/types';
 import { CategoryBadge } from './CategoryBadge';
 import { TimeAgo } from './TimeAgo';
 import { PLACEHOLDER_IMAGE } from '@/lib/constants';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, BarChart3 } from 'lucide-react';
 
 interface NewsCardProps {
   noticia: Noticia;
@@ -16,6 +16,7 @@ interface NewsCardProps {
 
 export function NewsCard({ noticia, featured = false }: NewsCardProps) {
   const isNew = isNewNews(noticia.publicado_em);
+  const isPoll = noticia.titulo.startsWith('[POLL]');
 
   return (
     <Link
@@ -70,8 +71,13 @@ export function NewsCard({ noticia, featured = false }: NewsCardProps) {
           {noticia.titulo}
         </h2>
 
-        {/* Subtítulo */}
-        {noticia.subtitulo && (
+        {/* Subtítulo / Poll indicator */}
+        {isPoll ? (
+          <div className="mt-2 flex items-center gap-2 text-ufc-red">
+            <BarChart3 className="w-4 h-4" />
+            <span className="text-sm font-medium">Vote agora</span>
+          </div>
+        ) : noticia.subtitulo ? (
           <p
             className={cn(
               'mt-2 line-clamp-2 text-dark-textMuted',
@@ -80,14 +86,19 @@ export function NewsCard({ noticia, featured = false }: NewsCardProps) {
           >
             {noticia.subtitulo}
           </p>
-        )}
+        ) : null}
 
         {/* Footer */}
         <div className="mt-auto flex items-center justify-between pt-4">
-          <TimeAgo
-            date={noticia.publicado_em}
-            className="text-sm"
-          />
+          <div className="flex items-center gap-2">
+            <TimeAgo
+              date={noticia.publicado_em}
+              className="text-sm"
+            />
+            {noticia.fonte_nome === 'UFC AI Company' && (
+              <span className="text-xs text-ufc-red font-medium">• Por Lucas Braga</span>
+            )}
+          </div>
 
           {/* Seta indicadora */}
           <span className="text-dark-textMuted transition-transform group-hover:translate-x-1 group-hover:text-ufc-red">

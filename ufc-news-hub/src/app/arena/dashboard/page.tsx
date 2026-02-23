@@ -227,11 +227,11 @@ export default function ArenaDashboardPage() {
                   {proximoEvento.nome}
                 </h3>
                 <p className="text-dark-textMuted mb-4">
-                  {new Date(proximoEvento.data_evento).toLocaleDateString('pt-BR', {
+                  {proximoEvento.data_evento && !isNaN(new Date(proximoEvento.data_evento).getTime()) ? new Date(proximoEvento.data_evento).toLocaleDateString('pt-BR', {
                     weekday: 'long',
                     day: 'numeric',
                     month: 'long',
-                  })}
+                  }) : '—'}
                   {' - '}
                   {proximoEvento.total_lutas} lutas
                 </p>

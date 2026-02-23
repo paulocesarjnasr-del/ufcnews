@@ -3,7 +3,9 @@ import { Pool } from 'pg';
 import { fetchMultipleRSSFeeds } from '@/lib/rss-parser';
 import { classifyNews } from '@/lib/keyword-classifier';
 import { checkDuplicate, checkDuplicateByUrl } from '@/lib/deduplication';
+import { scrapeArticleContent } from '@/lib/article-scraper';
 import { SyncResult, Lutador } from '@/types';
+import { emitEvent } from '@/lib/ai-company/event-bus';
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
@@ -180,28 +182,66 @@ export async function POST(): Promise<NextResponse<SyncResult>> {
         continue;
       }
 
-      // 3.3 Verificar duplicata por hash
+      // 3.3 Preparar conteúdo (scrape se necessário — precisa antes da dedup pra comparar qualidade)
+      let articleContent = item.description;
+      if (!articleContent || articleContent.length < 50) {
+        console.log(`  -> RSS sem conteudo, tentando scrape de ${item.link}`);
+        const scraped = await scrapeArticleContent(item.link);
+        if (scraped) {
+          articleContent = scraped;
+        }
+      }
+
+      // 3.4 Verificar duplicata — se existe artigo sobre mesmos lutadores, fica com o melhor
       const dedup = await checkDuplicate(
         item.title,
         classification.lutadores_mencionados,
-        pool
+        pool,
+        { conteudo: articleContent || '', fonteName: item.sourceName || 'Unknown' }
       );
 
       if (dedup.isDuplicate) {
-        console.log(`  -> DUPLICADA (${dedup.reason})`);
+        if (dedup.replaceId) {
+          // Nova versão é melhor — substitui a existente
+          try {
+            await pool.query(
+              `UPDATE noticias SET titulo = $1, subtitulo = $2, conteudo_completo = $3,
+               imagem_url = COALESCE($4, imagem_url), fonte_url = $5, fonte_nome = $6,
+               hash_deduplicacao = $7
+               WHERE id = $8`,
+              [
+                item.title,
+                classification.subtitulo,
+                articleContent,
+                item.enclosure?.url || null,
+                item.link,
+                item.sourceName || 'Unknown',
+                dedup.hash,
+                dedup.replaceId,
+              ]
+            );
+            console.log(`  -> ATUALIZADA (versão melhor de ${item.sourceName} substituiu a anterior)`);
+          } catch (replaceError) {
+            const msg = replaceError instanceof Error ? replaceError.message : String(replaceError);
+            console.log(`  -> DUPLICADA (falha ao atualizar: ${msg})`);
+          }
+        } else {
+          console.log(`  -> DUPLICADA (${dedup.reason}) — versão existente é igual ou melhor`);
+        }
         duplicadas++;
         continue;
       }
 
-      // 3.4 Salvar notícia
+      // 3.5 Salvar notícia nova
       console.log(
         `  -> Categoria: ${classification.categoria} | Lutadores: ${classification.lutadores_mencionados.length}`
       );
+
       try {
         const noticia = await saveNoticia({
           titulo: item.title,
           subtitulo: classification.subtitulo,
-          conteudo_completo: item.description,
+          conteudo_completo: articleContent,
           imagem_url: item.enclosure?.url || null,
           fonte_url: item.link,
           fonte_nome: item.sourceName || 'Unknown',
@@ -250,6 +290,11 @@ export async function POST(): Promise<NextResponse<SyncResult>> {
     console.log(`Adicionadas: ${adicionadas}`);
     console.log(`Duplicadas: ${duplicadas}`);
     console.log(`Rejeitadas: ${rejeitadas}\n`);
+
+    // Emit event for AI Company agents
+    if (adicionadas > 0) {
+      emitEvent('news.synced', { adicionadas, processadas, duplicadas, rejeitadas }).catch(() => {});
+    }
 
     return NextResponse.json({
       success: true,

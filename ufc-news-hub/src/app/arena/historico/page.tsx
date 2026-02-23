@@ -215,11 +215,11 @@ export default function HistoricoPage() {
                 <div className="px-4 py-3 bg-dark-bg border-b border-dark-border">
                   <p className="font-display text-lg uppercase text-white">{grupo.evento_nome}</p>
                   <p className="text-xs text-dark-textMuted">
-                    {new Date(grupo.evento_data).toLocaleDateString('pt-BR', {
+                    {grupo.evento_data && !isNaN(new Date(grupo.evento_data).getTime()) ? new Date(grupo.evento_data).toLocaleDateString('pt-BR', {
                       day: '2-digit',
                       month: 'long',
                       year: 'numeric',
-                    })}
+                    }) : '—'}
                   </p>
                 </div>
 

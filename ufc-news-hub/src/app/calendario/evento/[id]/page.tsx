@@ -152,7 +152,8 @@ export default function EventoCalendarioPage({ params }: PageProps) {
   }
 
   const { evento, main_card, prelims, early_prelims, horarios } = data;
-  const eventDate = new Date(evento.data_evento);
+  const rawDate = new Date(evento.data_evento);
+  const eventDate = isNaN(rawDate.getTime()) ? new Date() : rawDate;
   const isPast = eventDate < new Date() || evento.status === 'finalizado';
   const isLive = evento.status === 'ao_vivo';
 

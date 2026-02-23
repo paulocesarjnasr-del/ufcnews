@@ -16,8 +16,10 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export function formatTimeAgo(date: Date | string): string {
+export function formatTimeAgo(date: Date | string | null | undefined): string {
+  if (!date) return '—';
   const dateObj = typeof date === 'string' ? new Date(date) : date;
+  if (isNaN(dateObj.getTime())) return '—';
   const now = new Date();
 
   const minutes = differenceInMinutes(now, dateObj);
@@ -48,18 +50,24 @@ export function formatTimeAgo(date: Date | string): string {
   return `há ${years} ${years === 1 ? 'ano' : 'anos'}`;
 }
 
-export function formatDate(date: Date | string): string {
+export function formatDate(date: Date | string | null | undefined): string {
+  if (!date) return '—';
   const dateObj = typeof date === 'string' ? new Date(date) : date;
+  if (isNaN(dateObj.getTime())) return '—';
   return format(dateObj, "d 'de' MMMM 'de' yyyy", { locale: ptBR });
 }
 
-export function formatDateShort(date: Date | string): string {
+export function formatDateShort(date: Date | string | null | undefined): string {
+  if (!date) return '—';
   const dateObj = typeof date === 'string' ? new Date(date) : date;
+  if (isNaN(dateObj.getTime())) return '—';
   return format(dateObj, 'dd/MM/yyyy', { locale: ptBR });
 }
 
-export function isNewNews(date: Date | string): boolean {
+export function isNewNews(date: Date | string | null | undefined): boolean {
+  if (!date) return false;
   const dateObj = typeof date === 'string' ? new Date(date) : date;
+  if (isNaN(dateObj.getTime())) return false;
   const hours = differenceInHours(new Date(), dateObj);
   return hours < 1;
 }

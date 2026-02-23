@@ -33,7 +33,7 @@ export function FighterCard({ fighter, accentColor = 'ufc-red', initials }: Prop
           <img 
             src={fighter.imagem_url} 
             alt={fighter.nome}
-            className={`h-16 w-16 rounded-full border-2 border-${accentColor} object-cover`}
+            className={`h-16 w-16 rounded-full border-2 border-${accentColor} object-cover object-top`}
           />
         ) : (
           <div className={`flex h-16 w-16 items-center justify-center rounded-full border-2 border-${accentColor} bg-dark-border text-2xl font-bold text-dark-text`}>

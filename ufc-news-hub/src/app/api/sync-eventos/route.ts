@@ -3,6 +3,7 @@ import { query, queryOne } from '@/lib/db';
 import * as cheerio from 'cheerio';
 import type { Element } from 'domhandler';
 import { processarEventoFinalizado } from '@/lib/arena/pontuacao';
+import { emitEvent } from '@/lib/ai-company/event-bus';
 
 const UFC_EVENTS_URL = 'https://www.ufc.com/events';
 const UFC_BASE_URL = 'https://www.ufc.com';
@@ -330,10 +331,11 @@ function parseEventDetails(html: string, eventName?: string): {
 
     if (!lutador1_nome || !lutador2_nome) return null;
 
-    const categoria_peso = cleanName(
-      $fight.find('.c-listing-fight__class-text').text() ||
-      $fight.find('.c-listing-fight__class').text() || 'TBD'
-    ).substring(0, 50);
+    // Use .first() to avoid text concatenation of multiple matching elements
+    const rawCategoria =
+      $fight.find('.c-listing-fight__class-text').first().text() ||
+      $fight.find('.c-listing-fight__class').first().text() || 'TBD';
+    const categoria_peso = cleanName(rawCategoria).substring(0, 50);
 
     const is_titulo = $fight.find('.c-listing-fight__belt-img, .c-listing-fight__belt').length > 0;
 
@@ -949,6 +951,14 @@ async function syncEvents(): Promise<SyncResult> {
           try {
             const resultadoPontuacao = await processarEventoFinalizado(eventoId);
             console.log(`Arena: Evento ${event.nome} processado - ${resultadoPontuacao.previsoesProcessadas} previsões, ${resultadoPontuacao.pontosDistribuidos} pontos, ${resultadoPontuacao.duelosFinalizados} duelos`);
+
+            // Emit event for AI Company agents
+            await emitEvent('event.finalized', {
+              eventoId,
+              eventoNome: event.nome,
+              previsoesProcessadas: resultadoPontuacao.previsoesProcessadas,
+              pontosDistribuidos: resultadoPontuacao.pontosDistribuidos,
+            });
           } catch (error) {
             console.error(`Erro ao processar pontuação Arena para evento ${event.nome}:`, error);
           }

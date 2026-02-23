@@ -36,3 +36,16 @@ yarn-error.log*
 # TypeScript
 *.tsbuildinfo
 next-env.d.ts
+
+/src/generated/prisma
+
+# Logs
+logs/
+*.log
+
+# Scraper state
+/tmp/
+
+# Claude/AI docs (optional)
+CLAUDE_CODE_PROMPT.md
+MISSION_CONTROL_REFACTOR.md

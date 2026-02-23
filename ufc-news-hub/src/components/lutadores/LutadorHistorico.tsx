@@ -74,11 +74,11 @@ export function LutadorHistorico({ lutas, lutadorId }: LutadorHistoricoProps) {
             <div className="text-right text-sm text-dark-textMuted">
               <p>{luta.evento.nome}</p>
               <p>
-                {new Date(luta.evento.data).toLocaleDateString('pt-BR', {
+                {luta.evento.data && !isNaN(new Date(luta.evento.data).getTime()) ? new Date(luta.evento.data).toLocaleDateString('pt-BR', {
                   day: 'numeric',
                   month: 'short',
                   year: 'numeric',
-                })}
+                }) : '—'}
               </p>
             </div>
           </div>

@@ -1,0 +1,858 @@
+generator client {
+  provider        = "prisma-client"
+  output          = "../src/generated/prisma"
+  previewFeatures = ["partialIndexes"]
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model amizades {
+  id                                                 String          @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  usuario_id                                         String          @db.Uuid
+  amigo_id                                           String          @db.Uuid
+  status                                             status_amizade? @default(pendente)
+  created_at                                         DateTime?       @default(now()) @db.Timestamptz(6)
+  accepted_at                                        DateTime?       @db.Timestamptz(6)
+  usuarios_arena_amizades_amigo_idTousuarios_arena   usuarios_arena  @relation("amizades_amigo_idTousuarios_arena", fields: [amigo_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  usuarios_arena_amizades_usuario_idTousuarios_arena usuarios_arena  @relation("amizades_usuario_idTousuarios_arena", fields: [usuario_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([usuario_id, amigo_id], map: "amizade_unica")
+  @@index([amigo_id], map: "idx_amizades_amigo")
+  @@index([usuario_id], map: "idx_amizades_usuario")
+}
+
+model analises {
+  id                                        String     @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  evento_id                                 String?    @db.Uuid
+  slug                                      String     @unique @db.VarChar(255)
+  titulo                                    String     @db.VarChar(500)
+  subtitulo                                 String?
+  lutador1_id                               String?    @db.Uuid
+  lutador2_id                               String?    @db.Uuid
+  artigo_conteudo                           String
+  tactical_breakdown                        Json       @default("{}")
+  fight_prediction                          Json       @default("{}")
+  fighter1_info                             Json       @default("{}")
+  fighter2_info                             Json       @default("{}")
+  evento_nome                               String?    @db.VarChar(255)
+  evento_data                               DateTime?  @db.Timestamptz(6)
+  evento_local                              String?    @db.VarChar(255)
+  categoria_peso                            String?    @db.VarChar(100)
+  num_rounds                                Int?       @default(5)
+  is_titulo                                 Boolean?   @default(false)
+  broadcast                                 String?    @db.VarChar(255)
+  status                                    String?    @default("publicado") @db.VarChar(20)
+  created_at                                DateTime?  @default(now()) @db.Timestamptz(6)
+  updated_at                                DateTime?  @default(now()) @db.Timestamptz(6)
+  eventos                                   eventos?   @relation(fields: [evento_id], references: [id], onUpdate: NoAction)
+  lutadores_analises_lutador1_idTolutadores lutadores? @relation("analises_lutador1_idTolutadores", fields: [lutador1_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  lutadores_analises_lutador2_idTolutadores lutadores? @relation("analises_lutador2_idTolutadores", fields: [lutador2_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([created_at(sort: Desc)], map: "idx_analises_created")
+  @@index([evento_id], map: "idx_analises_evento")
+  @@index([slug], map: "idx_analises_slug")
+  @@index([status], map: "idx_analises_status")
+}
+
+model atividades {
+  id             String         @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  usuario_id     String         @db.Uuid
+  tipo           String         @db.VarChar(50)
+  titulo         String         @db.VarChar(100)
+  descricao      String?
+  dados          Json?
+  publica        Boolean?       @default(true)
+  created_at     DateTime?      @default(now()) @db.Timestamptz(6)
+  usuarios_arena usuarios_arena @relation(fields: [usuario_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([created_at(sort: Desc)], map: "idx_atividades_created")
+  @@index([usuario_id], map: "idx_atividades_usuario")
+}
+
+model comentarios {
+  id                String        @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  noticia_id        String        @db.Uuid
+  parent_id         String?       @db.Uuid
+  autor_nome        String        @db.VarChar(50)
+  autor_email       String?       @db.VarChar(255)
+  autor_fingerprint String        @db.VarChar(64)
+  conteudo          String
+  status            String?       @default("aprovado") @db.VarChar(20)
+  reportado_count   Int?          @default(0)
+  created_at        DateTime?     @default(now()) @db.Timestamptz(6)
+  updated_at        DateTime?     @default(now()) @db.Timestamptz(6)
+  noticias          noticias      @relation(fields: [noticia_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  comentarios       comentarios?  @relation("comentariosTocomentarios", fields: [parent_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  other_comentarios comentarios[] @relation("comentariosTocomentarios")
+
+  @@index([created_at(sort: Desc)], map: "idx_comentarios_created")
+  @@index([autor_fingerprint], map: "idx_comentarios_fingerprint")
+  @@index([noticia_id], map: "idx_comentarios_noticia")
+  @@index([parent_id], map: "idx_comentarios_parent")
+  @@index([status], map: "idx_comentarios_status")
+}
+
+model comentarios_rate_limit {
+  id          String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  fingerprint String    @db.VarChar(64)
+  created_at  DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@index([created_at], map: "idx_rate_limit_created")
+  @@index([fingerprint], map: "idx_rate_limit_fingerprint")
+}
+
+model conquistas {
+  id              String         @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  usuario_id      String         @db.Uuid
+  tipo            tipo_conquista
+  detalhes        Json?
+  desbloqueada_em DateTime?      @default(now()) @db.Timestamptz(6)
+  usuarios_arena  usuarios_arena @relation(fields: [usuario_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([usuario_id, tipo], map: "conquista_unica")
+  @@index([tipo], map: "idx_conquistas_tipo")
+  @@index([usuario_id], map: "idx_conquistas_usuario")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model duelos {
+  id                                                  String          @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  desafiante_id                                       String          @db.Uuid
+  desafiado_id                                        String          @db.Uuid
+  evento_id                                           String          @db.Uuid
+  status                                              status_duelo?   @default(pendente)
+  vencedor_id                                         String?         @db.Uuid
+  pontos_desafiante                                   Int?            @default(0)
+  pontos_desafiado                                    Int?            @default(0)
+  acertos_desafiante                                  Int?            @default(0)
+  acertos_desafiado                                   Int?            @default(0)
+  mensagem_desafio                                    String?         @db.VarChar(200)
+  created_at                                          DateTime?       @default(now()) @db.Timestamptz(6)
+  aceito_em                                           DateTime?       @db.Timestamptz(6)
+  finalizado_em                                       DateTime?       @db.Timestamptz(6)
+  usuarios_arena_duelos_desafiado_idTousuarios_arena  usuarios_arena  @relation("duelos_desafiado_idTousuarios_arena", fields: [desafiado_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  usuarios_arena_duelos_desafiante_idTousuarios_arena usuarios_arena  @relation("duelos_desafiante_idTousuarios_arena", fields: [desafiante_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  eventos                                             eventos         @relation(fields: [evento_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  usuarios_arena_duelos_vencedor_idTousuarios_arena   usuarios_arena? @relation("duelos_vencedor_idTousuarios_arena", fields: [vencedor_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([desafiado_id], map: "idx_duelos_desafiado")
+  @@index([desafiante_id], map: "idx_duelos_desafiante")
+  @@index([evento_id], map: "idx_duelos_evento")
+  @@index([status], map: "idx_duelos_status")
+}
+
+model evento_pontuacao {
+  id                  String         @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  evento_id           String         @db.Uuid
+  usuario_id          String         @db.Uuid
+  pontos_totais       Int?           @default(0)
+  acertos             Int?           @default(0)
+  total_lutas         Int?           @default(0)
+  previsoes_perfeitas Int?           @default(0)
+  card_perfeito       Boolean?       @default(false)
+  created_at          DateTime?      @default(now()) @db.Timestamptz(6)
+  eventos             eventos        @relation(fields: [evento_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  usuarios_arena      usuarios_arena @relation(fields: [usuario_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([evento_id, usuario_id], map: "evento_usuario_unico")
+  @@index([evento_id, pontos_totais(sort: Desc)], map: "idx_evento_pontuacao_evento")
+  @@index([usuario_id], map: "idx_evento_pontuacao_usuario")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model eventos {
+  id                    String             @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  nome                  String             @db.VarChar(255)
+  slug                  String?            @unique @db.VarChar(255)
+  data_evento           DateTime           @db.Timestamptz(6)
+  local_evento          String?            @db.VarChar(255)
+  cidade                String?            @db.VarChar(100)
+  pais                  String?            @db.VarChar(100)
+  tipo                  String?            @default("PPV") @db.VarChar(50)
+  status                status_evento?     @default(agendado)
+  imagem_url            String?            @db.VarChar(500)
+  descricao             String?
+  onde_assistir         String?            @default("UFC Fight Pass, Combate") @db.VarChar(255)
+  created_at            DateTime?          @default(now()) @db.Timestamptz(6)
+  updated_at            DateTime?          @default(now()) @db.Timestamptz(6)
+  ufc_slug              String?            @db.VarChar(100)
+  poster_url            String?            @db.VarChar(500)
+  horario_early_prelims String?            @db.VarChar(20)
+  horario_prelims       String?            @db.VarChar(20)
+  horario_main_card     String?            @db.VarChar(20)
+  last_scraped_at       DateTime?          @db.Timestamptz(6)
+  broadcast_info        Json?              @default("{}")
+  analises              analises[]
+  duelos                duelos[]
+  evento_pontuacao      evento_pontuacao[]
+  lutas                 lutas[]
+  previsoes             previsoes[]
+
+  @@index([data_evento(sort: Desc)], map: "idx_eventos_data")
+  @@index([data_evento(sort: Desc)], map: "idx_eventos_data_desc")
+  @@index([slug], map: "idx_eventos_slug")
+  @@index([status], map: "idx_eventos_status")
+  @@index([ufc_slug], map: "idx_eventos_ufc_slug")
+  @@index([ufc_slug], map: "idx_eventos_ufc_slug_unique")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model liga_chat {
+  id             String         @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  liga_id        String         @db.Uuid
+  usuario_id     String         @db.Uuid
+  mensagem       String
+  created_at     DateTime?      @default(now()) @db.Timestamptz(6)
+  ligas          ligas          @relation(fields: [liga_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  usuarios_arena usuarios_arena @relation(fields: [usuario_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([liga_id, created_at(sort: Desc)], map: "idx_liga_chat_liga")
+}
+
+model liga_membros {
+  id                   String         @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  liga_id              String         @db.Uuid
+  usuario_id           String         @db.Uuid
+  pontos_temporada     Int?           @default(0)
+  posicao_atual        Int?           @default(0)
+  melhor_posicao       Int?
+  pior_posicao         Int?
+  eventos_participados Int?           @default(0)
+  is_admin             Boolean?       @default(false)
+  joined_at            DateTime?      @default(now()) @db.Timestamptz(6)
+  ligas                ligas          @relation(fields: [liga_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  usuarios_arena       usuarios_arena @relation(fields: [usuario_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([liga_id, usuario_id], map: "membro_unico")
+  @@index([liga_id], map: "idx_liga_membros_liga")
+  @@index([liga_id, pontos_temporada(sort: Desc)], map: "idx_liga_membros_pontos")
+  @@index([usuario_id], map: "idx_liga_membros_usuario")
+}
+
+model liga_temporadas {
+  id                  String          @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  liga_id             String          @db.Uuid
+  numero_temporada    Int
+  inicio              DateTime        @db.Timestamptz(6)
+  fim                 DateTime?       @db.Timestamptz(6)
+  campeao_id          String?         @db.Uuid
+  pontos_campeao      Int?
+  total_participantes Int?
+  total_previsoes     Int?
+  created_at          DateTime?       @default(now()) @db.Timestamptz(6)
+  usuarios_arena      usuarios_arena? @relation(fields: [campeao_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  ligas               ligas           @relation(fields: [liga_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([liga_id, numero_temporada], map: "temporada_unica")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model ligas {
+  id                                              String            @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  nome                                            String            @db.VarChar(50)
+  descricao                                       String?           @db.VarChar(200)
+  imagem_url                                      String?
+  criador_id                                      String            @db.Uuid
+  tipo                                            tipo_liga?        @default(privada)
+  codigo_convite                                  String?           @unique @db.VarChar(8)
+  status                                          status_liga?      @default(ativa)
+  temporada_atual                                 Int?              @default(1)
+  max_membros                                     Int?              @default(50)
+  apenas_main_card                                Boolean?          @default(false)
+  mostrar_picks_antes                             Boolean?          @default(false)
+  total_membros                                   Int?              @default(1)
+  total_eventos_disputados                        Int?              @default(0)
+  campeao_id                                      String?           @db.Uuid
+  campeao_desde                                   DateTime?         @db.Timestamptz(6)
+  defesas_titulo                                  Int?              @default(0)
+  created_at                                      DateTime?         @default(now()) @db.Timestamptz(6)
+  updated_at                                      DateTime?         @default(now()) @db.Timestamptz(6)
+  liga_chat                                       liga_chat[]
+  liga_membros                                    liga_membros[]
+  liga_temporadas                                 liga_temporadas[]
+  usuarios_arena_ligas_campeao_idTousuarios_arena usuarios_arena?   @relation("ligas_campeao_idTousuarios_arena", fields: [campeao_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  usuarios_arena_ligas_criador_idTousuarios_arena usuarios_arena    @relation("ligas_criador_idTousuarios_arena", fields: [criador_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  previsoes_liga                                  previsoes_liga[]
+
+  @@index([codigo_convite], map: "idx_ligas_codigo")
+  @@index([criador_id], map: "idx_ligas_criador")
+  @@index([status], map: "idx_ligas_status")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+/// This model contains an expression index which requires additional setup for migrations. Visit https://pris.ly/d/expression-indexes for more info.
+model lutadores {
+  id                                       String              @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  nome                                     String              @unique @db.VarChar(255)
+  apelido                                  String?             @db.VarChar(255)
+  categoria_peso                           String?             @db.VarChar(100)
+  url_perfil                               String?             @db.VarChar(500)
+  imagem_url                               String?             @db.VarChar(500)
+  ativo                                    Boolean?            @default(true)
+  created_at                               DateTime?           @default(now()) @db.Timestamptz(6)
+  updated_at                               DateTime?           @default(now()) @db.Timestamptz(6)
+  pais                                     String?             @db.VarChar(50)
+  idade                                    Int?
+  altura                                   String?             @db.VarChar(20)
+  envergadura                              String?             @db.VarChar(20)
+  vitorias                                 Int?                @default(0)
+  derrotas                                 Int?                @default(0)
+  empates                                  Int?                @default(0)
+  nocautes                                 Int?                @default(0)
+  finalizacoes                             Int?                @default(0)
+  decisoes                                 Int?                @default(0)
+  ranking_divisao                          Int?
+  academia                                 String?             @db.VarChar(255)
+  estilo_luta                              String?             @db.VarChar(100)
+  cidade_natal                             String?             @db.VarChar(100)
+  data_nascimento                          DateTime?           @db.Date
+
+  // UFCStats career statistics
+  slpm                                     Float?              // Sig. Strikes Landed per Min
+  str_acc                                  Float?              // Striking Accuracy %
+  sapm                                     Float?              // Sig. Strikes Absorbed per Min
+  str_def                                  Float?              // Strike Defense %
+  td_avg                                   Float?              // Takedown Average per 15min
+  td_acc                                   Float?              // Takedown Accuracy %
+  td_def                                   Float?              // Takedown Defense %
+  sub_avg                                  Float?              // Submission Attempts per 15min
+  stance                                   String?             @db.VarChar(30)
+  last_stats_sync                          DateTime?           @db.Timestamptz(6)
+
+  analises_analises_lutador1_idTolutadores analises[]          @relation("analises_lutador1_idTolutadores")
+  analises_analises_lutador2_idTolutadores analises[]          @relation("analises_lutador2_idTolutadores")
+  lutas_lutas_lutador1_idTolutadores       lutas[]             @relation("lutas_lutador1_idTolutadores")
+  lutas_lutas_lutador2_idTolutadores       lutas[]             @relation("lutas_lutador2_idTolutadores")
+  lutas_lutas_vencedor_idTolutadores       lutas[]             @relation("lutas_vencedor_idTolutadores")
+  noticia_entidades                        noticia_entidades[]
+  previsoes                                previsoes[]
+
+  @@index([pais], map: "idx_lutadores_pais")
+  @@index([categoria_peso, ranking_divisao], map: "idx_lutadores_ranking")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model lutas {
+  id                                     String          @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  evento_id                              String          @db.Uuid
+  lutador1_id                            String          @db.Uuid
+  lutador2_id                            String          @db.Uuid
+  categoria_peso                         String          @db.VarChar(50)
+  ordem                                  Int?            @default(0)
+  tipo                                   tipo_luta?      @default(card_principal)
+  rounds                                 Int?            @default(3)
+  vencedor_id                            String?         @db.Uuid
+  metodo                                 metodo_vitoria?
+  round_final                            Int?
+  tempo_final                            String?         @db.VarChar(10)
+  status                                 status_luta?    @default(agendada)
+  is_titulo                              Boolean?        @default(false)
+  created_at                             DateTime?       @default(now()) @db.Timestamptz(6)
+  updated_at                             DateTime?       @default(now()) @db.Timestamptz(6)
+  lutador1_nome_display                  String?         @db.VarChar(100)
+  lutador2_nome_display                  String?         @db.VarChar(100)
+  is_featured                            Boolean?        @default(false)
+  records_atualizados                    Boolean?        @default(false)
+  eventos                                eventos         @relation(fields: [evento_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  lutadores_lutas_lutador1_idTolutadores lutadores       @relation("lutas_lutador1_idTolutadores", fields: [lutador1_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  lutadores_lutas_lutador2_idTolutadores lutadores       @relation("lutas_lutador2_idTolutadores", fields: [lutador2_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  lutadores_lutas_vencedor_idTolutadores lutadores?      @relation("lutas_vencedor_idTolutadores", fields: [vencedor_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  previsoes                              previsoes[]
+
+  @@index([evento_id], map: "idx_lutas_evento")
+  @@index([lutador1_id], map: "idx_lutas_lutador1")
+  @@index([lutador2_id], map: "idx_lutas_lutador2")
+  @@index([evento_id, ordem(sort: Desc)], map: "idx_lutas_ordem")
+  @@index([records_atualizados], map: "idx_lutas_records_atualizados", where: raw("(records_atualizados = false)"))
+  @@index([status], map: "idx_lutas_status")
+}
+
+model noticia_entidades {
+  id          String     @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  noticia_id  String?    @db.Uuid
+  lutador_id  String?    @db.Uuid
+  tipo_mencao String?    @default("mencionado") @db.VarChar(50)
+  created_at  DateTime?  @default(now()) @db.Timestamptz(6)
+  lutadores   lutadores? @relation(fields: [lutador_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  noticias    noticias?  @relation(fields: [noticia_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([noticia_id, lutador_id])
+  @@index([lutador_id], map: "idx_noticia_entidades_lutador")
+  @@index([noticia_id], map: "idx_noticia_entidades_noticia")
+}
+
+model noticias {
+  id                String              @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  titulo            String              @db.VarChar(500)
+  subtitulo         String?
+  conteudo_completo String?
+  imagem_url        String?             @db.VarChar(500)
+  fonte_url         String              @unique @db.VarChar(500)
+  fonte_nome        String?             @default("MMAMania") @db.VarChar(100)
+  categoria         categoria_noticia
+  hash_deduplicacao String?             @unique @db.VarChar(64)
+  eh_sobre_ufc      Boolean?            @default(true)
+  visualizacoes     Int?                @default(0)
+  publicado_em      DateTime            @db.Timestamptz(6)
+  created_at        DateTime?           @default(now()) @db.Timestamptz(6)
+  comentarios       comentarios[]
+  noticia_entidades noticia_entidades[]
+
+  @@index([categoria], map: "idx_noticias_categoria")
+  @@index([created_at(sort: Desc)], map: "idx_noticias_created")
+  @@index([fonte_nome], map: "idx_noticias_fonte")
+  @@index([hash_deduplicacao], map: "idx_noticias_hash")
+  @@index([publicado_em(sort: Desc)], map: "idx_noticias_publicado")
+}
+
+model notificacoes {
+  id             String         @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  usuario_id     String         @db.Uuid
+  tipo           String         @db.VarChar(50)
+  titulo         String         @db.VarChar(100)
+  mensagem       String?
+  dados          Json?
+  lida           Boolean?       @default(false)
+  created_at     DateTime?      @default(now()) @db.Timestamptz(6)
+  usuarios_arena usuarios_arena @relation(fields: [usuario_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([usuario_id, lida, created_at(sort: Desc)], map: "idx_notificacoes_usuario")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model previsoes {
+  id                      String           @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  usuario_id              String           @db.Uuid
+  luta_id                 String           @db.Uuid
+  evento_id               String           @db.Uuid
+  vencedor_previsto_id    String?          @db.Uuid
+  metodo_previsto         metodo_vitoria?
+  round_previsto          Int?
+  pontos_confianca        Int?             @default(100)
+  processada              Boolean?         @default(false)
+  acertou_vencedor        Boolean?
+  acertou_metodo          Boolean?
+  acertou_round           Boolean?
+  pontos_base             Int?             @default(0)
+  multiplicador_metodo    Decimal?         @default(1.0) @db.Decimal(3, 2)
+  multiplicador_round     Decimal?         @default(1.0) @db.Decimal(3, 2)
+  multiplicador_underdog  Decimal?         @default(1.0) @db.Decimal(3, 2)
+  multiplicador_confianca Decimal?         @default(1.0) @db.Decimal(3, 2)
+  pontos_ganhos           Int?             @default(0)
+  xp_ganho                Int?             @default(0)
+  odds_vencedor_previsto  Decimal?         @db.Decimal(6, 2)
+  created_at              DateTime?        @default(now()) @db.Timestamptz(6)
+  updated_at              DateTime?        @default(now()) @db.Timestamptz(6)
+  eventos                 eventos          @relation(fields: [evento_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  lutas                   lutas            @relation(fields: [luta_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  usuarios_arena          usuarios_arena   @relation(fields: [usuario_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  lutadores               lutadores?       @relation(fields: [vencedor_previsto_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  previsoes_liga          previsoes_liga[]
+
+  @@unique([usuario_id, luta_id], map: "previsao_unica")
+  @@index([evento_id], map: "idx_previsoes_evento")
+  @@index([luta_id], map: "idx_previsoes_luta")
+  @@index([processada], map: "idx_previsoes_processada", where: raw("(processada = false)"))
+  @@index([usuario_id], map: "idx_previsoes_usuario")
+}
+
+model previsoes_liga {
+  id            String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  previsao_id   String    @db.Uuid
+  liga_id       String    @db.Uuid
+  pontos_ganhos Int?      @default(0)
+  ligas         ligas     @relation(fields: [liga_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  previsoes     previsoes @relation(fields: [previsao_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([previsao_id, liga_id], map: "previsao_liga_unica")
+}
+
+model sync_logs {
+  id                   String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  started_at           DateTime? @default(now()) @db.Timestamptz(6)
+  finished_at          DateTime? @db.Timestamptz(6)
+  noticias_processadas Int?      @default(0)
+  noticias_adicionadas Int?      @default(0)
+  noticias_duplicadas  Int?      @default(0)
+  noticias_rejeitadas  Int?      @default(0)
+  erro                 String?
+  status               String?   @default("running") @db.VarChar(50)
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model usuarios_arena {
+  id                                           String             @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  username                                     String             @unique @db.VarChar(30)
+  display_name                                 String?            @db.VarChar(50)
+  avatar_url                                   String?
+  bio                                          String?            @db.VarChar(200)
+  email                                        String             @unique @db.VarChar(255)
+  senha_hash                                   String             @db.VarChar(255)
+  pontos_totais                                Int?               @default(0)
+  xp_total                                     Int?               @default(0)
+  nivel                                        nivel_usuario?     @default(iniciante)
+  streak_atual                                 Int?               @default(0)
+  melhor_streak                                Int?               @default(0)
+  streak_main_event                            Int?               @default(0)
+  melhor_streak_main_event                     Int?               @default(0)
+  total_previsoes                              Int?               @default(0)
+  previsoes_corretas                           Int?               @default(0)
+  previsoes_perfeitas                          Int?               @default(0)
+  underdogs_acertados                          Int?               @default(0)
+  kos_acertados                                Int?               @default(0)
+  subs_acertados                               Int?               @default(0)
+  decisoes_acertadas                           Int?               @default(0)
+  total_amigos                                 Int?               @default(0)
+  total_ligas                                  Int?               @default(0)
+  titulos_ganhos                               Int?               @default(0)
+  picks_publicos                               Boolean?           @default(true)
+  notificacoes_ativas                          Boolean?           @default(true)
+  created_at                                   DateTime?          @default(now()) @db.Timestamptz(6)
+  updated_at                                   DateTime?          @default(now()) @db.Timestamptz(6)
+  last_login_at                                DateTime?          @db.Timestamptz(6)
+  amizades_amizades_amigo_idTousuarios_arena   amizades[]         @relation("amizades_amigo_idTousuarios_arena")
+  amizades_amizades_usuario_idTousuarios_arena amizades[]         @relation("amizades_usuario_idTousuarios_arena")
+  atividades                                   atividades[]
+  conquistas                                   conquistas[]
+  duelos_duelos_desafiado_idTousuarios_arena   duelos[]           @relation("duelos_desafiado_idTousuarios_arena")
+  duelos_duelos_desafiante_idTousuarios_arena  duelos[]           @relation("duelos_desafiante_idTousuarios_arena")
+  duelos_duelos_vencedor_idTousuarios_arena    duelos[]           @relation("duelos_vencedor_idTousuarios_arena")
+  evento_pontuacao                             evento_pontuacao[]
+  liga_chat                                    liga_chat[]
+  liga_membros                                 liga_membros[]
+  liga_temporadas                              liga_temporadas[]
+  ligas_ligas_campeao_idTousuarios_arena       ligas[]            @relation("ligas_campeao_idTousuarios_arena")
+  ligas_ligas_criador_idTousuarios_arena       ligas[]            @relation("ligas_criador_idTousuarios_arena")
+  notificacoes                                 notificacoes[]
+  previsoes                                    previsoes[]
+
+  @@index([pontos_totais(sort: Desc)], map: "idx_usuarios_arena_pontos")
+  @@index([username], map: "idx_usuarios_arena_username")
+  @@index([xp_total(sort: Desc)], map: "idx_usuarios_arena_xp")
+}
+
+enum categoria_noticia {
+  lutadores
+  lutas
+  backstage
+}
+
+enum metodo_vitoria {
+  KO_TKO               @map("KO/TKO")
+  Submission
+  Decision___Unanimous @map("Decision - Unanimous")
+  Decision___Split     @map("Decision - Split")
+  Decision___Majority  @map("Decision - Majority")
+  DQ
+  No_Contest           @map("No Contest")
+  Draw
+}
+
+enum nivel_usuario {
+  iniciante
+  amateur
+  contender
+  challenger
+  elite
+  champion
+  legend
+}
+
+enum status_amizade {
+  pendente
+  aceita
+  bloqueada
+}
+
+enum status_duelo {
+  pendente
+  aceito
+  recusado
+  finalizado
+  cancelado
+}
+
+enum status_evento {
+  agendado
+  ao_vivo
+  finalizado
+  cancelado
+}
+
+enum status_liga {
+  ativa
+  pausada
+  encerrada
+}
+
+enum status_luta {
+  agendada
+  ao_vivo
+  finalizada
+  cancelada
+}
+
+enum tipo_conquista {
+  sniper
+  on_fire
+  dog_whisperer
+  giant_slayer
+  champion
+  knockout_artist
+  submission_specialist
+  analyst
+  globetrotter
+  first_blood
+  social_butterfly
+  league_founder
+  perfect_card
+  underdog_hunter
+  main_event_master
+  streak_5
+  streak_10
+  streak_20
+}
+
+enum tipo_liga {
+  publica
+  privada
+}
+
+enum tipo_luta {
+  main_event
+  co_main
+  card_principal
+  preliminar
+  early_prelim
+}
+
+// ═══════════════════════════════════════
+// AI COMPANY MODELS
+// ═══════════════════════════════════════
+
+model Agent {
+  id           String   @id // "ceo", "cso", "news-writer", etc.
+  humanName    String
+  codename     String
+  role         String
+  title        String
+  model        String   // "opus-4.6", "sonnet-4.5", "haiku-4.5"
+  modelReason  String   @default("")
+  systemPrompt String   @db.Text
+  desc         String   @default("")
+  status       String   @default("active") // active, idle, warning, error, offline
+  level        String   // executive, director, agent
+  icon         String
+  color        String
+
+  // Hierarchy
+  reportsTo String?
+  reports   String[] // IDs of direct reports
+
+  // Avatar
+  avatarUrl String?
+
+  // Stats
+  tasksCompleted Int       @default(0)
+  lastRunAt      DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  // XP & LEVELING SYSTEM
+  agentLevel    Int      @default(1) // L1=Trainee, L2=Specialist, L3=Senior, L4=Lead
+  levelTitle    String   @default("Trainee")
+  xp            Int      @default(0)
+  xpToNextLevel Int      @default(100)
+
+  // PERFORMANCE TRACKING
+  weeklyScore                 Float @default(0)   // 0-5, calculado semanalmente
+  weeklyTaskCount             Int   @default(0)
+  weeklySuccessRate           Float @default(0)   // 0-1
+  avgResponseTime             Float @default(0)   // tempo medio em ms
+  consecutiveWeeksAboveTarget Int   @default(0)
+  consecutiveWeeksBelowTarget Int   @default(0)
+  warnings                    Int   @default(0)
+
+  // HISTORY
+  promotedAt DateTime?
+  demotedAt  DateTime?
+  hiredAt    DateTime  @default(now())
+  firedAt    DateTime? // null = empregado ativo
+
+  // Relations
+  tasks              AgentTask[]
+  logs               AgentLog[]
+  approvals          Approval[]          @relation("agent_approvals")
+  performanceReviews PerformanceReview[]
+  costLogs           AgentCostLog[]      @relation("agent_costs")
+
+  @@map("agents")
+}
+
+model AgentTask {
+  id      String @id @default(cuid())
+  agentId String
+  agent   Agent  @relation(fields: [agentId], references: [id])
+
+  type   String  @default("prompt_response")
+  input  String  @db.Text
+  output String? @db.Text
+  status String  @default("pending") // pending, running, completed, failed, awaiting_approval
+
+  parentTaskId String?
+  parentTask   AgentTask?  @relation("subtasks", fields: [parentTaskId], references: [id])
+  subtasks     AgentTask[] @relation("subtasks")
+
+  modelUsed    String?
+  tokensInput  Int?
+  tokensOutput Int?
+  durationMs   Int?
+  error        String? @db.Text
+
+  createdAt   DateTime  @default(now())
+  completedAt DateTime?
+
+  approvals Approval[]
+
+  @@index([agentId])
+  @@index([status])
+  @@map("agent_tasks")
+}
+
+model Approval {
+  id      String    @id @default(cuid())
+  taskId  String
+  task    AgentTask @relation(fields: [taskId], references: [id])
+  agentId String
+  agent   Agent     @relation("agent_approvals", fields: [agentId], references: [id])
+
+  actionType  String
+  description String  @db.Text
+  payload     String  @db.Text
+
+  status     String    @default("pending") // pending, approved, rejected
+  reviewedBy String?
+  reviewedAt DateTime?
+  reviewNote String?
+
+  createdAt DateTime @default(now())
+
+  @@index([taskId])
+  @@index([status])
+  @@map("approvals")
+}
+
+model AgentLog {
+  id      String @id @default(cuid())
+  agentId String
+  agent   Agent  @relation(fields: [agentId], references: [id])
+
+  level    String
+  message  String  @db.Text
+  metadata String? @db.Text
+
+  createdAt DateTime @default(now())
+
+  @@index([agentId])
+  @@index([level])
+  @@map("agent_logs")
+}
+
+model CompanyPrompt {
+  id     String @id @default(cuid())
+  userId String
+  prompt String @db.Text
+
+  ceoAnalysis String? @db.Text
+  status      String  @default("processing")
+
+  tasks   String[]
+  summary String?  @db.Text
+
+  createdAt   DateTime  @default(now())
+  completedAt DateTime?
+
+  @@map("company_prompts")
+}
+
+model AgentCostLog {
+  id           String   @id @default(cuid())
+  agentId      String
+  agent        Agent    @relation("agent_costs", fields: [agentId], references: [id])
+  tokensInput  Int
+  tokensOutput Int
+  costUsd      Float
+  model        String
+  taskId       String?
+  createdAt    DateTime @default(now())
+
+  @@index([agentId])
+  @@index([createdAt])
+  @@map("agent_cost_logs")
+}
+
+model AgentEvent {
+  id          String    @id @default(cuid())
+  type        String    // event.finalized, event.new_card, news.synced, cron.daily, cron.weekly
+  payload     String    @db.Text
+  status      String    @default("pending") // pending, processing, completed, failed
+  error       String?   @db.Text
+  triggeredAt DateTime  @default(now())
+  processedAt DateTime?
+
+  @@index([status])
+  @@index([type])
+  @@index([triggeredAt(sort: Desc)])
+  @@map("agent_events")
+}
+
+model RemediationPlan {
+  id         String    @id @default(cuid())
+  promptId   String?   // CompanyPrompt that originated this plan
+  analysis   String    @db.Text // CEO analysis of what needs to improve
+  actions    String    @db.Text // JSON: [{ agentId, instruction, priority, autoApprove }]
+  status     String    @default("pending") // pending, approved, executing, completed, rejected
+  createdAt  DateTime  @default(now())
+  approvedAt DateTime?
+  approvedBy String?
+  executedAt DateTime?
+  results    String?   @db.Text // JSON with execution results
+
+  @@index([status])
+  @@map("remediation_plans")
+}
+
+model PerformanceReview {
+  id      String @id @default(cuid())
+  agentId String
+  agent   Agent  @relation(fields: [agentId], references: [id])
+
+  weekNumber Int
+  year       Int
+
+  // Metrics
+  tasksCompleted    Int
+  tasksFailed       Int
+  avgResponseTimeMs Int
+  tokensUsed        Int
+  costUsd           Float
+  successRate       Float // 0-1
+  qualityScore      Float // 0-5
+  efficiencyScore   Float // 0-5
+
+  // Composite
+  weeklyScore Float // 0-5, media ponderada
+  xpEarned    Int
+
+  // Actions
+  action String? // "promoted" | "demoted" | "warning" | "employee_of_week" | null
+
+  createdAt DateTime @default(now())
+
+  @@index([agentId])
+  @@index([year, weekNumber])
+  @@map("performance_reviews")
+}

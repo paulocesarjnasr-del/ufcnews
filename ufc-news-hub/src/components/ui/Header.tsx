@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { formatTimeAgo } from '@/lib/utils';
-import { Newspaper, BarChart3, Target, Calendar, Menu, X } from 'lucide-react';
+import { Newspaper, BarChart3, Target, Calendar, Menu, X, Users } from 'lucide-react';
 
 interface SyncStatus {
   status: 'running' | 'completed' | 'error';
@@ -13,6 +13,7 @@ interface SyncStatus {
 
 const mainNav = [
   { href: '/', label: 'Noticias', icon: Newspaper },
+  { href: '/fighters', label: 'Lutadores', icon: Users },
   { href: '/analises', label: 'Análises', icon: BarChart3 },
   { href: '/arena', label: 'Arena', icon: Target },
   { href: '/calendario', label: 'Calendario', icon: Calendar },

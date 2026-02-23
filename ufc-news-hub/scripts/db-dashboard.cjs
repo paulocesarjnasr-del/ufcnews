@@ -532,7 +532,7 @@ const HTML = `<!DOCTYPE html>
     display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
     background: rgba(0,0,0,0.7); z-index: 100; justify-content: center; align-items: center;
   }
-  .code-modal-overlay.show { display: flex; }
+  .code-modal-overlay.show, .code-modal-overlay.open { display: flex; }
   .code-modal {
     background: #12121a; border: 1px solid #333; border-radius: 12px;
     width: 90%; max-width: 800px; max-height: 80vh; display: flex; flex-direction: column;

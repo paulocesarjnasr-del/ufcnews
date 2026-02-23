@@ -1610,15 +1610,15 @@ async function loadTable(table) {
     var html = '<table class="data-table"><thead><tr>';
     displayCols.forEach(function(col) {
       var arrow = st.sort === col ? (st.order === 'asc' ? ' ↑' : ' ↓') : '';
-      html += '<th onclick="sortTable(\x27' + table + '\x27,\x27' + col + '\x27)">' + col + arrow + '</th>';
+      html += '<th onclick="sortTable(\\x27' + table + '\\x27,\\x27' + col + '\\x27)">' + col + arrow + '</th>';
     });
     html += '</tr></thead><tbody>';
     data.rows.forEach(function(row) {
-      html += '<tr onclick="openSidebar(\x27' + table + '\x27,\x27' + row.id + '\x27)">';
+      html += '<tr onclick="openSidebar(\\x27' + table + '\\x27,\\x27' + row.id + '\\x27)">';
       displayCols.forEach(function(col) {
         var val = row[col];
         if (col === 'imagem_url' && val) {
-          html += '<td><img src="' + esc(val) + '" style="height:30px;border-radius:4px;" onerror="this.style.display=\x27none\x27"></td>';
+          html += '<td><img src="' + esc(val) + '" style="height:30px;border-radius:4px;" onerror="this.style.display=\\x27none\\x27"></td>';
         } else if (val === null || val === undefined) {
           html += '<td style="color:#333;">—</td>';
         } else if (typeof val === 'string' && val.length > 50) {
@@ -1633,9 +1633,9 @@ async function loadTable(table) {
     document.getElementById('table-' + table).innerHTML = html;
     var pageHtml = '';
     if (data.pages > 1) {
-      if (data.page > 1) pageHtml += '<button class="page-btn" onclick="goPage(\x27' + table + '\x27,' + (data.page - 1) + ')">←</button>';
+      if (data.page > 1) pageHtml += '<button class="page-btn" onclick="goPage(\\x27' + table + '\\x27,' + (data.page - 1) + ')">←</button>';
       pageHtml += '<span>' + data.page + ' / ' + data.pages + ' (' + data.total + ' registros)</span>';
-      if (data.page < data.pages) pageHtml += '<button class="page-btn" onclick="goPage(\x27' + table + '\x27,' + (data.page + 1) + ')">→</button>';
+      if (data.page < data.pages) pageHtml += '<button class="page-btn" onclick="goPage(\\x27' + table + '\\x27,' + (data.page + 1) + ')">→</button>';
     } else {
       pageHtml = '<span>' + data.total + ' registros</span>';
     }
@@ -1657,9 +1657,9 @@ async function openSidebar(table, id) {
       var val = record[key];
       var isEmpty = val === null || val === undefined || val === '';
       html += '<div class="ds-field">';
-      html += '<div class="ds-label">' + esc(key) + ' <span class="ds-edit-btn" onclick="editField(\x27' + table + '\x27,\x27' + id + '\x27,\x27' + key + '\x27)">✏️</span></div>';
+      html += '<div class="ds-label">' + esc(key) + ' <span class="ds-edit-btn" onclick="editField(\\x27' + table + '\\x27,\\x27' + id + '\\x27,\\x27' + key + '\\x27)">✏️</span></div>';
       if (key === 'imagem_url' && val) {
-        html += '<div class="ds-value"><img src="' + esc(val) + '" onerror="this.style.display=\x27none\x27"></div>';
+        html += '<div class="ds-value"><img src="' + esc(val) + '" onerror="this.style.display=\\x27none\\x27"></div>';
       } else if (isEmpty) {
         html += '<div class="ds-value empty">— vazio —</div>';
       } else if (typeof val === 'string' && val.length > 200) {

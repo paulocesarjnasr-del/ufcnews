@@ -200,10 +200,10 @@ export default function PerfilPage({ params }: PageProps) {
               )}
 
               <p className="mt-4 text-xs text-dark-textMuted">
-                Membro desde {new Date(perfil.created_at).toLocaleDateString('pt-BR', {
+                Membro desde {perfil.created_at && !isNaN(new Date(perfil.created_at).getTime()) ? new Date(perfil.created_at).toLocaleDateString('pt-BR', {
                   month: 'long',
                   year: 'numeric'
-                })}
+                }) : '—'}
               </p>
             </div>
 
@@ -372,7 +372,7 @@ export default function PerfilPage({ params }: PageProps) {
                         </p>
                         {desbloqueada && conquistaData && (
                           <p className="mt-2 text-xs text-ufc-gold">
-                            Desbloqueada em {new Date(conquistaData.desbloqueada_em).toLocaleDateString('pt-BR')}
+                            Desbloqueada em {conquistaData.desbloqueada_em && !isNaN(new Date(conquistaData.desbloqueada_em).getTime()) ? new Date(conquistaData.desbloqueada_em).toLocaleDateString('pt-BR') : '—'}
                           </p>
                         )}
                       </div>

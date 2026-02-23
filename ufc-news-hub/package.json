@@ -16,10 +16,16 @@
     "auto-sync": "tsx scripts/auto-sync.ts",
     "scrape:eventos": "tsx scripts/scrape-ufc-events.ts",
     "scrape:records": "tsx scripts/scrape-fighter-records.ts",
-    "auto-sync:eventos": "tsx scripts/auto-sync-eventos.ts"
+    "auto-sync:eventos": "tsx scripts/auto-sync-eventos.ts",
+    "db:seed-agents": "tsx prisma/seed.ts"
   },
   "dependencies": {
+    "@ai-sdk/anthropic": "^3.0.46",
     "@anthropic-ai/sdk": "^0.32.1",
+    "@prisma/adapter-pg": "^7.4.1",
+    "@prisma/client": "^7.4.1",
+    "@tailwindcss/typography": "^0.5.19",
+    "ai": "^6.0.94",
     "cheerio": "^1.0.0",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
@@ -30,8 +36,11 @@
     "node-cron": "^3.0.3",
     "pg": "^8.13.1",
     "playwright": "^1.57.0",
+    "prisma": "^7.4.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "react-markdown": "^10.1.0",
+    "remark-gfm": "^4.0.1",
     "rss-parser": "^3.13.0",
     "swr": "^2.2.5",
     "tailwind-merge": "^2.6.0"
@@ -48,6 +57,7 @@
     "postcss": "^8.4.49",
     "tailwindcss": "^3.4.17",
     "tsx": "^4.19.2",
-    "typescript": "^5.7.2"
+    "typescript": "^5.7.2",
+    "xlsx": "^0.18.5"
   }
 }

@@ -11,6 +11,7 @@ export async function GET(request: NextRequest) {
     const categoria = searchParams.get('categoria');
     const pais = searchParams.get('pais');
     const ativo = searchParams.get('ativo');
+    const sort = searchParams.get('sort');
 
     let whereConditions: string[] = [];
     const params: unknown[] = [];
@@ -44,14 +45,47 @@ export async function GET(request: NextRequest) {
       ? `WHERE ${whereConditions.join(' AND ')}`
       : '';
 
+    // Build ORDER BY based on sort parameter
+    let orderByClause: string;
+    switch (sort) {
+      case 'photo_first':
+        orderByClause = `
+          ORDER BY
+            CASE WHEN imagem_url IS NOT NULL AND imagem_url != '' THEN 0 ELSE 1 END ASC,
+            CASE WHEN ranking_divisao IS NOT NULL THEN ranking_divisao ELSE 999 END ASC,
+            (COALESCE(vitorias, 0) - COALESCE(derrotas, 0)) DESC,
+            nome ASC
+        `;
+        break;
+      case 'ranked':
+        orderByClause = `
+          ORDER BY
+            CASE WHEN ranking_divisao IS NOT NULL THEN 0 ELSE 1 END ASC,
+            CASE WHEN ranking_divisao IS NOT NULL THEN ranking_divisao ELSE 999 END ASC,
+            (COALESCE(vitorias, 0) - COALESCE(derrotas, 0)) DESC,
+            nome ASC
+        `;
+        break;
+      default:
+        orderByClause = `
+          ORDER BY
+            CASE WHEN ranking_divisao IS NOT NULL THEN ranking_divisao ELSE 999 END ASC,
+            (COALESCE(vitorias, 0) - COALESCE(derrotas, 0)) DESC,
+            nome ASC
+        `;
+    }
+
+    // Use minimal fields for large requests (comparator dropdown)
+    const fields = searchParams.get('fields');
+    const selectClause = fields === 'minimal' 
+      ? `SELECT id, nome, apelido, imagem_url, categoria_peso, pais, vitorias, derrotas, empates, ranking_divisao`
+      : `SELECT *`;
+
     const lutadores = await query<LutadorExpandido>(
-      `SELECT *
+      `${selectClause}
       FROM lutadores
       ${whereClause}
-      ORDER BY
-        CASE WHEN ranking_divisao IS NOT NULL THEN ranking_divisao ELSE 999 END ASC,
-        (COALESCE(vitorias, 0) - COALESCE(derrotas, 0)) DESC,
-        nome ASC
+      ${orderByClause}
       LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`,
       [...params, limit, offset]
     );

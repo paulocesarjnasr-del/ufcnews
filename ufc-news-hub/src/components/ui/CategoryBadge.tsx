@@ -21,12 +21,12 @@ export function CategoryBadge({ categoria, className }: CategoryBadgeProps) {
     <span
       className={cn(
         'inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-bold uppercase tracking-wider',
-        CATEGORIA_COLORS[categoria],
+        CATEGORIA_COLORS[categoria] || 'bg-dark-card text-dark-textMuted',
         className
       )}
     >
-      <Icon className="w-3.5 h-3.5" />
-      {CATEGORIA_LABELS[categoria]}
+      {Icon ? <Icon className="w-3.5 h-3.5" /> : null}
+      {CATEGORIA_LABELS[categoria] || categoria || '—'}
     </span>
   );
 }

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import Image from 'next/image';
+import FighterImage from '@/components/ui/FighterImage';
 import { useArenaAuth } from '@/hooks/useArenaAuth';
 import { ArenaMenu } from '@/components/arena/ArenaMenu';
 import { UserAvatar } from '@/components/arena/UserAvatar';
@@ -195,12 +195,12 @@ export default function AvatarSelectionPage() {
                    usuario?.username?.slice(0, 2).toUpperCase()}
                 </span>
               ) : avatarType === 'fighter' && selectedFighter ? (
-                <Image
+                <FighterImage
                   src={lutadores.find(l => l.id === selectedFighter)?.imagem_url || ''}
                   alt="Avatar"
                   width={80}
                   height={80}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover object-top"
                 />
               ) : (
                 <span className="text-dark-textMuted">?</span>
@@ -244,11 +244,11 @@ export default function AvatarSelectionPage() {
                     title={lutador.nome}
                   >
                     {lutador.imagem_url ? (
-                      <Image
+                      <FighterImage
                         src={lutador.imagem_url}
                         alt={lutador.nome}
                         fill
-                        className="object-cover"
+                        className="object-cover object-top"
                       />
                     ) : (
                       <div className="w-full h-full bg-dark-border flex items-center justify-center">

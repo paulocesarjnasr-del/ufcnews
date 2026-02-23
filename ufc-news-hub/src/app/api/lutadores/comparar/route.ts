@@ -54,15 +54,19 @@ export async function GET(request: NextRequest) {
     );
 
     // Calcular estatísticas de comparação
-    const calcularStats = (l: LutadorExpandido) => ({
-      record: `${l.vitorias || 0}-${l.derrotas || 0}-${l.empates || 0}`,
-      taxa_vitoria: l.vitorias && (l.vitorias + l.derrotas) > 0
-        ? Math.round((l.vitorias / (l.vitorias + l.derrotas)) * 100)
-        : 0,
-      taxa_finalizacao: l.vitorias && l.vitorias > 0
-        ? Math.round(((l.nocautes || 0) + (l.finalizacoes || 0)) / l.vitorias * 100)
-        : 0,
-    });
+    const calcularStats = (l: LutadorExpandido) => {
+      const v = l.vitorias || 0;
+      const d = l.derrotas || 0;
+      const total = v + d;
+      return {
+        record: `${v}-${d}-${l.empates || 0}`,
+        taxa_vitoria: total > 0 ? Math.round((v / total) * 100) : 0,
+        taxa_finalizacao: v > 0 ? Math.round(((l.nocautes || 0) + (l.finalizacoes || 0)) / v * 100) : 0,
+        ko_ratio: v > 0 ? Math.round(((l.nocautes || 0) / v) * 100) : 0,
+        sub_ratio: v > 0 ? Math.round(((l.finalizacoes || 0) / v) * 100) : 0,
+        dec_ratio: v > 0 ? Math.round(((l.decisoes || 0) / v) * 100) : 0,
+      };
+    };
 
     const stats1 = calcularStats(lutador1);
     const stats2 = calcularStats(lutador2);

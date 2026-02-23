@@ -75,7 +75,8 @@ export default function AnalisesPage() {
             {analises.map((a) => {
               const f1Last = a.fighter1_info?.nome?.split(' ').pop() || '?';
               const f2Last = a.fighter2_info?.nome?.split(' ').pop() || '?';
-              const eventoDate = a.evento_data ? new Date(a.evento_data) : null;
+              const rawDate = a.evento_data ? new Date(a.evento_data) : null;
+              const eventoDate = rawDate && !isNaN(rawDate.getTime()) ? rawDate : null;
 
               return (
                 <Link key={a.id} href={`/analise/${a.slug}`} className="group block">

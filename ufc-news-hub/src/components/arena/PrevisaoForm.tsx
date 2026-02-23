@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import Image from 'next/image';
+import FighterImage from '@/components/ui/FighterImage';
 import { LutaComLutadores, Lutador, MetodoVitoria, Previsao } from '@/types';
 
 interface PrevisaoFormProps {
@@ -201,11 +201,11 @@ function LutadorOption({ lutador, isSelected, onClick }: LutadorOptionProps) {
     >
       <div className="relative h-12 w-12 overflow-hidden rounded-full">
         {lutador.imagem_url ? (
-          <Image
+          <FighterImage
             src={lutador.imagem_url}
             alt={lutador.nome}
             fill
-            className="object-cover"
+            className="object-cover object-top"
           />
         ) : (
           <div className="flex h-full w-full items-center justify-center bg-dark-border text-lg font-bold text-dark-textMuted">

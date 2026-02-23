@@ -1,7 +1,7 @@
 'use client';
 
-import Image from 'next/image';
 import Link from 'next/link';
+import FighterImage from '@/components/ui/FighterImage';
 
 interface Fighter {
   id: string;
@@ -67,11 +67,11 @@ function FighterCorner({
           hover:border-ufc-red transition-colors
         `}>
           {fighter.imagem_url ? (
-            <Image
+            <FighterImage
               src={fighter.imagem_url}
               alt={fighter.nome}
               fill
-              className="object-cover"
+              className="object-cover object-top"
               sizes="40px"
             />
           ) : (

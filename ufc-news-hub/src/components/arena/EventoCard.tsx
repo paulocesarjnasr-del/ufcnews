@@ -11,7 +11,8 @@ interface EventoCardProps {
 }
 
 export function EventoCard({ evento, featured = false }: EventoCardProps) {
-  const dataEvento = new Date(evento.data_evento);
+  const rawDate = evento.data_evento ? new Date(evento.data_evento) : null;
+  const dataEvento = rawDate && !isNaN(rawDate.getTime()) ? rawDate : new Date();
   const isPast = dataEvento < new Date();
 
   return (
@@ -28,7 +29,7 @@ export function EventoCard({ evento, featured = false }: EventoCardProps) {
               src={evento.imagem_url}
               alt={evento.nome}
               fill
-              className="object-cover"
+              className="object-cover object-top"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-dark-card via-dark-card/80 to-transparent" />
           </div>

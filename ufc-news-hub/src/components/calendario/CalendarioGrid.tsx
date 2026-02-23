@@ -34,6 +34,7 @@ export function CalendarioGrid({ eventos, isLoading }: CalendarioGridProps) {
   const eventosPorMes = eventos.reduce<Record<string, typeof eventos>>(
     (acc, evento) => {
       const data = new Date(evento.data_evento);
+      if (isNaN(data.getTime())) return acc;
       const mesAno = data.toLocaleDateString('pt-BR', {
         month: 'long',
         year: 'numeric',

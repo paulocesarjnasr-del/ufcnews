@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import FighterImage from '@/components/ui/FighterImage';
 import { ArenaMenu } from '@/components/arena/ArenaMenu';
 import { UserAvatar } from '@/components/arena/UserAvatar';
 import { Countdown } from '@/components/calendario/Countdown';
@@ -218,12 +219,12 @@ export default function ArenaPage() {
                           <div className="flex-1 text-center">
                             <div className="w-20 h-20 mx-auto mb-2 rounded-full overflow-hidden bg-dark-border">
                               {mainEvent.lutador1?.imagem_url ? (
-                                <Image
+                                <FighterImage
                                   src={mainEvent.lutador1.imagem_url}
                                   alt={mainEvent.lutador1.nome}
                                   width={80}
                                   height={80}
-                                  className="w-full h-full object-cover"
+                                  className="w-full h-full object-cover object-top"
                                 />
                               ) : (
                                 <div className="w-full h-full flex items-center justify-center text-dark-textMuted">
@@ -253,12 +254,12 @@ export default function ArenaPage() {
                           <div className="flex-1 text-center">
                             <div className="w-20 h-20 mx-auto mb-2 rounded-full overflow-hidden bg-dark-border">
                               {mainEvent.lutador2?.imagem_url ? (
-                                <Image
+                                <FighterImage
                                   src={mainEvent.lutador2.imagem_url}
                                   alt={mainEvent.lutador2.nome}
                                   width={80}
                                   height={80}
-                                  className="w-full h-full object-cover"
+                                  className="w-full h-full object-cover object-top"
                                 />
                               ) : (
                                 <div className="w-full h-full flex items-center justify-center text-dark-textMuted">

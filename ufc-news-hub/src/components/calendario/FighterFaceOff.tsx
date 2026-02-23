@@ -1,7 +1,7 @@
 'use client';
 
-import Image from 'next/image';
 import Link from 'next/link';
+import FighterImage from '@/components/ui/FighterImage';
 
 interface Fighter {
   id: string;
@@ -47,11 +47,11 @@ function FighterCard({
         {/* Avatar */}
         <div className="relative w-10 h-10 sm:w-12 sm:h-12 rounded-full overflow-hidden bg-dark-card border border-dark-border">
           {fighter.imagem_url ? (
-            <Image
+            <FighterImage
               src={fighter.imagem_url}
               alt={fighter.nome}
               fill
-              className="object-cover"
+              className="object-cover object-top"
               sizes="48px"
             />
           ) : (
@@ -104,11 +104,11 @@ function FighterCard({
         ${isWinner ? 'ring-4 ring-ufc-gold/30' : ''}
       `}>
         {fighter.imagem_url ? (
-          <Image
+          <FighterImage
             src={fighter.imagem_url}
             alt={fighter.nome}
             fill
-            className="object-cover group-hover:scale-105 transition-transform duration-300"
+            className="object-cover object-top group-hover:scale-105 transition-transform duration-300"
             sizes="(max-width: 640px) 112px, (max-width: 1024px) 160px, 192px"
           />
         ) : (

@@ -1,0 +1,14 @@
+import 'dotenv/config';
+import pg from 'pg';
+const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL });
+const r1 = await pool.query("SELECT count(*) FROM lutadores WHERE last_stats_sync IS NOT NULL");
+const r2 = await pool.query("SELECT count(*) FROM lutadores");
+const r3 = await pool.query("SELECT count(*) FROM lutadores WHERE last_stats_sync IS NULL AND ativo = true");
+const synced = parseInt(r1.rows[0].count);
+const total = parseInt(r2.rows[0].count);
+const remaining = parseInt(r3.rows[0].count);
+console.log(`Total lutadores: ${total}`);
+console.log(`Com stats sync: ${synced}`);
+console.log(`Sem stats sync: ${remaining}`);
+console.log(`Progresso Phase 4: ${synced}/${synced + remaining} (${Math.round(synced/(synced+remaining)*100)}%)`);
+await pool.end();

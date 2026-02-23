@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { emitEvent, processEvents } from '@/lib/ai-company/event-bus';
 
 // Endpoint para ser chamado por um cron job externo
 // Exemplo: curl -X POST http://localhost:3000/api/cron?secret=YOUR_SECRET
@@ -62,6 +63,26 @@ async function runSync(baseUrl: string) {
     }
   }
 
+  // 4. Emit daily event for AI Company agents
+  console.log('[CRON] Emitting cron.daily event for AI agents...');
+  try {
+    await emitEvent('cron.daily', { timestamp: new Date().toISOString() });
+
+    // Weekly event on Mondays
+    if (today.getUTCDay() === 1) {
+      await emitEvent('cron.weekly', { timestamp: new Date().toISOString() });
+    }
+
+    // Process pending events (including the ones just emitted)
+    const eventResults = await processEvents();
+    (results as Record<string, unknown>).eventBus = eventResults;
+    console.log('[CRON] Event bus processed:', eventResults);
+  } catch (error) {
+    const errorMsg = error instanceof Error ? error.message : 'Erro desconhecido';
+    console.error('[CRON] Erro no event bus:', errorMsg);
+    results.errors.push(`EventBus: ${errorMsg}`);
+  }
+
   console.log(`[CRON] Sincronização completa finalizada - ${new Date().toISOString()}`);
 
   return results;
@@ -70,7 +91,7 @@ async function runSync(baseUrl: string) {
 // GET — Called by Vercel Cron
 export async function GET(request: Request) {
   // Vercel Cron sends user-agent "vercel-cron/1.0" — optionally verify
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || `http://localhost:${process.env.PORT || '3010'}`;
 
   try {
     const results = await runSync(baseUrl);
@@ -100,7 +121,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || `http://localhost:${process.env.PORT || '3010'}`;
 
   try {
     const results = await runSync(baseUrl);

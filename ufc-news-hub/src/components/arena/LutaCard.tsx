@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import Image from 'next/image';
+import FighterImage from '@/components/ui/FighterImage';
 import { LutaComLutadores, Lutador, MetodoVitoria, Previsao } from '@/types';
 import { PrevisaoForm } from './PrevisaoForm';
 import { ConsensoBar } from './ConsensoBar';
@@ -255,11 +255,11 @@ function LutadorDisplay({
         }`}
       >
         {lutador.imagem_url ? (
-          <Image
+          <FighterImage
             src={lutador.imagem_url}
             alt={lutador.nome}
             fill
-            className="object-cover"
+            className="object-cover object-top"
           />
         ) : (
           <div className="flex h-full w-full items-center justify-center bg-dark-border text-xl font-bold text-dark-textMuted">

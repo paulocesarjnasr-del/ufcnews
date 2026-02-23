@@ -28,7 +28,24 @@ const parser = new Parser({
       ['media:thumbnail', 'mediaThumbnail'],
     ],
   },
+  requestOptions: {
+    headers: {
+      'User-Agent': 'UFC-News-Hub/1.0 (RSS Aggregator)',
+      'Accept': 'application/rss+xml, application/xml, text/xml',
+    },
+  },
 });
+
+/**
+ * Sanitiza XML malformado antes de passar pro parser.
+ * Corrige entidades inválidas que causam "Invalid character in entity name".
+ */
+function sanitizeXml(xml: string): string {
+  // Fix lone ampersands that aren't part of valid entities
+  // Valid: &amp; &lt; &gt; &quot; &apos; &#123; &#x1A;
+  // Invalid: & followed by invalid entity name chars (like backslash)
+  return xml.replace(/&(?!(?:amp|lt|gt|quot|apos|#\d+|#x[0-9a-fA-F]+);)/g, '&amp;');
+}
 
 interface RSSFeedItem {
   title?: string;
@@ -196,7 +213,23 @@ export async function fetchMultipleRSSFeeds(): Promise<RSSItem[]> {
   for (const feedUrl of RSS_FEED_URLS) {
     try {
       console.log(`  -> Buscando: ${feedUrl}`);
-      const feed = await parser.parseURL(feedUrl);
+
+      // Try direct parsing first, fall back to sanitized XML on failure
+      let feed;
+      try {
+        feed = await parser.parseURL(feedUrl);
+      } catch {
+        console.log(`     Tentando com sanitizacao XML: ${feedUrl}`);
+        const res = await fetch(feedUrl, {
+          headers: {
+            'User-Agent': 'UFC-News-Hub/1.0 (RSS Aggregator)',
+            'Accept': 'application/rss+xml, application/xml, text/xml',
+          },
+        });
+        const rawXml = await res.text();
+        const sanitized = sanitizeXml(rawXml);
+        feed = await parser.parseString(sanitized);
+      }
 
       if (!feed.items || feed.items.length === 0) {
         console.log(`     Feed vazio: ${feedUrl}`);

@@ -132,7 +132,7 @@ export default function AnalisePage() {
               Análise
             </span>
             <span className="text-sm text-dark-textMuted">
-              {new Date(analise.created_at).toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' })}
+              {analise.created_at && !isNaN(new Date(analise.created_at).getTime()) ? new Date(analise.created_at).toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' }) : '—'}
             </span>
           </div>
 

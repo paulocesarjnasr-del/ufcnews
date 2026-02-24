@@ -34,6 +34,7 @@
     "lucide-react": "^0.575.0",
     "next": "^15.1.0",
     "node-cron": "^3.0.3",
+    "node-pty": "^1.1.0",
     "pg": "^8.13.1",
     "playwright": "^1.57.0",
     "prisma": "^7.4.1",
@@ -43,7 +44,8 @@
     "remark-gfm": "^4.0.1",
     "rss-parser": "^3.13.0",
     "swr": "^2.2.5",
-    "tailwind-merge": "^2.6.0"
+    "tailwind-merge": "^2.6.0",
+    "ws": "^8.19.0"
   },
   "devDependencies": {
     "@types/node": "^22.10.2",

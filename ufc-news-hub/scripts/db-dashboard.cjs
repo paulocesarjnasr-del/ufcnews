@@ -2,6 +2,8 @@ const http = require('http');
 const { Pool } = require('pg');
 const fs = require('fs');
 const path = require('path');
+const WebSocket = require('ws');
+const { spawn } = require('child_process');
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL || 'postgresql://ufcnews:ufcnews123@localhost:5432/ufc_news_hub',
@@ -262,7 +264,11 @@ const HTML = `<!DOCTYPE html>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🗄️</text></svg>">
-<title>UFC News Hub — Database Live</title>
+<title>UFC News Hub — CRM Dashboard</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@xterm/xterm@5.5.0/css/xterm.min.css">
+<script src="https://cdn.jsdelivr.net/npm/@xterm/xterm@5.5.0/lib/xterm.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@xterm/addon-fit@0.10.0/lib/addon-fit.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@xterm/addon-web-links@0.11.0/lib/addon-web-links.min.js"></script>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
@@ -626,11 +632,52 @@ const HTML = `<!DOCTYPE html>
   .detail-sidebar .ds-value.empty { color: #f87171; font-style: italic; }
   .detail-sidebar .ds-value img { max-width: 200px; border-radius: 8px; margin-top: 4px; }
   .ds-edit-btn { font-size: 9px; color: #60a5fa; cursor: pointer; margin-left: 8px; }
+
+  /* ── Terminal ── */
+  .term-toggle {
+    position: fixed; top: 16px; right: 20px; z-index: 200;
+    width: 40px; height: 40px; border-radius: 8px;
+    background: #1a1a28; border: 1px solid #333;
+    color: #4ade80; font-size: 18px; font-weight: 700; font-family: monospace;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+  }
+  .term-toggle:hover { background: #222; border-color: #4ade80; box-shadow: 0 0 12px rgba(74,222,128,0.3); }
+  .term-toggle.active { background: rgba(74,222,128,0.15); border-color: #4ade80; }
+  .term-panel {
+    display: none; position: fixed; bottom: 0; left: 0; right: 0; height: 45vh;
+    background: #0a0a0f; border-top: 2px solid #4ade80; z-index: 150;
+    flex-direction: column;
+  }
+  .term-panel.open { display: flex; }
+  .term-bar {
+    display: flex; align-items: center; padding: 6px 12px; gap: 10px;
+    background: #12121a; border-bottom: 1px solid #1e1e2e; flex-shrink: 0;
+  }
+  .term-bar .term-title { font-size: 11px; color: #4ade80; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; }
+  .term-bar .term-close {
+    margin-left: auto; background: none; border: none; color: #666; font-size: 18px; cursor: pointer; padding: 0 4px;
+  }
+  .term-bar .term-close:hover { color: #f87171; }
+  .term-body { flex: 1; overflow: hidden; }
+  .term-body .xterm { height: 100%; }
 </style>
 </head>
 <body>
 
 <!-- Header -->
+<!-- Terminal Toggle -->
+<button class="term-toggle" id="termToggle" onclick="toggleTerminal()" title="Terminal (Claude Code)">>_</button>
+
+<!-- Terminal Panel -->
+<div class="term-panel" id="termPanel">
+  <div class="term-bar">
+    <span class="term-title">🖥️ Terminal</span>
+    <button class="term-close" onclick="toggleTerminal()">&times;</button>
+  </div>
+  <div class="term-body" id="termBody"></div>
+</div>
+
 <div class="header">
   <h1>🗄️ UFC News Hub <span class="red">CRM</span></h1>
   <div class="sub">31 tabelas · 60 tools · 18 agentes · 122 índices</div>
@@ -1541,7 +1588,96 @@ function animateSteps(container, taskName, tools) {
 // ── Keyboard shortcut for modal ──
 document.addEventListener('keydown', function(e) {
   if (e.key === 'Escape') { closeCodeModal(); closeSidebar(); }
+  if (e.key === 'F12' && !e.ctrlKey && !e.metaKey) { e.preventDefault(); toggleTerminal(); }
 });
+
+// ── Terminal ──
+var termInstance = null;
+var termWs = null;
+var termFit = null;
+var termOpen = false;
+
+function toggleTerminal() {
+  var panel = document.getElementById('termPanel');
+  var btn = document.getElementById('termToggle');
+  termOpen = !termOpen;
+  if (termOpen) {
+    panel.classList.add('open');
+    btn.classList.add('active');
+    if (!termInstance) initTerminal();
+    else if (termFit) termFit.fit();
+  } else {
+    panel.classList.remove('open');
+    btn.classList.remove('active');
+  }
+}
+
+function initTerminal() {
+  var term = new Terminal({
+    cursorBlink: true,
+    fontSize: 13,
+    fontFamily: "'SF Mono', 'Fira Code', 'JetBrains Mono', monospace",
+    theme: {
+      background: '#0a0a0f',
+      foreground: '#e0e0e0',
+      cursor: '#4ade80',
+      selectionBackground: 'rgba(74,222,128,0.2)',
+      black: '#0a0a0f',
+      red: '#f87171',
+      green: '#4ade80',
+      yellow: '#facc15',
+      blue: '#60a5fa',
+      magenta: '#c084fc',
+      cyan: '#22d3ee',
+      white: '#e0e0e0',
+    },
+    allowProposedApi: true,
+  });
+
+  var fitAddon = new FitAddon.FitAddon();
+  var webLinksAddon = new WebLinksAddon.WebLinksAddon();
+  term.loadAddon(fitAddon);
+  term.loadAddon(webLinksAddon);
+  term.open(document.getElementById('termBody'));
+  fitAddon.fit();
+  termFit = fitAddon;
+  termInstance = term;
+
+  // WebSocket to backend PTY
+  var protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+  var ws = new WebSocket(protocol + '//' + location.host + '/ws/terminal');
+  termWs = ws;
+
+  ws.onopen = function() {
+    // Send initial size
+    ws.send(JSON.stringify({ type: 'resize', cols: term.cols, rows: term.rows }));
+  };
+
+  ws.onmessage = function(evt) {
+    term.write(evt.data);
+  };
+
+  ws.onclose = function() {
+    term.write('\\r\\n\\x1b[31m[Terminal disconnected]\\x1b[0m\\r\\n');
+  };
+
+  term.onData(function(data) {
+    if (ws.readyState === WebSocket.OPEN) {
+      ws.send(JSON.stringify({ type: 'input', data: data }));
+    }
+  });
+
+  term.onResize(function(size) {
+    if (ws.readyState === WebSocket.OPEN) {
+      ws.send(JSON.stringify({ type: 'resize', cols: size.cols, rows: size.rows }));
+    }
+  });
+
+  // Re-fit on window resize
+  window.addEventListener('resize', function() {
+    if (termOpen && termFit) termFit.fit();
+  });
+}
 
 // ── Data Browsing ──
 var tableState = {};
@@ -1903,9 +2039,78 @@ const server = http.createServer(async (req, res) => {
   }
 });
 
+// ── WebSocket Terminal Server ─────────────────────────────────────────
+const wss = new WebSocket.Server({ noServer: true });
+
+server.on('upgrade', (req, socket, head) => {
+  if (req.url === '/ws/terminal') {
+    wss.handleUpgrade(req, socket, head, (ws) => {
+      wss.emit('connection', ws, req);
+    });
+  } else {
+    socket.destroy();
+  }
+});
+
+wss.on('connection', (ws) => {
+  const cols = 120;
+  const rows = 30;
+  const homeDir = process.env.HOME || '/Users/gabz_cresta';
+
+  // Use python3 pty module to get a real PTY
+  const ptyProcess = spawn('python3', ['-c',
+    'import pty,os,sys;' +
+    'os.environ["TERM"]="xterm-256color";' +
+    'os.environ["COLORTERM"]="truecolor";' +
+    'os.environ["COLUMNS"]="' + cols + '";' +
+    'os.environ["LINES"]="' + rows + '";' +
+    'os.chdir("' + homeDir + '");' +
+    'pty.spawn(["/bin/zsh","-i"])'
+  ], {
+    stdio: ['pipe', 'pipe', 'pipe'],
+    env: Object.assign({}, process.env, {
+      TERM: 'xterm-256color',
+      COLORTERM: 'truecolor',
+      COLUMNS: String(cols),
+      LINES: String(rows),
+    }),
+  });
+
+  ptyProcess.stdout.on('data', (data) => {
+    try { ws.send(data.toString()); } catch(e) {}
+  });
+
+  ptyProcess.stderr.on('data', (data) => {
+    try { ws.send(data.toString()); } catch(e) {}
+  });
+
+  ptyProcess.on('close', () => {
+    try { ws.close(); } catch(e) {}
+  });
+
+  ws.on('message', (msg) => {
+    try {
+      const parsed = JSON.parse(msg);
+      if (parsed.type === 'input') {
+        ptyProcess.stdin.write(parsed.data);
+      } else if (parsed.type === 'resize') {
+        // Send SIGWINCH-style resize via stty
+        // Python pty doesn't support resize easily, but COLUMNS/LINES env helps
+      }
+    } catch(e) {
+      ptyProcess.stdin.write(msg.toString());
+    }
+  });
+
+  ws.on('close', () => {
+    try { ptyProcess.kill(); } catch(e) {}
+  });
+});
+
 server.listen(PORT, '0.0.0.0', () => {
-  console.log('\\n🗄️  UFC News Hub — Database Dashboard');
-  console.log('   http://localhost:' + PORT + '\\n');
+  console.log('\\n🗄️  UFC News Hub — CRM Dashboard');
+  console.log('   http://localhost:' + PORT);
+  console.log('   Terminal: ws://localhost:' + PORT + '/ws/terminal\\n');
 });
 
 // Graceful shutdown

@@ -743,11 +743,9 @@ const HTML = `<!DOCTYPE html>
   <div class="view-toggle" id="toolsViewToggle">
     <button class="vbtn active" onclick="setToolView('cards')">📇 Cards</button>
     <button class="vbtn" onclick="setToolView('matrix')">📊 Matrix</button>
-    <button class="vbtn" onclick="setToolView('lab')">🧪 Lab</button>
   </div>
   <div id="toolsCards"></div>
   <div id="toolsMatrix" style="display:none"></div>
-  <div id="toolsLab" style="display:none"></div>
 </div>
 
 <!-- Lutadores View -->

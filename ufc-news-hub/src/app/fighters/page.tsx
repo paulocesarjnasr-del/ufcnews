@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import FighterImage from '@/components/ui/FighterImage';
 import { Header } from '@/components/ui/Header';
-import { Search, Filter, ChevronDown, Users, X } from 'lucide-react';
+import { Search, Filter, Users, X } from 'lucide-react';
 import { LutadorExpandido } from '@/types';
 
 const WEIGHT_CLASSES = [
@@ -52,6 +52,8 @@ export default function FightersPage() {
   const [showFilters, setShowFilters] = useState(false);
   const [offset, setOffset] = useState(0);
   const searchTimeout = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const sentinelRef = useRef<HTMLDivElement>(null);
+  const observerRef = useRef<IntersectionObserver | null>(null);
   const LIMIT = 60;
 
   const fetchFighters = useCallback(async (reset = false) => {
@@ -96,14 +98,34 @@ export default function FightersPage() {
     fetchFighters(true);
   }, [search, categoria]);
 
+  const hasMore = fighters.length < total;
+
+  // Infinite scroll observer
+  useEffect(() => {
+    if (observerRef.current) observerRef.current.disconnect();
+
+    observerRef.current = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore && !isLoading && !isLoadingMore) {
+          fetchFighters(false);
+        }
+      },
+      { rootMargin: '400px' }
+    );
+
+    if (sentinelRef.current) {
+      observerRef.current.observe(sentinelRef.current);
+    }
+
+    return () => observerRef.current?.disconnect();
+  }, [hasMore, isLoading, isLoadingMore, fetchFighters]);
+
   const handleSearch = (value: string) => {
     if (searchTimeout.current) clearTimeout(searchTimeout.current);
     searchTimeout.current = setTimeout(() => {
       setSearch(value);
     }, 300);
   };
-
-  const hasMore = fighters.length < total;
 
   return (
     <div className="min-h-screen bg-dark-bg">
@@ -216,28 +238,19 @@ export default function FightersPage() {
               ))}
             </div>
 
-            {/* Load More */}
+            {/* Infinite scroll trigger */}
             {hasMore && (
               <div className="mt-8 flex justify-center">
-                <button
-                  onClick={() => fetchFighters(false)}
-                  disabled={isLoadingMore}
-                  className="flex items-center gap-2 rounded-xl bg-dark-card border border-dark-border px-6 py-3 text-sm font-medium text-dark-textMuted transition-colors hover:text-dark-text hover:border-ufc-red disabled:opacity-50"
-                >
-                  {isLoadingMore ? (
-                    <>
-                      <div className="h-4 w-4 animate-spin rounded-full border-2 border-dark-textMuted border-t-ufc-red" />
-                      Carregando...
-                    </>
-                  ) : (
-                    <>
-                      <ChevronDown className="h-4 w-4" />
-                      Carregar mais ({total - fighters.length} restantes)
-                    </>
-                  )}
-                </button>
+                {isLoadingMore && (
+                  <div className="flex items-center gap-2 text-sm text-dark-textMuted">
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-dark-textMuted border-t-ufc-red" />
+                    Carregando...
+                  </div>
+                )}
               </div>
             )}
+            {/* Sentinel div for IntersectionObserver */}
+            <div ref={sentinelRef} className="h-1" />
           </>
         )}
       </div>

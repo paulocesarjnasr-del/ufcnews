@@ -406,6 +406,8 @@ model noticias {
   @@index([fonte_nome], map: "idx_noticias_fonte")
   @@index([hash_deduplicacao], map: "idx_noticias_hash")
   @@index([publicado_em(sort: Desc)], map: "idx_noticias_publicado")
+  @@index([eh_sobre_ufc, publicado_em(sort: Desc)], map: "idx_noticias_ufc_publicado")
+  @@index([eh_sobre_ufc, categoria, publicado_em(sort: Desc)], map: "idx_noticias_ufc_cat_publicado")
 }
 
 model notificacoes {

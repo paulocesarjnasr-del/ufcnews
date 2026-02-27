@@ -45,7 +45,6 @@ export async function GET(request: NextRequest) {
       ? `WHERE ${whereConditions.join(' AND ')}`
       : '';
 
-    // Build ORDER BY based on sort parameter
     let orderByClause: string;
     switch (sort) {
       case 'photo_first':
@@ -75,27 +74,26 @@ export async function GET(request: NextRequest) {
         `;
     }
 
-    // Use minimal fields for large requests (comparator dropdown)
     const fields = searchParams.get('fields');
-    const selectClause = fields === 'minimal' 
+    const selectClause = fields === 'minimal'
       ? `SELECT id, nome, apelido, imagem_url, categoria_peso, pais, vitorias, derrotas, empates, ranking_divisao`
       : `SELECT *`;
 
-    const lutadores = await query<LutadorExpandido>(
-      `${selectClause}
-      FROM lutadores
-      ${whereClause}
-      ${orderByClause}
-      LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`,
-      [...params, limit, offset]
-    );
+    const [lutadores, totalResult] = await Promise.all([
+      query<LutadorExpandido>(
+        `${selectClause}
+        FROM lutadores
+        ${whereClause}
+        ${orderByClause}
+        LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`,
+        [...params, limit, offset]
+      ),
+      query<{ count: string }>(
+        `SELECT COUNT(*) as count FROM lutadores ${whereClause}`,
+        params
+      ),
+    ]);
 
-    const totalResult = await query<{ count: string }>(
-      `SELECT COUNT(*) as count FROM lutadores ${whereClause}`,
-      params
-    );
-
-    // Agrupar por categoria se solicitado
     const groupByParam = searchParams.get('groupBy');
     let porCategoria: Record<string, LutadorExpandido[]> | undefined;
 
@@ -116,6 +114,10 @@ export async function GET(request: NextRequest) {
       total: parseInt(totalResult[0]?.count || '0'),
       limit,
       offset,
+    }, {
+      headers: {
+        'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=60',
+      },
     });
   } catch (error) {
     console.error('Erro ao buscar lutadores:', error);

@@ -31,11 +31,18 @@ export function useNoticias(options: UseNoticiasOptions = {}): UseNoticiasReturn
     refreshInterval = AUTO_REFRESH_INTERVAL,
   } = options;
 
+  const { data: contadores } = useSWR<ContadorCategorias>(
+    '/api/noticias/contadores',
+    fetcher,
+    {
+      refreshInterval: 10 * 60 * 1000,
+      revalidateOnFocus: false,
+    }
+  );
+
   const getKey = (pageIndex: number, previousPageData: NoticiasPaginadas | null) => {
-    // Chegou ao fim
     if (previousPageData && previousPageData.noticias.length === 0) return null;
 
-    // Primeira página ou próximas
     const params = new URLSearchParams({
       pagina: String(pageIndex + 1),
       porPagina: String(porPagina),
@@ -54,32 +61,24 @@ export function useNoticias(options: UseNoticiasOptions = {}): UseNoticiasReturn
     size,
     setSize,
     isLoading,
-    isValidating,
     mutate,
-  } = useSWRInfinite<NoticiasPaginadas & { contadores: ContadorCategorias }>(
+  } = useSWRInfinite<NoticiasPaginadas>(
     getKey,
     fetcher,
     {
       refreshInterval,
-      revalidateOnFocus: true,
+      revalidateOnFocus: false,
       revalidateFirstPage: true,
     }
   );
 
-  // Combinar todas as notícias de todas as páginas e remover duplicatas
   const allNoticias = data ? data.flatMap((page) => page?.noticias || []) : [];
-  // Deduplica por ID para evitar erro de chave duplicada no React
   const noticias = [...new Map(allNoticias.filter(n => n?.id).map(n => [n.id, n])).values()];
 
-  // Contadores da primeira página
-  const contadores = data?.[0]?.contadores;
-
-  // Verificar se há mais páginas
   const hasMore = data
     ? data[data.length - 1]?.pagina < data[data.length - 1]?.totalPaginas
     : false;
 
-  // Loading de mais páginas
   const isLoadingMore =
     isLoading || (size > 0 && data && typeof data[size - 1] === 'undefined');
 
@@ -95,7 +94,6 @@ export function useNoticias(options: UseNoticiasOptions = {}): UseNoticiasReturn
   };
 }
 
-// Hook para uma única notícia
 export function useNoticia(id: string) {
   const { data, error, isLoading, mutate } = useSWR(
     id ? `/api/noticias/${id}` : null,

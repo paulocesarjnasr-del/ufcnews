@@ -70,6 +70,7 @@ export function Header() {
               <Link
                 key={item.href}
                 href={item.href}
+                prefetch={true}
                 className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium transition-all neu-button ${
                   isActive(item.href)
                     ? 'bg-ufc-red/10 text-ufc-red'
@@ -126,6 +127,7 @@ export function Header() {
                 <Link
                   key={item.href}
                   href={item.href}
+                  prefetch={true}
                   className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
                     isActive(item.href)
                       ? 'bg-ufc-red/10 text-ufc-red'

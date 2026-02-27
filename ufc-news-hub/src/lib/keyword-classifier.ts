@@ -438,46 +438,107 @@ function textContainsAnyKeyword(text: string, keywords: string[]): string | null
   return null;
 }
 
+interface FighterLookupMap {
+  fullNames: Map<string, string>;
+  uniqueLastNames: Map<string, string>;
+  uniqueNicknames: Map<string, string>;
+}
+
+function buildFighterMap(
+  lutadores: Array<{ nome: string; apelido: string | null }>
+): FighterLookupMap {
+  const fullNames = new Map<string, string>();
+  const lastNameCounts = new Map<string, string[]>();
+  const nicknameCounts = new Map<string, string[]>();
+
+  for (const lutador of lutadores) {
+    const normalizedFull = normalizeText(lutador.nome);
+    fullNames.set(normalizedFull, lutador.nome);
+
+    const parts = lutador.nome.split(' ');
+    if (parts.length > 1) {
+      const lastName = normalizeText(parts[parts.length - 1]);
+      if (lastName.length > 4) {
+        const existing = lastNameCounts.get(lastName) || [];
+        existing.push(lutador.nome);
+        lastNameCounts.set(lastName, existing);
+      }
+    }
+
+    if (lutador.apelido && lutador.apelido.length > 2) {
+      const normalizedNick = normalizeText(lutador.apelido);
+      const existing = nicknameCounts.get(normalizedNick) || [];
+      existing.push(lutador.nome);
+      nicknameCounts.set(normalizedNick, existing);
+    }
+  }
+
+  const uniqueLastNames = new Map<string, string>();
+  for (const [lastName, fighters] of lastNameCounts) {
+    if (fighters.length === 1) {
+      uniqueLastNames.set(lastName, fighters[0]);
+    }
+  }
+
+  const uniqueNicknames = new Map<string, string>();
+  for (const [nickname, fighters] of nicknameCounts) {
+    if (fighters.length === 1) {
+      uniqueNicknames.set(nickname, fighters[0]);
+    }
+  }
+
+  return { fullNames, uniqueLastNames, uniqueNicknames };
+}
+
+function extractTextNgrams(text: string): string[] {
+  const words = text.split(/\s+/).filter(w => w.length > 1);
+  const ngrams: string[] = [];
+
+  for (let i = 0; i < words.length; i++) {
+    ngrams.push(words[i]);
+    if (i + 1 < words.length) {
+      ngrams.push(`${words[i]} ${words[i + 1]}`);
+    }
+    if (i + 2 < words.length) {
+      ngrams.push(`${words[i]} ${words[i + 1]} ${words[i + 2]}`);
+    }
+    if (i + 3 < words.length) {
+      ngrams.push(`${words[i]} ${words[i + 1]} ${words[i + 2]} ${words[i + 3]}`);
+    }
+  }
+
+  return ngrams;
+}
+
 function findMatchingFighters(
   text: string,
   lutadores: Array<{ nome: string; apelido: string | null }>
 ): string[] {
   const normalizedText = normalizeText(text);
-  const matched: string[] = [];
+  const fighterMap = buildFighterMap(lutadores);
+  const ngrams = extractTextNgrams(normalizedText);
+  const matched = new Set<string>();
 
-  for (const lutador of lutadores) {
-    // Check full name
-    if (normalizedText.includes(normalizeText(lutador.nome))) {
-      matched.push(lutador.nome);
+  for (const ngram of ngrams) {
+    const fullMatch = fighterMap.fullNames.get(ngram);
+    if (fullMatch) {
+      matched.add(fullMatch);
       continue;
     }
 
-    // Check nickname
-    if (lutador.apelido && normalizedText.includes(normalizeText(lutador.apelido))) {
-      matched.push(lutador.nome);
+    const nickMatch = fighterMap.uniqueNicknames.get(ngram);
+    if (nickMatch) {
+      matched.add(nickMatch);
       continue;
     }
 
-    // Check last name (only if > 4 chars to avoid false positives)
-    const nameParts = lutador.nome.split(' ');
-    if (nameParts.length > 1) {
-      const lastName = nameParts[nameParts.length - 1];
-      if (lastName.length > 4 && normalizedText.includes(normalizeText(lastName))) {
-        // Skip common surnames to avoid false positives
-        const commonWords = [
-          'silva', 'santos', 'costa', 'jesus', 'junior', 'filho',
-          'white', 'brown', 'green', 'king', 'price', 'lewis',
-          'davis', 'allen', 'rosa', 'smith', 'jones', 'williams',
-          'johnson', 'miller', 'wilson', 'taylor', 'anderson',
-        ];
-        if (!commonWords.includes(lastName.toLowerCase())) {
-          matched.push(lutador.nome);
-        }
-      }
+    const lastNameMatch = fighterMap.uniqueLastNames.get(ngram);
+    if (lastNameMatch) {
+      matched.add(lastNameMatch);
     }
   }
 
-  return [...new Set(matched)];
+  return [...matched];
 }
 
 function calculateCategoryScore(text: string, keywords: WeightedKeyword[]): number {

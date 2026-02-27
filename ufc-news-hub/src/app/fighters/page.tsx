@@ -54,7 +54,7 @@ export default function FightersPage() {
   const searchTimeout = useRef<ReturnType<typeof setTimeout>>(undefined);
   const sentinelRef = useRef<HTMLDivElement>(null);
   const observerRef = useRef<IntersectionObserver | null>(null);
-  const LIMIT = 60;
+  const LIMIT = 120;
 
   const fetchFighters = useCallback(async (reset = false) => {
     const currentOffset = reset ? 0 : offset;

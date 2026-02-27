@@ -134,6 +134,10 @@ export async function GET() {
     return NextResponse.json({
       ...evento,
       lutas: lutasFormatadas,
+    }, {
+      headers: {
+        'Cache-Control': 'public, s-maxage=120, stale-while-revalidate=30',
+      },
     });
   } catch (error) {
     console.error('Erro ao buscar próximo evento:', error);

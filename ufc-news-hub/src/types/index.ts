@@ -37,6 +37,20 @@ export interface NoticiaComLutadores extends Noticia {
   lutadores: Lutador[];
 }
 
+export interface ReelNoticia {
+  id: string;
+  titulo: string;
+  reel_caption: string | null;
+  imagem_url: string | null;
+  fonte_url: string;
+  fonte_nome: string;
+  categoria: CategoriaNoticia;
+  publicado_em: string;
+  likes_count: number;
+  user_liked: boolean;
+  comments_count: number;
+}
+
 export interface NoticiaEntidade {
   id: string;
   noticia_id: string;

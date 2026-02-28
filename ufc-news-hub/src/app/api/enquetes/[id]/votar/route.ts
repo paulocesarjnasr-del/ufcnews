@@ -82,14 +82,14 @@ export async function POST(request: NextRequest, { params }: Params) {
     // Insert vote
     await queryOne<{ id: string }>(
       `INSERT INTO votos_enquete (enquete_id, opcao, usuario_id, guest_id, ip_address)
-       VALUES ($1, $2, $3, $4, $5::inet)
+       VALUES ($1, $2, $3, $4, NULLIF($5, '')::inet)
        RETURNING id`,
       [
         id,
         body.opcao,
         body.usuarioId || null,
         body.guestId || null,
-        ip,
+        ip || '',
       ]
     );
 

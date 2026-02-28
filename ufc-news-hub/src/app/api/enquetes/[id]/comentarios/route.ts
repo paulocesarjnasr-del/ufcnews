@@ -156,7 +156,7 @@ export async function POST(request: NextRequest, { params }: Params) {
   } catch (error) {
     console.error('[API /enquetes/comentarios] POST Error:', error);
     return NextResponse.json(
-      { error: 'Erro ao criar comentario' },
+      { error: 'Erro ao criar comentario', details: error instanceof Error ? error.message : String(error) },
       { status: 500 }
     );
   }

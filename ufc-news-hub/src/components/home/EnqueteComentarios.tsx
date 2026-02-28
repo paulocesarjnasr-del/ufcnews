@@ -199,7 +199,7 @@ export function EnqueteComentarios({
             placeholder="Seu nome"
             maxLength={60}
             className={cn(
-              'rounded-lg border border-dark-border bg-dark-bg px-3 py-2 text-sm text-dark-text',
+              'neu-inset rounded-lg px-3 py-2 text-sm text-dark-text',
               'placeholder:text-dark-textMuted/50 focus:border-ufc-red/50 focus:outline-none focus:ring-1 focus:ring-ufc-red/30'
             )}
           />
@@ -214,7 +214,7 @@ export function EnqueteComentarios({
             rows={3}
             maxLength={MAX_CHARS + 50}
             className={cn(
-              'w-full resize-none rounded-lg border border-dark-border bg-dark-bg px-3 py-2 text-sm text-dark-text',
+              'neu-inset w-full resize-none rounded-lg px-3 py-2 text-sm text-dark-text',
               'placeholder:text-dark-textMuted/50 focus:border-ufc-red/50 focus:outline-none focus:ring-1 focus:ring-ufc-red/30',
               isOverLimit && 'border-ufc-red'
             )}
@@ -243,6 +243,7 @@ export function EnqueteComentarios({
           className={cn(
             'neu-button self-end px-4 py-2 text-sm font-medium text-white transition-all duration-200',
             'border border-dark-border hover:border-ufc-red/40 hover:text-ufc-gold',
+            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ufc-red focus-visible:ring-offset-2 focus-visible:ring-offset-dark-bg',
             (isSubmitting || !conteudo.trim() || isOverLimit) && 'pointer-events-none opacity-50'
           )}
         >

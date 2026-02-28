@@ -107,7 +107,7 @@ export function EnqueteResultado({ enquete, resultado, votouEm }: EnqueteResulta
   }, []);
 
   return (
-    <div className="neu-card flex flex-col gap-5 p-4 md:p-6">
+    <div className="neu-inset flex flex-col gap-5 p-4 md:p-6">
       {/* Fighter A result */}
       <ResultBar
         nome={enquete.opcao_a_nome}

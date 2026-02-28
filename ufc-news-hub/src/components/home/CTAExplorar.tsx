@@ -96,7 +96,7 @@ export function CTAExplorar() {
             key={card.href}
             href={card.href}
             prefetch={true}
-            className="neu-card-hover group flex flex-col items-center gap-3 rounded-2xl p-6 md:p-8 transition-all duration-300 hover:scale-[1.03]"
+            className="neu-card-hover group flex flex-col items-center gap-3 rounded-2xl p-6 md:p-8 transition-all duration-300"
             style={{
               '--card-accent': card.accentColor,
             } as React.CSSProperties}

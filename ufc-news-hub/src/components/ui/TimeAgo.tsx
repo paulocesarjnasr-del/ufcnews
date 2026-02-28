@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { formatTimeAgo, isNewNews } from '@/lib/utils';
 
 interface TimeAgoProps {
@@ -10,22 +10,10 @@ interface TimeAgoProps {
 }
 
 export function TimeAgo({ date, className, showNewBadge = false }: TimeAgoProps) {
-  const [timeAgo, setTimeAgo] = useState<string>('');
-  const [isNew, setIsNew] = useState(false);
-
-  useEffect(() => {
-    // Calcular tempo inicial
-    setTimeAgo(formatTimeAgo(date));
-    setIsNew(isNewNews(date));
-
-    // Atualizar a cada 30 segundos
-    const interval = setInterval(() => {
-      setTimeAgo(formatTimeAgo(date));
-      setIsNew(isNewNews(date));
-    }, 30000);
-
-    return () => clearInterval(interval);
-  }, [date]);
+  // Calculate once on render — no interval needed for news timestamps
+  // News timestamps don't change, and "2 hours ago" vs "2 hours 1 min ago" doesn't matter
+  const timeAgo = useMemo(() => formatTimeAgo(date), [date]);
+  const isNew = useMemo(() => isNewNews(date), [date]);
 
   return (
     <span className={className}>

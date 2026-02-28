@@ -124,8 +124,9 @@ export async function checkDuplicate(
   }
 
   // 2. Similaridade alta de título (>70%) — mesma notícia de fonte diferente
-  const recentTitles = await pool.query<{ id: string; titulo: string; conteudo_completo: string | null; fonte_nome: string | null }>(
-    `SELECT id, titulo, conteudo_completo, fonte_nome FROM noticias
+  // Busca só id, titulo e fonte_nome (sem conteudo_completo que é pesado)
+  const recentTitles = await pool.query<{ id: string; titulo: string; fonte_nome: string | null }>(
+    `SELECT id, titulo, fonte_nome FROM noticias
      WHERE created_at > NOW() - INTERVAL '24 hours'
      ORDER BY created_at DESC
      LIMIT 100`
@@ -136,8 +137,14 @@ export async function checkDuplicate(
     if (similarity > 0.70) {
       console.log(`Notícia similar encontrada (${(similarity * 100).toFixed(0)}%): "${row.titulo.substring(0, 60)}..."`);
 
-      if (newArticle && shouldReplace(row, newArticle)) {
-        return { isDuplicate: true, reason: 'titulo_similar', hash, replaceId: row.id };
+      if (newArticle) {
+        // Fetch content length only when needed for replacement check
+        const contentCheck = await pool.query<{ conteudo_completo: string | null }>(
+          'SELECT conteudo_completo FROM noticias WHERE id = $1', [row.id]
+        );
+        if (shouldReplace({ conteudo_completo: contentCheck.rows[0]?.conteudo_completo, fonte_nome: row.fonte_nome }, newArticle)) {
+          return { isDuplicate: true, reason: 'titulo_similar', hash, replaceId: row.id };
+        }
       }
       return { isDuplicate: true, reason: 'titulo_similar', hash };
     }
@@ -146,15 +153,17 @@ export async function checkDuplicate(
   // 3. Mesmos 2+ lutadores + MESMO ângulo = mesma história
   // Diferentes ângulos (preview vs result vs profile) NÃO são duplicatas
   if (lutadoresMencionados.length >= 2) {
-    const recentCheck = await pool.query<{ id: string; titulo: string; conteudo_completo: string | null; fonte_nome: string | null }>(
-      `SELECT DISTINCT n.id, n.titulo, n.conteudo_completo, n.fonte_nome
+    // Busca sem conteudo_completo (leve)
+    const recentCheck = await pool.query<{ id: string; titulo: string; fonte_nome: string | null }>(
+      `SELECT DISTINCT n.id, n.titulo, n.fonte_nome
        FROM noticias n
        JOIN noticia_entidades ne ON n.id = ne.noticia_id
        JOIN lutadores l ON ne.lutador_id = l.id
        WHERE LOWER(l.nome) = ANY($1::text[])
        AND n.created_at > NOW() - INTERVAL '24 hours'
-       GROUP BY n.id, n.titulo, n.conteudo_completo, n.fonte_nome
-       HAVING COUNT(DISTINCT l.id) >= 2`,
+       GROUP BY n.id, n.titulo, n.fonte_nome
+       HAVING COUNT(DISTINCT l.id) >= 2
+       LIMIT 20`,
       [lutadoresMencionados.map((n) => n.toLowerCase())]
     );
 
@@ -170,8 +179,13 @@ export async function checkDuplicate(
       // Same fighters + same angle = duplicate. Check if new one is better.
       console.log(`Duplicata: mesmos lutadores + mesmo ângulo (${newAngle}): "${row.titulo.substring(0, 60)}..."`);
 
-      if (newArticle && shouldReplace(row, newArticle)) {
-        return { isDuplicate: true, reason: 'mesmo_evento', hash, replaceId: row.id };
+      if (newArticle) {
+        const contentCheck = await pool.query<{ conteudo_completo: string | null }>(
+          'SELECT conteudo_completo FROM noticias WHERE id = $1', [row.id]
+        );
+        if (shouldReplace({ conteudo_completo: contentCheck.rows[0]?.conteudo_completo, fonte_nome: row.fonte_nome }, newArticle)) {
+          return { isDuplicate: true, reason: 'mesmo_evento', hash, replaceId: row.id };
+        }
       }
       return { isDuplicate: true, reason: 'mesmo_evento', hash };
     }

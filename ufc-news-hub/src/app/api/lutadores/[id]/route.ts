@@ -118,6 +118,23 @@ export async function GET(request: NextRequest, { params }: Params) {
       };
     });
 
+    // Buscar histórico completo de lutas do UFC.com
+    const historicoUfc = await query<{
+      id: string;
+      resultado: string;
+      oponente_nome: string;
+      data_luta: string | null;
+      metodo: string | null;
+      round: number | null;
+      tempo: string | null;
+    }>(
+      `SELECT id, resultado, oponente_nome, data_luta, metodo, round, tempo
+       FROM historico_lutas_ufc
+       WHERE lutador_id = $1
+       ORDER BY data_luta DESC NULLS LAST`,
+      [id]
+    );
+
     // Calcular record
     const record = `${lutador.vitorias || 0}-${lutador.derrotas || 0}-${lutador.empates || 0}`;
 
@@ -125,6 +142,7 @@ export async function GET(request: NextRequest, { params }: Params) {
       ...lutador,
       record,
       lutas_recentes: lutasFormatadas,
+      historico_ufc: historicoUfc,
     });
   } catch (error) {
     console.error('Erro ao buscar lutador:', error);

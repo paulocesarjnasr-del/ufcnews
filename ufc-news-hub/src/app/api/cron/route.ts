@@ -45,6 +45,21 @@ async function runSync(baseUrl: string) {
     results.errors.push(`Eventos: ${errorMsg}`);
   }
 
+  // 2.5. Cleanup old news (>24h)
+  console.log('[CRON] Limpando notícias > 24h...');
+  try {
+    const deleteResult = await fetch(`${baseUrl}/api/news/cleanup`, {
+      method: 'POST',
+    });
+    const cleanupData = await deleteResult.json();
+    (results as Record<string, unknown>).cleanup = cleanupData;
+    console.log('[CRON] Cleanup:', cleanupData);
+  } catch (error) {
+    const errorMsg = error instanceof Error ? error.message : 'Erro desconhecido';
+    console.error('[CRON] Erro no cleanup:', errorMsg);
+    results.errors.push(`Cleanup: ${errorMsg}`);
+  }
+
   // 3. Analysis generation — 2 days before next event
   console.log('[CRON] Checking if analysis generation needed (2 days before event)...');
   try {

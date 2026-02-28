@@ -152,7 +152,7 @@ function FighterPhoto({
       {/* Photo circle */}
       <div
         className="relative h-[120px] w-[120px] md:h-[200px] md:w-[200px] rounded-full overflow-hidden border-2 border-ufc-gold transition-transform duration-300 hover:scale-105"
-        style={{ boxShadow: '0 0 30px rgba(255, 0, 0, 0.3)' }}
+        style={{ boxShadow: '0 0 30px rgba(210, 10, 10, 0.3)' }}
       >
         {imagemUrl ? (
           <FighterImage
@@ -191,7 +191,7 @@ function FighterPhoto({
   );
 }
 
-function CountdownTimer({ targetDate, mounted }: { targetDate: string; mounted: boolean }) {
+function CountdownTimer({ targetDate }: { targetDate: string }) {
   const [timeLeft, setTimeLeft] = useState<TimeLeft | null>(null);
 
   useEffect(() => {
@@ -222,7 +222,7 @@ function CountdownTimer({ targetDate, mounted }: { targetDate: string; mounted: 
       className={cn(
         'flex items-center justify-center gap-2 md:gap-3',
         'flex-wrap',
-        mounted ? 'hero-fade-in-delayed' : 'opacity-0'
+        'hero-fade-in-delayed'
       )}
     >
       {units.map((unit, i) => (
@@ -407,7 +407,7 @@ export default function HeroCinematico() {
             >
               <span
                 className="hero-pulse-vs font-display text-[40px] md:text-[64px] leading-none text-ufc-red select-none"
-                style={{ textShadow: '0 0 20px rgba(255, 0, 0, 0.5)' }}
+                style={{ textShadow: '0 0 20px rgba(210, 10, 10, 0.5)' }}
               >
                 VS
               </span>
@@ -447,7 +447,7 @@ export default function HeroCinematico() {
 
           {/* Countdown */}
           <div className="mt-8">
-            <CountdownTimer targetDate={data.data_evento} mounted={mounted} />
+            <CountdownTimer targetDate={data.data_evento} />
           </div>
 
           {/* CTA Button */}
@@ -459,7 +459,7 @@ export default function HeroCinematico() {
           >
             <Link
               href={`/calendario/evento/${data.id}`}
-              className="neu-button border border-ufc-red/60 px-6 py-3 font-display text-lg uppercase tracking-wider text-white transition-all duration-300 hover:text-ufc-gold hover:shadow-[0_0_20px_rgba(210,10,10,0.4)]"
+              className="neu-button border border-ufc-red/60 px-6 py-3 font-display text-lg uppercase tracking-wider text-white transition-all duration-300 hover:text-ufc-gold hover:shadow-[0_0_20px_rgba(210,10,10,0.4)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ufc-red focus-visible:ring-offset-2 focus-visible:ring-offset-dark-bg"
             >
               Ver Card Completo
             </Link>

@@ -54,7 +54,7 @@ function FighterVoteCard({
       {/* Fighter photo */}
       <div
         className="relative h-[80px] w-[80px] md:h-[100px] md:w-[100px] overflow-hidden rounded-full border-2 border-ufc-gold"
-        style={{ boxShadow: '0 0 20px rgba(255, 0, 0, 0.25)' }}
+        style={{ boxShadow: '0 0 20px rgba(210, 10, 10, 0.25)' }}
       >
         {foto ? (
           <FighterImage
@@ -97,6 +97,7 @@ function FighterVoteCard({
         className={cn(
           'neu-button mt-2 w-full max-w-[160px] px-5 py-2.5 font-display text-sm uppercase tracking-wider text-white transition-all duration-300',
           'border border-ufc-red/60 hover:text-ufc-gold hover:shadow-[0_0_16px_rgba(210,10,10,0.4)]',
+          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ufc-red focus-visible:ring-offset-2 focus-visible:ring-offset-dark-bg',
           (disabled || isLoading) && 'pointer-events-none opacity-50'
         )}
       >
@@ -157,7 +158,7 @@ export function EnqueteVotacao({ enquete, onVotar }: EnqueteVotacaoProps) {
         <div className="flex items-center">
           <span
             className="font-display text-2xl text-ufc-red md:text-3xl select-none"
-            style={{ textShadow: '0 0 12px rgba(255, 0, 0, 0.4)' }}
+            style={{ textShadow: '0 0 12px rgba(210, 10, 10, 0.4)' }}
           >
             VS
           </span>

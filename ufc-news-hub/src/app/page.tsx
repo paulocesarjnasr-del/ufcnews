@@ -9,7 +9,7 @@ export default function HomePage() {
       <Header />
       <main>
         <HeroCinematico />
-        <div className="container mx-auto px-4 py-8 space-y-12">
+        <div className="container mx-auto py-8 space-y-12">
           <EnqueteWidget />
           <CTAExplorar />
         </div>

@@ -2,18 +2,16 @@
 
 import { use, useState } from 'react';
 import Image from 'next/image';
-import FighterImage from '@/components/ui/FighterImage';
 import Link from 'next/link';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { CategoryBadge } from '@/components/ui/CategoryBadge';
 import { TimeAgo } from '@/components/ui/TimeAgo';
-import { NewsCard } from '@/components/ui/NewsCard';
 import { AudioPlayer } from '@/components/ui/AudioPlayer';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { useNoticia } from '@/hooks/useNoticias';
-import { formatDate, getInitials } from '@/lib/utils';
+import { formatDate } from '@/lib/utils';
 import { PLACEHOLDER_IMAGE } from '@/lib/constants';
-import { Noticia, Lutador } from '@/types';
+import { Noticia } from '@/types';
 import { CommentSection } from '@/components/comments/CommentSection';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -271,11 +269,6 @@ export default function NoticiaPage({ params }: PageProps) {
     );
   }
 
-  const { lutadores, relacionadas } = noticia as {
-    lutadores?: Lutador[];
-    relacionadas?: Noticia[];
-  } & Noticia;
-
   return (
     <MainLayout>
       <article className="mx-auto max-w-4xl">
@@ -415,45 +408,6 @@ export default function NoticiaPage({ params }: PageProps) {
         {/* Separador */}
         <hr className="mb-6 border-dark-border" />
 
-        {/* Lutadores Mencionados */}
-        {lutadores && lutadores.length > 0 && (
-          <section className="mb-8">
-            <h2 className="mb-4 font-display text-xl uppercase text-dark-text">
-              Lutadores Mencionados
-            </h2>
-            <div className="flex flex-wrap gap-4">
-              {lutadores.map((lutador) => (
-                <div
-                  key={lutador.id}
-                  className="flex flex-col items-center rounded-lg border border-dark-border bg-dark-card p-4 transition-all hover:border-ufc-red/30"
-                >
-                  {lutador.imagem_url ? (
-                    <FighterImage
-                      src={lutador.imagem_url}
-                      alt={lutador.nome}
-                      width={64}
-                      height={64}
-                      className="mb-2 h-16 w-16 rounded-full object-cover object-top"
-                    />
-                  ) : (
-                    <div className="mb-2 flex h-16 w-16 items-center justify-center rounded-full bg-dark-border text-lg font-bold text-dark-textMuted">
-                      {getInitials(lutador.nome)}
-                    </div>
-                  )}
-                  <span className="text-center text-sm font-medium text-dark-text">
-                    {lutador.nome}
-                  </span>
-                  {lutador.categoria_peso && (
-                    <span className="text-xs text-dark-textMuted">
-                      {lutador.categoria_peso}
-                    </span>
-                  )}
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
-
         {/* Fonte Original — só mostra para notícias de outros sites */}
         {noticia.fonte_nome !== 'UFC AI Company' && (
           <section className="mb-8">
@@ -484,20 +438,6 @@ export default function NoticiaPage({ params }: PageProps) {
 
         {/* Separador */}
         <hr className="mb-8 border-dark-border" />
-
-        {/* Noticias Relacionadas */}
-        {relacionadas && relacionadas.length > 0 && (
-          <section>
-            <h2 className="mb-6 font-display text-xl uppercase text-dark-text">
-              Noticias Relacionadas
-            </h2>
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {relacionadas.map((relacionada) => (
-                <NewsCard key={relacionada.id} noticia={relacionada} />
-              ))}
-            </div>
-          </section>
-        )}
 
         {/* Separador antes dos comentários */}
         <hr className="my-8 border-dark-border" />

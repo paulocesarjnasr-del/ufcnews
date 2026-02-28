@@ -123,6 +123,82 @@ export interface Analise {
   is_titulo: boolean;
   broadcast: string | null;
   status: string;
+  analysis_type?: string;
   created_at: string;
   updated_at: string;
+}
+
+// ==========================================
+// Full Card Analysis Types
+// ==========================================
+
+export interface BettingValue {
+  moneyline: {
+    pick: 'fighter1' | 'fighter2';
+    fighter_name: string;
+    confidence: number; // 1-10
+    reasoning: string;
+  };
+  method: {
+    pick: string;
+    value_rating: number; // 1-10
+    reasoning: string;
+  };
+  over_under: {
+    pick: 'over' | 'under';
+    rounds: number;
+    reasoning: string;
+  };
+  bestBet: string;
+  avoidBet: string;
+}
+
+export interface FightAnalysisItem {
+  fight_id: string;
+  fight_label: string; // e.g. "Main Event", "Co-Main Event"
+  fight_type: string; // main_event, co_main, card_principal
+  ordem: number;
+  categoria_peso: string;
+  num_rounds: number;
+  is_titulo: boolean;
+  fighter1_info: FighterInfo;
+  fighter2_info: FighterInfo;
+  artigo_conteudo: string;
+  tactical_breakdown: TacticalBreakdownData;
+  fight_prediction: FightPredictionData;
+  betting_value: BettingValue;
+}
+
+export interface BestBet {
+  fight_label: string;
+  bet_type: string; // "Moneyline", "Method", "Over/Under"
+  pick: string;
+  reasoning: string;
+  confidence: number; // 1-10
+  value_rating: number; // 1-10
+}
+
+export interface ParlaySuggestion {
+  legs: string[];
+  reasoning: string;
+  risk_level: 'low' | 'medium' | 'high';
+}
+
+export interface CardOverview {
+  card_summary: string; // HTML
+  best_bets: BestBet[];
+  parlay: ParlaySuggestion;
+  total_fights: number;
+}
+
+export interface CardAnalise extends Analise {
+  fights_analysis: FightAnalysisItem[];
+  card_overview: CardOverview;
+  analysis_type: 'full_card';
+}
+
+export function isCardAnalise(analise: Analise): analise is CardAnalise {
+  return analise.analysis_type === 'full_card'
+    && 'fights_analysis' in analise
+    && Array.isArray((analise as CardAnalise).fights_analysis);
 }

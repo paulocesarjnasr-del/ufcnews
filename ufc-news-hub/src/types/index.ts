@@ -287,6 +287,7 @@ export interface LutadorExpandido extends Lutador {
   estilo_luta: string | null;
   cidade_natal: string | null;
   data_nascimento: string | null;
+  ufc_slug: string | null;
 }
 
 export interface LutaHistoricoItem {
@@ -311,8 +312,19 @@ export interface LutaHistoricoItem {
   is_titulo: boolean;
 }
 
+export interface HistoricoUfcItem {
+  id: string;
+  resultado: string;
+  oponente_nome: string;
+  data_luta: string | null;
+  metodo: string | null;
+  round: number | null;
+  tempo: string | null;
+}
+
 export interface LutadorComHistorico extends LutadorExpandido {
   lutas_recentes: LutaHistoricoItem[];
+  historico_ufc: HistoricoUfcItem[];
   record: string;
 }
 

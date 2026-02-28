@@ -22,7 +22,8 @@ interface FighterImageProps {
  * If any image fails (403/404), shows initials fallback.
  */
 export default function FighterImage({ src, alt, fill, width, height, sizes, className, priority, fallbackInitials }: FighterImageProps) {
-  const [failed, setFailed] = useState(false);
+  const isInvalidUrl = !src.startsWith('http');
+  const [failed, setFailed] = useState(isInvalidUrl);
 
   if (failed) {
     // Show initials fallback

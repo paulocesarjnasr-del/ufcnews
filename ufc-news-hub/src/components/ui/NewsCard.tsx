@@ -1,5 +1,6 @@
 'use client';
 
+import { memo } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { cn, isNewNews } from '@/lib/utils';
@@ -14,7 +15,7 @@ interface NewsCardProps {
   featured?: boolean;
 }
 
-export function NewsCard({ noticia, featured = false }: NewsCardProps) {
+export const NewsCard = memo(function NewsCard({ noticia, featured = false }: NewsCardProps) {
   const isNew = isNewNews(noticia.publicado_em);
   const isPoll = noticia.titulo.startsWith('[POLL]');
 
@@ -37,6 +38,7 @@ export function NewsCard({ noticia, featured = false }: NewsCardProps) {
           src={noticia.imagem_url || PLACEHOLDER_IMAGE}
           alt={noticia.titulo}
           fill
+          priority={featured}
           className="object-cover transition-transform duration-500 group-hover:scale-105"
           sizes={featured ? '(max-width: 768px) 100vw, 66vw' : '(max-width: 768px) 100vw, 33vw'}
         />
@@ -108,4 +110,4 @@ export function NewsCard({ noticia, featured = false }: NewsCardProps) {
       </div>
     </Link>
   );
-}
+});

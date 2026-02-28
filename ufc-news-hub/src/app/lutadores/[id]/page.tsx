@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { Header } from '@/components/ui/Header';
 import { LutadorPerfil } from '@/components/lutadores/LutadorPerfil';
 import { LutadorHistorico } from '@/components/lutadores/LutadorHistorico';
-import { LutadorComHistorico } from '@/types';
+import { LutadorComHistorico, HistoricoUfcItem } from '@/types';
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -91,16 +91,31 @@ export default function LutadorPage({ params }: PageProps) {
             {/* Perfil */}
             <LutadorPerfil lutador={lutador} />
 
-            {/* Historico de Lutas */}
-            <div>
-              <h2 className="mb-4 font-display text-xl uppercase text-dark-text">
-                Historico de Lutas
-              </h2>
-              <LutadorHistorico
-                lutas={lutador.lutas_recentes}
-                lutadorId={lutador.id}
-              />
-            </div>
+            {/* Historico de Lutas (sistema interno) */}
+            {lutador.lutas_recentes && lutador.lutas_recentes.length > 0 && (
+              <div>
+                <h2 className="mb-4 font-display text-xl uppercase text-dark-text">
+                  Lutas Agendadas / Recentes
+                </h2>
+                <LutadorHistorico
+                  lutas={lutador.lutas_recentes}
+                  lutadorId={lutador.id}
+                />
+              </div>
+            )}
+
+            {/* Historico UFC Completo (scraped from UFC.com) */}
+            {lutador.historico_ufc && lutador.historico_ufc.length > 0 && (
+              <div>
+                <h2 className="mb-4 font-display text-xl uppercase text-dark-text flex items-center gap-2">
+                  <svg className="h-5 w-5 text-ufc-red" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                  </svg>
+                  Historico Completo no UFC ({lutador.historico_ufc.length} lutas)
+                </h2>
+                <HistoricoUfcTable fights={lutador.historico_ufc} />
+              </div>
+            )}
           </div>
 
           {/* Sidebar */}
@@ -211,6 +226,97 @@ function StatRow({ label, value }: { label: string; value: string }) {
     <div className="flex justify-between">
       <span className="text-dark-textMuted">{label}</span>
       <span className="font-medium text-dark-text">{value}</span>
+    </div>
+  );
+}
+
+function HistoricoUfcTable({ fights }: { fights: HistoricoUfcItem[] }) {
+  function formatDate(dateStr: string | null): string {
+    if (!dateStr) return '-';
+    try {
+      const d = new Date(dateStr);
+      return d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' });
+    } catch {
+      return dateStr;
+    }
+  }
+
+  function getResultBadge(resultado: string) {
+    switch (resultado.toLowerCase()) {
+      case 'win':
+        return <span className="inline-flex items-center rounded-full bg-emerald-500/20 px-2.5 py-0.5 text-xs font-bold text-emerald-400 ring-1 ring-emerald-500/30">W</span>;
+      case 'loss':
+        return <span className="inline-flex items-center rounded-full bg-red-500/20 px-2.5 py-0.5 text-xs font-bold text-red-400 ring-1 ring-red-500/30">L</span>;
+      case 'draw':
+        return <span className="inline-flex items-center rounded-full bg-yellow-500/20 px-2.5 py-0.5 text-xs font-bold text-yellow-400 ring-1 ring-yellow-500/30">D</span>;
+      case 'nc':
+        return <span className="inline-flex items-center rounded-full bg-gray-500/20 px-2.5 py-0.5 text-xs font-bold text-gray-400 ring-1 ring-gray-500/30">NC</span>;
+      default:
+        return <span className="inline-flex items-center rounded-full bg-gray-500/20 px-2.5 py-0.5 text-xs font-bold text-gray-400 ring-1 ring-gray-500/30">-</span>;
+    }
+  }
+
+  function getMethodColor(metodo: string | null): string {
+    if (!metodo) return 'text-dark-textMuted';
+    const m = metodo.toLowerCase();
+    if (m.includes('ko') || m.includes('tko')) return 'text-red-400';
+    if (m.includes('sub')) return 'text-blue-400';
+    if (m.includes('dec')) return 'text-amber-400';
+    return 'text-dark-textMuted';
+  }
+
+  return (
+    <div className="rounded-lg border border-dark-border bg-dark-card overflow-hidden">
+      {/* Desktop table */}
+      <div className="hidden sm:block overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b border-dark-border bg-dark-bg/50">
+              <th className="px-4 py-3 text-left text-xs font-semibold uppercase text-dark-textMuted w-12">Res</th>
+              <th className="px-4 py-3 text-left text-xs font-semibold uppercase text-dark-textMuted">Oponente</th>
+              <th className="px-4 py-3 text-left text-xs font-semibold uppercase text-dark-textMuted">Metodo</th>
+              <th className="px-4 py-3 text-center text-xs font-semibold uppercase text-dark-textMuted w-14">Rd</th>
+              <th className="px-4 py-3 text-center text-xs font-semibold uppercase text-dark-textMuted w-16">Tempo</th>
+              <th className="px-4 py-3 text-right text-xs font-semibold uppercase text-dark-textMuted">Data</th>
+            </tr>
+          </thead>
+          <tbody>
+            {fights.map((fight, idx) => (
+              <tr
+                key={fight.id}
+                className={`border-b border-dark-border/50 transition-colors hover:bg-dark-border/20 ${
+                  idx % 2 === 0 ? 'bg-dark-card' : 'bg-dark-bg/30'
+                }`}
+              >
+                <td className="px-4 py-3">{getResultBadge(fight.resultado)}</td>
+                <td className="px-4 py-3 font-medium text-dark-text">{fight.oponente_nome}</td>
+                <td className={`px-4 py-3 ${getMethodColor(fight.metodo)}`}>{fight.metodo || '-'}</td>
+                <td className="px-4 py-3 text-center text-dark-textMuted">{fight.round || '-'}</td>
+                <td className="px-4 py-3 text-center text-dark-textMuted">{fight.tempo || '-'}</td>
+                <td className="px-4 py-3 text-right text-dark-textMuted text-xs">{formatDate(fight.data_luta)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Mobile cards */}
+      <div className="sm:hidden divide-y divide-dark-border/50">
+        {fights.map((fight) => (
+          <div key={fight.id} className="p-3 flex items-center gap-3">
+            <div className="flex-shrink-0">{getResultBadge(fight.resultado)}</div>
+            <div className="flex-1 min-w-0">
+              <div className="font-medium text-dark-text text-sm truncate">{fight.oponente_nome}</div>
+              <div className="flex items-center gap-2 text-xs text-dark-textMuted mt-0.5">
+                <span className={getMethodColor(fight.metodo)}>{fight.metodo || '-'}</span>
+                {fight.round && <span>R{fight.round}</span>}
+                {fight.tempo && <span>{fight.tempo}</span>}
+              </div>
+            </div>
+            <div className="text-xs text-dark-textMuted whitespace-nowrap">{formatDate(fight.data_luta)}</div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

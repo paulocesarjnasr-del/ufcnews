@@ -28,11 +28,13 @@ export async function GET(request: Request) {
     }
 
     const analises = await query(
-      `SELECT id, slug, titulo, subtitulo, evento_nome, evento_data, evento_local, 
-              categoria_peso, is_titulo, fighter1_info, fighter2_info, created_at
-       FROM analises 
-       WHERE status = 'publicado' 
-       ORDER BY created_at DESC 
+      `SELECT id, slug, titulo, subtitulo, evento_nome, evento_data, evento_local,
+              categoria_peso, is_titulo, fighter1_info, fighter2_info, created_at,
+              analysis_type,
+              COALESCE(jsonb_array_length(fights_analysis), 0) as total_fights
+       FROM analises
+       WHERE status = 'publicado'
+       ORDER BY created_at DESC
        LIMIT 50`
     );
     return NextResponse.json(analises);

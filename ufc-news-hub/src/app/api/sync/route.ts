@@ -53,7 +53,7 @@ async function updateSyncLog(
 }
 
 async function getAllLutadores(): Promise<Lutador[]> {
-  const result = await pool.query('SELECT * FROM lutadores WHERE ativo = true');
+  const result = await pool.query('SELECT id, nome, apelido FROM lutadores WHERE ativo = true');
   return result.rows;
 }
 
@@ -182,15 +182,9 @@ export async function POST(): Promise<NextResponse<SyncResult>> {
         continue;
       }
 
-      // 3.3 Preparar conteúdo (scrape se necessário — precisa antes da dedup pra comparar qualidade)
-      let articleContent = item.description;
-      if (!articleContent || articleContent.length < 50) {
-        console.log(`  -> RSS sem conteudo, tentando scrape de ${item.link}`);
-        const scraped = await scrapeArticleContent(item.link);
-        if (scraped) {
-          articleContent = scraped;
-        }
-      }
+      // 3.3 Preparar conteúdo — usa RSS content, scrape é feito em background depois
+      let articleContent = item.description || item.content || item.contentSnippet || '';
+      const needsScrape = !articleContent || articleContent.length < 50;
 
       // 3.4 Verificar duplicata — se existe artigo sobre mesmos lutadores, fica com o melhor
       const dedup = await checkDuplicate(
@@ -262,6 +256,19 @@ export async function POST(): Promise<NextResponse<SyncResult>> {
 
         console.log('  -> ADICIONADA');
         adicionadas++;
+
+        // Background scrape: enrich content if RSS had no body
+        if (needsScrape && noticia.id) {
+          scrapeArticleContent(item.link).then(async (scraped) => {
+            if (scraped && scraped.length > (articleContent?.length || 0)) {
+              await pool.query(
+                'UPDATE noticias SET conteudo_completo = $1 WHERE id = $2',
+                [scraped, noticia.id]
+              ).catch(() => {});
+              console.log(`  -> [BG] Conteúdo enriquecido para ${item.title.substring(0, 40)}...`);
+            }
+          }).catch(() => {});
+        }
       } catch (error: unknown) {
         // Pode ser erro de constraint (duplicata)
         const errorMessage = error instanceof Error ? error.message : String(error);
@@ -291,8 +298,10 @@ export async function POST(): Promise<NextResponse<SyncResult>> {
     console.log(`Duplicadas: ${duplicadas}`);
     console.log(`Rejeitadas: ${rejeitadas}\n`);
 
-    // Emit event for AI Company agents
+    // Refresh news counter cache
     if (adicionadas > 0) {
+      await pool.query('SELECT refresh_noticias_contadores()').catch(() => {});
+      // Emit event for AI Company agents
       emitEvent('news.synced', { adicionadas, processadas, duplicadas, rejeitadas }).catch(() => {});
     }
 

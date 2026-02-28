@@ -45,7 +45,7 @@ export const PLACEHOLDER_IMAGE = '/placeholder-ufc.svg';
 
 export const ITEMS_PER_PAGE = 12;
 
-export const AUTO_REFRESH_INTERVAL = 5 * 60 * 1000; // 5 minutos em ms
+export const AUTO_REFRESH_INTERVAL = 30 * 60 * 1000; // 30 minutos em ms
 
 // Constantes do Sistema de Comentários
 export const COMMENT_MAX_LENGTH = 2000;

@@ -418,7 +418,10 @@ function normalizeText(text: string): string {
   return text
     .toLowerCase()
     .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, ''); // Remove accents
+    .replace(/[\u0300-\u036f]/g, '') // Remove accents
+    .replace(/[^a-z0-9\s]/g, '')     // Remove punctuation
+    .replace(/\s+/g, ' ')            // Collapse whitespace
+    .trim();
 }
 
 function textContainsKeyword(text: string, keywords: string[]): boolean {

@@ -45,25 +45,46 @@ async function runSync(baseUrl: string) {
     results.errors.push(`Eventos: ${errorMsg}`);
   }
 
-  // 3. Weekly analysis generation (only on Tuesdays)
-  const today = new Date();
-  if (today.getUTCDay() === 2) { // Tuesday
-    console.log('[CRON] Tuesday detected — checking if analysis generation needed...');
-    try {
-      const analysisResponse = await fetch(`${baseUrl}/api/analises/generate?secret=${process.env.CRON_SECRET || 'ufc-news-cron-secret'}`, {
-        method: 'POST',
-      });
-      const analysisResult = await analysisResponse.json();
-      (results as Record<string, unknown>).analise = analysisResult;
-      console.log('[CRON] Analysis result:', analysisResult);
-    } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : 'Erro desconhecido';
-      console.error('[CRON] Erro ao gerar análise:', errorMsg);
-      results.errors.push(`Análise: ${errorMsg}`);
+  // 3. Analysis generation — 2 days before next event
+  console.log('[CRON] Checking if analysis generation needed (2 days before event)...');
+  try {
+    const { queryOne: cronQueryOne } = await import('@/lib/db');
+    const nextEvent = await cronQueryOne<{ id: string; nome: string; data_evento: string }>(
+      `SELECT id, nome, data_evento FROM eventos
+       WHERE status = 'agendado' AND data_evento > NOW()
+       ORDER BY data_evento ASC LIMIT 1`
+    );
+    if (nextEvent) {
+      const daysUntil = (new Date(nextEvent.data_evento).getTime() - Date.now()) / 86400000;
+      const alreadyExists = await cronQueryOne<{ id: string }>(
+        `SELECT id FROM analises WHERE evento_id = $1`, [nextEvent.id]
+      );
+      if (daysUntil <= 2 && daysUntil >= 0 && !alreadyExists) {
+        console.log(`[CRON] Event "${nextEvent.nome}" is ${daysUntil.toFixed(1)} days away — generating analysis...`);
+        const analysisResponse = await fetch(`${baseUrl}/api/analises/generate?secret=${process.env.CRON_SECRET || 'ufc-news-cron-secret'}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ evento_id: nextEvent.id }),
+        });
+        const analysisResult = await analysisResponse.json();
+        (results as Record<string, unknown>).analise = analysisResult;
+        console.log('[CRON] Analysis result:', analysisResult);
+      } else if (alreadyExists) {
+        console.log(`[CRON] Analysis already exists for "${nextEvent.nome}"`);
+      } else {
+        console.log(`[CRON] Next event "${nextEvent.nome}" is ${daysUntil.toFixed(1)} days away — too early`);
+      }
+    } else {
+      console.log('[CRON] No upcoming events found');
     }
+  } catch (error) {
+    const errorMsg = error instanceof Error ? error.message : 'Erro desconhecido';
+    console.error('[CRON] Erro ao gerar análise:', errorMsg);
+    results.errors.push(`Análise: ${errorMsg}`);
   }
 
   // 4. Emit daily event for AI Company agents
+  const today = new Date();
   console.log('[CRON] Emitting cron.daily event for AI agents...');
   try {
     await emitEvent('cron.daily', { timestamp: new Date().toISOString() });

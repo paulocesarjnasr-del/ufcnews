@@ -14,7 +14,7 @@ export async function POST() {
       return NextResponse.json({ error: 'No upcoming event found' }, { status: 404 });
     }
 
-    // 2. Get main event fight (highest ordem)
+    // 2. Get main event fight (prefer tipo='main_event', fallback to lowest ordem which is the headliner)
     const luta = await queryOne<{
       id: string;
       lutador1_id: string;
@@ -28,7 +28,11 @@ export async function POST() {
        JOIN lutadores l1 ON l1.id = l.lutador1_id
        JOIN lutadores l2 ON l2.id = l.lutador2_id
        WHERE l.evento_id = $1
-       ORDER BY l.ordem DESC
+       ORDER BY
+         CASE WHEN l.tipo = 'main_event' THEN 0
+              WHEN l.tipo = 'co_main' THEN 1
+              ELSE 2 END,
+         l.ordem ASC
        LIMIT 1`,
       [evento.id]
     );

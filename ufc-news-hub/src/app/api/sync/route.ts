@@ -5,6 +5,7 @@ import { classifyNews } from '@/lib/keyword-classifier';
 import { checkDuplicate, checkDuplicateByUrl } from '@/lib/deduplication';
 import { scrapeArticleContent } from '@/lib/article-scraper';
 import { SyncResult, Lutador } from '@/types';
+import { generateReelCaption } from '@/lib/reel-caption';
 import { emitEvent } from '@/lib/ai-company/event-bus';
 
 const pool = new Pool({
@@ -243,6 +244,18 @@ export async function POST(): Promise<NextResponse<SyncResult>> {
           hash_deduplicacao: dedup.hash,
           publicado_em: new Date(item.pubDate),
         });
+
+        // Generate reel caption
+        try {
+          const caption = await generateReelCaption(item.title, classification.subtitulo);
+          await pool.query(
+            'UPDATE noticias SET reel_caption = $1 WHERE id = $2',
+            [caption, noticia.id]
+          );
+          console.log(`  -> Caption: ${caption}`);
+        } catch (captionError) {
+          console.error('  -> Erro ao gerar caption:', captionError);
+        }
 
         // 3.5 Salvar relações com lutadores
         for (const nomeLutador of classification.lutadores_mencionados) {

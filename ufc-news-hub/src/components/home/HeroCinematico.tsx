@@ -295,8 +295,8 @@ export default function HeroCinematico() {
 
   return (
     <>
-      {/* Scoped CSS keyframes */}
-      <style jsx>{`
+      {/* Global keyframes for hero animations (needs to reach child components) */}
+      <style>{`
         @keyframes heroSlideLeft {
           from { opacity: 0; transform: translateX(-60px); }
           to { opacity: 1; transform: translateX(0); }

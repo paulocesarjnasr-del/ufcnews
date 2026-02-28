@@ -261,10 +261,10 @@ export default function NoticiaPage({ params }: PageProps) {
             A noticia que voce procura nao existe ou foi removida.
           </p>
           <Link
-            href="/"
+            href="/noticias"
             className="rounded-md bg-ufc-red px-4 py-2 text-white transition-colors hover:bg-ufc-redDark"
           >
-            Voltar para Home
+            Voltar para Noticias
           </Link>
         </div>
       </MainLayout>
@@ -282,7 +282,7 @@ export default function NoticiaPage({ params }: PageProps) {
         {/* Header */}
         <div className="mb-6">
           <Link
-            href="/"
+            href="/noticias"
             className="group mb-4 inline-flex items-center gap-2 text-dark-textMuted transition-colors hover:text-ufc-red"
           >
             <svg

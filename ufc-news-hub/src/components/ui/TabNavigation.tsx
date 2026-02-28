@@ -14,7 +14,7 @@ interface Tab {
 }
 
 const tabs: Tab[] = [
-  { href: '/', label: 'Todas', countKey: 'todas', icon: LayoutGrid },
+  { href: '/noticias', label: 'Todas', countKey: 'todas', icon: LayoutGrid },
   { href: '/lutadores', label: 'Lutadores', countKey: 'lutadores', icon: Users },
   { href: '/lutas', label: 'Lutas', countKey: 'lutas', icon: Swords },
   { href: '/backstage', label: 'Backstage', countKey: 'backstage', icon: Clapperboard },

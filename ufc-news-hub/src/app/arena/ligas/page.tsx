@@ -3,30 +3,30 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { Users, Trophy, Plus, Search } from 'lucide-react';
 
 import { useArenaAuth } from '@/hooks/useArenaAuth';
 
 interface Liga {
   id: string;
   nome: string;
-  descricao: string | null;
   tipo: 'publica' | 'privada';
   total_membros: number;
   max_membros: number;
-  campeao?: { username: string; display_name: string | null };
   posicao_atual?: number;
   pontos_temporada?: number;
+  minha_posicao?: number;
 }
 
 export default function LigasPage() {
   const router = useRouter();
-  const { usuario, isAuthenticated, isLoading: authLoading } = useArenaAuth();
+  const { isAuthenticated, isLoading: authLoading } = useArenaAuth();
   const [minhasLigas, setMinhasLigas] = useState<Liga[]>([]);
   const [ligasPublicas, setLigasPublicas] = useState<Liga[]>([]);
   const [codigoConvite, setCodigoConvite] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
-  const [showJoinModal, setShowJoinModal] = useState(false);
+  const [joiningId, setJoiningId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
@@ -43,8 +43,8 @@ export default function LigasPage() {
   async function fetchLigas() {
     try {
       const [minhasRes, publicasRes] = await Promise.all([
-        fetch('/api/arena/ligas'),
-        fetch('/api/arena/ligas?publicas=true&limit=10'),
+        fetch('/api/arena/ligas?tipo=minhas'),
+        fetch('/api/arena/ligas?tipo=publicas&limit=10'),
       ]);
 
       if (minhasRes.ok) {
@@ -56,14 +56,14 @@ export default function LigasPage() {
         const data = await publicasRes.json();
         setLigasPublicas(data.ligas || []);
       }
-    } catch (error) {
-      console.error('Erro ao carregar ligas:', error);
+    } catch (err) {
+      console.error('Erro ao carregar ligas:', err);
     } finally {
       setIsLoading(false);
     }
   }
 
-  async function handleEntrarLiga(e: React.FormEvent) {
+  async function handleEntrarComCodigo(e: React.FormEvent) {
     e.preventDefault();
     setError('');
 
@@ -82,8 +82,8 @@ export default function LigasPage() {
       const data = await res.json();
 
       if (res.ok) {
-        setShowJoinModal(false);
         setCodigoConvite('');
+        setError('');
         fetchLigas();
       } else {
         setError(data.error || 'Erro ao entrar na liga');
@@ -94,6 +94,7 @@ export default function LigasPage() {
   }
 
   async function handleEntrarLigaPublica(ligaId: string) {
+    setJoiningId(ligaId);
     try {
       const res = await fetch('/api/arena/ligas/entrar', {
         method: 'POST',
@@ -104,8 +105,10 @@ export default function LigasPage() {
       if (res.ok) {
         fetchLigas();
       }
-    } catch (error) {
-      console.error('Erro ao entrar na liga:', error);
+    } catch (err) {
+      console.error('Erro ao entrar na liga:', err);
+    } finally {
+      setJoiningId(null);
     }
   }
 
@@ -118,251 +121,159 @@ export default function LigasPage() {
   }
 
   return (
-    <div>
-      <div className="container mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
-          <div>
-            <div className="flex items-center gap-2 text-sm text-dark-textMuted mb-2">
-              <Link href="/arena" className="hover:text-ufc-red">
-                Arena
-              </Link>
-              <span>/</span>
-              <span className="text-dark-text">Ligas</span>
-            </div>
-            <h1 className="font-display text-4xl uppercase text-dark-text">
-              Minhas <span className="text-ufc-gold">Ligas</span>
-            </h1>
+    <div className="container mx-auto px-4 py-8 max-w-2xl">
+      {/* Join by Code */}
+      <div className="neu-card rounded-xl p-5 mb-8">
+        <form onSubmit={handleEntrarComCodigo} className="flex items-center gap-3">
+          <div className="flex-1">
+            <input
+              type="text"
+              value={codigoConvite}
+              onChange={(e) => setCodigoConvite(e.target.value.toUpperCase())}
+              placeholder="Codigo de convite"
+              maxLength={8}
+              className="neu-inset w-full rounded-lg px-4 py-3 font-mono text-sm tracking-wider text-dark-text placeholder-dark-textMuted focus:outline-none focus:ring-2 focus:ring-ufc-gold/50"
+            />
           </div>
-
-          <div className="flex gap-2">
-            <button
-              onClick={() => setShowJoinModal(true)}
-              className="rounded border border-ufc-gold px-4 py-2 text-sm text-ufc-gold hover:bg-ufc-gold hover:text-dark-bg transition-colors"
-            >
-              Entrar com Codigo
-            </button>
-            <Link
-              href="/arena/ligas/criar"
-              className="rounded bg-ufc-red px-4 py-2 text-sm text-white hover:bg-ufc-redLight transition-colors"
-            >
-              Criar Liga
-            </Link>
-          </div>
-        </div>
-
-        {/* Minhas Ligas */}
-        <section className="mb-12">
-          <h2 className="font-display text-2xl uppercase text-dark-text mb-4">
-            Suas Ligas
-          </h2>
-
-          {isLoading ? (
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="h-48 animate-pulse rounded-lg bg-dark-card" />
-              ))}
-            </div>
-          ) : minhasLigas.length === 0 ? (
-            <div className="rounded-lg border border-dark-border bg-dark-card p-8 text-center">
-              <p className="text-dark-textMuted mb-4">
-                Voce ainda nao participa de nenhuma liga
-              </p>
-              <p className="text-sm text-dark-textMuted">
-                Crie uma liga para competir com amigos ou entre em uma liga publica
-              </p>
-            </div>
-          ) : (
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {minhasLigas.map((liga) => (
-                <Link
-                  key={liga.id}
-                  href={`/arena/ligas/${liga.id}`}
-                  className="rounded-lg border border-dark-border bg-dark-card p-6 hover:border-ufc-gold/50 transition-colors"
-                >
-                  <div className="flex items-start justify-between mb-4">
-                    <div>
-                      <span className={`text-xs font-bold uppercase ${
-                        liga.tipo === 'privada' ? 'text-purple-400' : 'text-green-400'
-                      }`}>
-                        {liga.tipo}
-                      </span>
-                      <h3 className="font-display text-xl text-dark-text mt-1">
-                        {liga.nome}
-                      </h3>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-display text-2xl text-ufc-gold">
-                        #{liga.posicao_atual || '-'}
-                      </p>
-                      <p className="text-xs text-dark-textMuted">posicao</p>
-                    </div>
-                  </div>
-
-                  {liga.descricao && (
-                    <p className="text-sm text-dark-textMuted mb-4 line-clamp-2">
-                      {liga.descricao}
-                    </p>
-                  )}
-
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-dark-textMuted">
-                      {liga.total_membros}{liga.max_membros > 0 ? `/${liga.max_membros}` : ''} membros
-                      {liga.max_membros === 0 && <span className="text-green-400 ml-1">(Ilimitado)</span>}
-                    </span>
-                    {liga.pontos_temporada !== undefined && (
-                      <span className="text-ufc-red">
-                        {liga.pontos_temporada} pts
-                      </span>
-                    )}
-                  </div>
-
-                  {liga.campeao && (
-                    <div className="mt-4 pt-4 border-t border-dark-border">
-                      <span className="text-xs text-dark-textMuted">Campeao: </span>
-                      <span className="text-sm text-ufc-gold">
-                        {liga.campeao.display_name || liga.campeao.username}
-                      </span>
-                    </div>
-                  )}
-                </Link>
-              ))}
-            </div>
-          )}
-        </section>
-
-        {/* Ligas Publicas */}
-        <section>
-          <h2 className="font-display text-2xl uppercase text-dark-text mb-4">
-            Ligas Publicas
-          </h2>
-
-          {isLoading ? (
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="h-48 animate-pulse rounded-lg bg-dark-card" />
-              ))}
-            </div>
-          ) : ligasPublicas.length === 0 ? (
-            <div className="rounded-lg border border-dark-border bg-dark-card p-8 text-center">
-              <p className="text-dark-textMuted">
-                Nenhuma liga publica disponivel no momento
-              </p>
-            </div>
-          ) : (
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {ligasPublicas.map((liga) => {
-                const jaMembro = minhasLigas.some((l) => l.id === liga.id);
-
-                return (
-                  <div
-                    key={liga.id}
-                    className="rounded-lg border border-dark-border bg-dark-card p-6"
-                  >
-                    <div className="mb-4">
-                      <span className="text-xs font-bold uppercase text-green-400">
-                        publica
-                      </span>
-                      <h3 className="font-display text-xl text-dark-text mt-1">
-                        {liga.nome}
-                      </h3>
-                    </div>
-
-                    {liga.descricao && (
-                      <p className="text-sm text-dark-textMuted mb-4 line-clamp-2">
-                        {liga.descricao}
-                      </p>
-                    )}
-
-                    <div className="flex items-center justify-between mb-4 text-sm">
-                      <span className="text-dark-textMuted">
-                        {liga.total_membros}{liga.max_membros > 0 ? `/${liga.max_membros}` : ''} membros
-                        {liga.max_membros === 0 && <span className="text-green-400 ml-1">(Ilimitado)</span>}
-                      </span>
-                    </div>
-
-                    {jaMembro ? (
-                      <Link
-                        href={`/arena/ligas/${liga.id}`}
-                        className="block w-full text-center rounded border border-dark-border py-2 text-sm text-dark-textMuted hover:border-ufc-gold hover:text-ufc-gold transition-colors"
-                      >
-                        Ver Liga
-                      </Link>
-                    ) : (liga.max_membros > 0 && liga.total_membros >= liga.max_membros) ? (
-                      <button
-                        disabled
-                        className="w-full rounded bg-dark-border py-2 text-sm text-dark-textMuted cursor-not-allowed"
-                      >
-                        Liga Cheia
-                      </button>
-                    ) : (
-                      <button
-                        onClick={() => handleEntrarLigaPublica(liga.id)}
-                        className="w-full rounded bg-ufc-gold py-2 text-sm text-dark-bg hover:bg-ufc-gold/90 transition-colors"
-                      >
-                        Entrar
-                      </button>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </section>
+          <button
+            type="submit"
+            className="neu-button flex items-center gap-2 rounded-lg bg-ufc-gold px-5 py-3 text-sm font-medium text-dark-bg hover:bg-ufc-gold/90 transition-colors"
+          >
+            <Search className="w-4 h-4" />
+            Entrar
+          </button>
+        </form>
+        {error && (
+          <p className="mt-2 text-sm text-red-400">{error}</p>
+        )}
       </div>
 
-      {/* Modal Codigo de Convite */}
-      {showJoinModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
-          <div className="w-full max-w-md mx-4 rounded-lg border border-dark-border bg-dark-card p-6">
-            <h3 className="font-display text-xl uppercase text-dark-text mb-4">
-              Entrar em Liga Privada
-            </h3>
+      {/* Minhas Ligas */}
+      <section className="mb-10">
+        <h2 className="font-display text-2xl uppercase text-dark-text mb-4 flex items-center gap-2">
+          <Trophy className="w-5 h-5 text-ufc-gold" />
+          Minhas Ligas
+        </h2>
 
-            <form onSubmit={handleEntrarLiga}>
-              {error && (
-                <div className="mb-4 rounded border border-red-500/50 bg-red-500/10 p-3 text-sm text-red-400">
-                  {error}
-                </div>
-              )}
-
-              <div className="mb-4">
-                <label className="block text-sm text-dark-textMuted mb-1">
-                  Codigo de Convite
-                </label>
-                <input
-                  type="text"
-                  value={codigoConvite}
-                  onChange={(e) => setCodigoConvite(e.target.value.toUpperCase())}
-                  placeholder="XXXXXX"
-                  maxLength={8}
-                  className="w-full rounded border border-dark-border bg-dark-bg px-4 py-3 text-center font-mono text-2xl tracking-widest text-dark-text focus:border-ufc-gold focus:outline-none"
-                />
-              </div>
-
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowJoinModal(false);
-                    setCodigoConvite('');
-                    setError('');
-                  }}
-                  className="flex-1 rounded border border-dark-border py-2 text-dark-textMuted hover:bg-dark-border transition-colors"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  className="flex-1 rounded bg-ufc-gold py-2 text-dark-bg hover:bg-ufc-gold/90 transition-colors"
-                >
-                  Entrar
-                </button>
-              </div>
-            </form>
+        {isLoading ? (
+          <div className="space-y-3">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-20 animate-pulse rounded-xl bg-dark-card" />
+            ))}
           </div>
-        </div>
-      )}
+        ) : minhasLigas.length === 0 ? (
+          <div className="neu-card rounded-xl p-8 text-center">
+            <p className="text-dark-textMuted mb-2">
+              Voce ainda nao participa de nenhuma liga
+            </p>
+            <p className="text-sm text-dark-textMuted">
+              Crie uma liga ou entre em uma publica abaixo
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {minhasLigas.map((liga) => (
+              <Link
+                key={liga.id}
+                href={`/arena/ligas/${liga.id}`}
+                className="neu-card-hover flex items-center justify-between rounded-xl p-4 transition-all"
+              >
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-full bg-ufc-red/20 flex items-center justify-center">
+                    <Trophy className="w-5 h-5 text-ufc-red" />
+                  </div>
+                  <div>
+                    <h3 className="font-medium text-dark-text">{liga.nome}</h3>
+                    <p className="text-xs text-dark-textMuted flex items-center gap-1">
+                      <Users className="w-3 h-3" />
+                      {liga.total_membros} membros
+                    </p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className="font-display text-xl text-ufc-gold">
+                    #{liga.minha_posicao || liga.posicao_atual || '-'}
+                  </p>
+                  <p className="text-xs text-dark-textMuted">posicao</p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
+      </section>
+
+      {/* Ligas Publicas */}
+      <section className="mb-10">
+        <h2 className="font-display text-2xl uppercase text-dark-text mb-4 flex items-center gap-2">
+          <Users className="w-5 h-5 text-green-400" />
+          Ligas Publicas
+        </h2>
+
+        {isLoading ? (
+          <div className="space-y-3">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-20 animate-pulse rounded-xl bg-dark-card" />
+            ))}
+          </div>
+        ) : ligasPublicas.length === 0 ? (
+          <div className="neu-card rounded-xl p-8 text-center">
+            <p className="text-dark-textMuted">
+              Nenhuma liga publica disponivel no momento
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {ligasPublicas.map((liga) => {
+              const jaMembro = minhasLigas.some((l) => l.id === liga.id);
+
+              return (
+                <div
+                  key={liga.id}
+                  className="neu-card flex items-center justify-between rounded-xl p-4"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center">
+                      <Users className="w-5 h-5 text-green-400" />
+                    </div>
+                    <div>
+                      <h3 className="font-medium text-dark-text">{liga.nome}</h3>
+                      <p className="text-xs text-dark-textMuted">
+                        {liga.total_membros} membros
+                      </p>
+                    </div>
+                  </div>
+
+                  {jaMembro ? (
+                    <Link
+                      href={`/arena/ligas/${liga.id}`}
+                      className="neu-button rounded-lg px-4 py-2 text-sm text-dark-textMuted hover:text-ufc-gold transition-colors"
+                    >
+                      Ver
+                    </Link>
+                  ) : (
+                    <button
+                      onClick={() => handleEntrarLigaPublica(liga.id)}
+                      disabled={joiningId === liga.id}
+                      className="neu-button rounded-lg bg-ufc-gold px-4 py-2 text-sm font-medium text-dark-bg hover:bg-ufc-gold/90 transition-colors disabled:opacity-50"
+                    >
+                      {joiningId === liga.id ? '...' : 'Entrar'}
+                    </button>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </section>
+
+      {/* CTA Criar Liga */}
+      <Link
+        href="/arena/ligas/criar"
+        className="neu-button flex items-center justify-center gap-2 w-full rounded-xl bg-ufc-red py-4 font-display uppercase text-white hover:bg-ufc-redLight transition-colors"
+      >
+        <Plus className="w-5 h-5" />
+        Criar Liga
+      </Link>
     </div>
   );
 }

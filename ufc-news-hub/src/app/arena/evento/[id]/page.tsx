@@ -2,7 +2,7 @@
 
 import { useState, useEffect, use } from 'react';
 import Link from 'next/link';
-import { Header } from '@/components/ui/Header';
+
 import { LutaCard } from '@/components/arena/LutaCard';
 import { Countdown } from '@/components/calendario/Countdown';
 import { OndeAssistir } from '@/components/calendario/OndeAssistir';
@@ -79,14 +79,11 @@ export default function EventoArenaPage({ params }: PageProps) {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-dark-bg">
-        <Header />
-        <div className="container mx-auto px-4 py-8">
-          <div className="animate-pulse space-y-4">
-            <div className="h-8 w-48 bg-dark-card rounded" />
-            <div className="h-32 bg-dark-card rounded" />
-            <div className="h-48 bg-dark-card rounded" />
-          </div>
+      <div className="container mx-auto px-4 py-8">
+        <div className="animate-pulse space-y-4">
+          <div className="h-8 w-48 bg-dark-card rounded" />
+          <div className="h-32 bg-dark-card rounded" />
+          <div className="h-48 bg-dark-card rounded" />
         </div>
       </div>
     );
@@ -94,19 +91,16 @@ export default function EventoArenaPage({ params }: PageProps) {
 
   if (!evento) {
     return (
-      <div className="min-h-screen bg-dark-bg">
-        <Header />
-        <div className="container mx-auto px-4 py-8 text-center">
-          <h1 className="font-display text-2xl text-dark-text">
-            Evento nao encontrado
-          </h1>
-          <Link
-            href="/arena"
-            className="mt-4 inline-block text-ufc-red hover:text-ufc-redLight"
-          >
-            ← Voltar para Arena
-          </Link>
-        </div>
+      <div className="container mx-auto px-4 py-8 text-center">
+        <h1 className="font-display text-2xl text-dark-text">
+          Evento nao encontrado
+        </h1>
+        <Link
+          href="/arena"
+          className="mt-4 inline-block text-ufc-red hover:text-ufc-redLight"
+        >
+          ← Voltar para Arena
+        </Link>
       </div>
     );
   }
@@ -134,9 +128,7 @@ export default function EventoArenaPage({ params }: PageProps) {
   ).length;
 
   return (
-    <div className="min-h-screen bg-dark-bg">
-      <Header />
-
+    <div>
       {/* Hero */}
       <section className="border-b border-dark-border bg-gradient-to-b from-ufc-red/10 to-transparent">
         <div className="container mx-auto px-4 py-8">

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, use } from 'react';
 import Link from 'next/link';
-import { Header } from '@/components/ui/Header';
+
 import { useArenaAuth } from '@/hooks/useArenaAuth';
 import { NIVEL_CONFIG, CONQUISTAS_DEFINICOES, TipoConquista } from '@/types/arena';
 
@@ -75,27 +75,21 @@ export default function PerfilPage({ params }: PageProps) {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-dark-bg">
-        <Header />
-        <div className="flex items-center justify-center min-h-[60vh]">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-ufc-red"></div>
-        </div>
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-ufc-red"></div>
       </div>
     );
   }
 
   if (error || !perfil) {
     return (
-      <div className="min-h-screen bg-dark-bg">
-        <Header />
-        <div className="container mx-auto px-4 py-8 text-center">
-          <h1 className="font-display text-2xl text-dark-text mb-4">
-            {error || 'Usuario nao encontrado'}
-          </h1>
-          <Link href="/arena" className="text-ufc-red hover:text-ufc-redLight">
-            ← Voltar para Arena
-          </Link>
-        </div>
+      <div className="container mx-auto px-4 py-8 text-center">
+        <h1 className="font-display text-2xl text-dark-text mb-4">
+          {error || 'Usuario nao encontrado'}
+        </h1>
+        <Link href="/arena" className="text-ufc-red hover:text-ufc-redLight">
+          ← Voltar para Arena
+        </Link>
       </div>
     );
   }
@@ -113,9 +107,7 @@ export default function PerfilPage({ params }: PageProps) {
   const conquistasTipos = conquistas.map(c => c.tipo);
 
   return (
-    <div className="min-h-screen bg-dark-bg">
-      <Header />
-
+    <div>
       <div className="container mx-auto px-4 py-8">
         {/* Breadcrumb */}
         <div className="flex items-center gap-2 text-sm text-dark-textMuted mb-6">

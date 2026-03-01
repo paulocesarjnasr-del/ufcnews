@@ -4,7 +4,7 @@ import { useState, useEffect, use } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { UserAvatar } from '@/components/arena/UserAvatar';
+
 import { useArenaAuth } from '@/hooks/useArenaAuth';
 import { Liga, LigaMembro, NIVEL_CONFIG } from '@/types/arena';
 
@@ -57,7 +57,7 @@ type MembroComUsuario = LigaMembro & {
 export default function LigaPage({ params }: PageProps) {
   const { id } = use(params);
   const router = useRouter();
-  const { usuario, isAuthenticated, isLoading: authLoading, logout } = useArenaAuth();
+  const { usuario, isAuthenticated } = useArenaAuth();
   const [liga, setLiga] = useState<LigaDetalhes | null>(null);
   const [membros, setMembros] = useState<MembroComUsuario[]>([]);
   const [isMembro, setIsMembro] = useState(false);
@@ -217,45 +217,19 @@ export default function LigaPage({ params }: PageProps) {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-dark-bg">
-        <header className="sticky top-0 z-50 bg-dark-bg/80 backdrop-blur-md border-b border-dark-border/50">
-          <div className="container mx-auto px-4 py-3">
-            <div className="flex items-center justify-between">
-              <Link href="/arena" className="font-display text-xl uppercase tracking-wider">
-                <span className="text-white">Arena</span>
-                <span className="text-ufc-red ml-1">UFC</span>
-              </Link>
-              {!authLoading && <UserAvatar usuario={usuario} onLogout={logout} />}
-            </div>
-          </div>
-        </header>
-        <div className="flex items-center justify-center min-h-[60vh]">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-ufc-red" />
-        </div>
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-ufc-red" />
       </div>
     );
   }
 
   if (!liga) {
     return (
-      <div className="min-h-screen bg-dark-bg">
-        <header className="sticky top-0 z-50 bg-dark-bg/80 backdrop-blur-md border-b border-dark-border/50">
-          <div className="container mx-auto px-4 py-3">
-            <div className="flex items-center justify-between">
-              <Link href="/arena" className="font-display text-xl uppercase tracking-wider">
-                <span className="text-white">Arena</span>
-                <span className="text-ufc-red ml-1">UFC</span>
-              </Link>
-              {!authLoading && <UserAvatar usuario={usuario} onLogout={logout} />}
-            </div>
-          </div>
-        </header>
-        <div className="container mx-auto px-4 py-8 text-center">
-          <h1 className="font-display text-2xl text-white">Liga nao encontrada</h1>
-          <Link href="/arena/ligas" className="mt-4 inline-block text-ufc-red hover:text-ufc-redLight">
-            ← Voltar para Ligas
-          </Link>
-        </div>
+      <div className="container mx-auto px-4 py-8 text-center">
+        <h1 className="font-display text-2xl text-white">Liga nao encontrada</h1>
+        <Link href="/arena/ligas" className="mt-4 inline-block text-ufc-red hover:text-ufc-redLight">
+          ← Voltar para Ligas
+        </Link>
       </div>
     );
   }
@@ -263,20 +237,7 @@ export default function LigaPage({ params }: PageProps) {
   const isAdmin = isMembro && membros.find(m => m.usuario_id === usuario?.id)?.is_admin;
 
   return (
-    <div className="min-h-screen bg-dark-bg">
-      {/* Header */}
-      <header className="sticky top-0 z-50 bg-dark-bg/80 backdrop-blur-md border-b border-dark-border/50">
-        <div className="container mx-auto px-4 py-3">
-          <div className="flex items-center justify-between">
-            <Link href="/arena" className="font-display text-xl uppercase tracking-wider">
-              <span className="text-white">Arena</span>
-              <span className="text-ufc-red ml-1">UFC</span>
-            </Link>
-            {!authLoading && <UserAvatar usuario={usuario} onLogout={logout} />}
-          </div>
-        </div>
-      </header>
-
+    <div>
       <main className="container mx-auto px-4 py-8 max-w-4xl">
         {/* Breadcrumb */}
         <div className="flex items-center gap-2 text-sm text-dark-textMuted mb-6">

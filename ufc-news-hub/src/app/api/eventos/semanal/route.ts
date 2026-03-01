@@ -29,7 +29,7 @@ export async function GET() {
     let evento: (Evento & { total_lutas: number; poster_url: string | null; horario_main_card: string | null }) | null = null;
 
     if (beforeSundayCutoff) {
-      // Show the most recent event (this week's or last - even if finished)
+      // Show the most recent event that already happened or is today (not next week's)
       evento = await queryOne<Evento & { total_lutas: number; poster_url: string | null; horario_main_card: string | null }>(
         `SELECT
           e.*,
@@ -39,7 +39,7 @@ export async function GET() {
         FROM eventos e
         LEFT JOIN lutas l ON l.evento_id = e.id
         WHERE e.data_evento >= NOW() - INTERVAL '7 days'
-          AND e.data_evento <= NOW() + INTERVAL '7 days'
+          AND e.data_evento <= NOW() + INTERVAL '1 day'
         GROUP BY e.id
         ORDER BY e.data_evento DESC
         LIMIT 1`

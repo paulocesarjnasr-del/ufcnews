@@ -56,6 +56,9 @@ const config: Config = {
         'like-pop': 'like-pop 0.3s ease-out',
         'slide-from-bottom': 'slide-from-bottom 0.3s ease-out',
         'draw-octagon': 'draw-octagon 2s ease-out forwards',
+        // Arena Octagon Portal animations
+        'float': 'float 6s ease-in-out infinite',
+        'glow-pulse-border': 'glow-pulse-border 3s ease-in-out infinite',
       },
       keyframes: {
         'pulse-red': {
@@ -125,6 +128,17 @@ const config: Config = {
         'draw-octagon': {
           '0%': { strokeDashoffset: '800' },
           '100%': { strokeDashoffset: '0' },
+        },
+        // Arena Octagon Portal keyframes
+        'float': {
+          '0%, 100%': { transform: 'translateY(0) translateX(0)', opacity: '0' },
+          '10%': { opacity: '1' },
+          '90%': { opacity: '1' },
+          '100%': { transform: 'translateY(-100vh) translateX(20px)', opacity: '0' },
+        },
+        'glow-pulse-border': {
+          '0%, 100%': { boxShadow: '0 0 10px rgba(210, 10, 10, 0.1), 8px 8px 16px rgba(0,0,0,0.4), -8px -8px 16px rgba(45,45,45,0.1)' },
+          '50%': { boxShadow: '0 0 25px rgba(210, 10, 10, 0.25), 8px 8px 16px rgba(0,0,0,0.4), -8px -8px 16px rgba(45,45,45,0.1)' },
         },
       },
     },

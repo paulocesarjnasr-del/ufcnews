@@ -1,14 +1,13 @@
 'use client';
 
-import { useState, useEffect, use } from 'react';
+import { useState, useEffect, useCallback, use } from 'react';
 import Link from 'next/link';
 
 import { LutaCard } from '@/components/arena/LutaCard';
 import { Countdown } from '@/components/calendario/Countdown';
 import { OndeAssistir } from '@/components/calendario/OndeAssistir';
-import { EventoComLutas, Previsao } from '@/types';
-import { useFingerprint } from '@/hooks/useFingerprint';
-import { useUserName } from '@/hooks/useUserName';
+import { useArenaAuth } from '@/hooks/useArenaAuth';
+import type { EventoComLutas, Previsao } from '@/types';
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -19,18 +18,41 @@ export default function EventoArenaPage({ params }: PageProps) {
   const [evento, setEvento] = useState<EventoComLutas | null>(null);
   const [userPrevisoes, setUserPrevisoes] = useState<Record<string, Previsao>>({});
   const [isLoading, setIsLoading] = useState(true);
-  const fingerprint = useFingerprint();
-  const { userName, showNamePrompt, NamePromptModal } = useUserName();
+  const { usuario, isAuthenticated } = useArenaAuth();
 
   useEffect(() => {
     fetchEvento();
   }, [id]);
 
+  const fetchUserPrevisoes = useCallback(async () => {
+    if (!isAuthenticated || !evento) return;
+    try {
+      const res = await fetch(`/api/arena/previsoes?evento_id=${id}`);
+      if (res.ok) {
+        const data = await res.json();
+        const previsoes: Record<string, Previsao> = {};
+        if (data.previsoes) {
+          for (const p of data.previsoes) {
+            previsoes[p.luta_id] = {
+              ...p,
+              lutador_escolhido_id: p.vencedor_previsto_id ?? p.lutador_escolhido_id,
+              usuario_fingerprint: p.usuario_id ?? '',
+              usuario_nome: usuario?.username ?? '',
+            };
+          }
+        }
+        setUserPrevisoes(previsoes);
+      }
+    } catch (error) {
+      console.error('Erro ao buscar previsoes:', error);
+    }
+  }, [isAuthenticated, evento, id, usuario]);
+
   useEffect(() => {
-    if (fingerprint && evento) {
+    if (isAuthenticated && evento) {
       fetchUserPrevisoes();
     }
-  }, [fingerprint, evento]);
+  }, [isAuthenticated, evento, fetchUserPrevisoes]);
 
   async function fetchEvento() {
     try {
@@ -44,30 +66,6 @@ export default function EventoArenaPage({ params }: PageProps) {
     } finally {
       setIsLoading(false);
     }
-  }
-
-  async function fetchUserPrevisoes() {
-    if (!evento || !fingerprint) return;
-
-    const previsoes: Record<string, Previsao> = {};
-
-    for (const luta of evento.lutas) {
-      try {
-        const res = await fetch(
-          `/api/previsoes?luta_id=${luta.id}&fingerprint=${fingerprint}`
-        );
-        if (res.ok) {
-          const data = await res.json();
-          if (data.previsao) {
-            previsoes[luta.id] = data.previsao;
-          }
-        }
-      } catch (error) {
-        console.error('Erro ao buscar previsao:', error);
-      }
-    }
-
-    setUserPrevisoes(previsoes);
   }
 
   const handlePrevisaoSubmit = (previsao: Previsao) => {
@@ -235,8 +233,6 @@ export default function EventoArenaPage({ params }: PageProps) {
 
       {/* Content */}
       <div className="container mx-auto px-4 py-8">
-        {showNamePrompt && <NamePromptModal />}
-
         {/* Main Card */}
         {lutasPorTipo.main.length > 0 && (
           <section className="mb-8">
@@ -249,10 +245,10 @@ export default function EventoArenaPage({ params }: PageProps) {
                   key={luta.id}
                   luta={luta}
                   userPrevisao={userPrevisoes[luta.id]}
-                  fingerprint={fingerprint}
-                  userName={userName}
+                  fingerprint={usuario?.id || ''}
+                  userName={usuario?.username || ''}
                   onPrevisaoSubmit={handlePrevisaoSubmit}
-                  showForm={!!userName && evento.status === 'agendado'}
+                  showForm={isAuthenticated && evento.status === 'agendado'}
                 />
               ))}
             </div>
@@ -271,10 +267,10 @@ export default function EventoArenaPage({ params }: PageProps) {
                   key={luta.id}
                   luta={luta}
                   userPrevisao={userPrevisoes[luta.id]}
-                  fingerprint={fingerprint}
-                  userName={userName}
+                  fingerprint={usuario?.id || ''}
+                  userName={usuario?.username || ''}
                   onPrevisaoSubmit={handlePrevisaoSubmit}
-                  showForm={!!userName && evento.status === 'agendado'}
+                  showForm={isAuthenticated && evento.status === 'agendado'}
                 />
               ))}
             </div>
@@ -293,10 +289,10 @@ export default function EventoArenaPage({ params }: PageProps) {
                   key={luta.id}
                   luta={luta}
                   userPrevisao={userPrevisoes[luta.id]}
-                  fingerprint={fingerprint}
-                  userName={userName}
+                  fingerprint={usuario?.id || ''}
+                  userName={usuario?.username || ''}
                   onPrevisaoSubmit={handlePrevisaoSubmit}
-                  showForm={!!userName && evento.status === 'agendado'}
+                  showForm={isAuthenticated && evento.status === 'agendado'}
                 />
               ))}
             </div>

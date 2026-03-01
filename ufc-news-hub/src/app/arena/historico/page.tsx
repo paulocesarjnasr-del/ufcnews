@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { UserAvatar } from '@/components/arena/UserAvatar';
+
 import { useArenaAuth } from '@/hooks/useArenaAuth';
 
 interface PrevisaoHistorico {
@@ -39,7 +39,7 @@ interface HistoricoStats {
 
 export default function HistoricoPage() {
   const router = useRouter();
-  const { usuario, isAuthenticated, isLoading: authLoading, logout } = useArenaAuth();
+  const { isAuthenticated, isLoading: authLoading } = useArenaAuth();
   const [previsoes, setPrevisoes] = useState<PrevisaoHistorico[]>([]);
   const [stats, setStats] = useState<HistoricoStats | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -100,21 +100,7 @@ export default function HistoricoPage() {
   }
 
   return (
-    <div className="min-h-screen bg-dark-bg">
-      {/* Header */}
-      <header className="sticky top-0 z-50 bg-dark-bg/80 backdrop-blur-md border-b border-dark-border/50">
-        <div className="container mx-auto px-4 py-3">
-          <div className="flex items-center justify-between">
-            <Link href="/arena" className="font-display text-xl uppercase tracking-wider">
-              <span className="text-white">Arena</span>
-              <span className="text-ufc-red ml-1">UFC</span>
-            </Link>
-            <UserAvatar usuario={usuario} onLogout={logout} />
-          </div>
-        </div>
-      </header>
-
-      {/* Content */}
+    <div>
       <main className="container mx-auto px-4 py-8 max-w-4xl">
         <div className="mb-8">
           <h1 className="font-display text-3xl uppercase text-white">

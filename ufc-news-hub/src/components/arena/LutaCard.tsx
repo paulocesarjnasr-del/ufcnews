@@ -2,22 +2,9 @@
 
 import { useState } from 'react';
 import FighterImage from '@/components/ui/FighterImage';
-import { LutaComLutadores, Lutador, MetodoVitoria, Previsao } from '@/types';
+import { LutaComLutadores, Lutador, Previsao } from '@/types';
 import { PrevisaoForm } from './PrevisaoForm';
 import { ConsensoBar } from './ConsensoBar';
-
-// Gera link do Tapology baseado no nome do lutador
-function getTapologyUrl(nome: string): string {
-  const slug = nome
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '') // Remove acentos
-    .replace(/[^a-z0-9\s-]/g, '') // Remove caracteres especiais
-    .replace(/\s+/g, '-') // Espaços para hífens
-    .replace(/-+/g, '-') // Remove hífens duplicados
-    .trim();
-  return `https://www.tapology.com/search?term=${encodeURIComponent(nome)}`;
-}
 
 interface LutaCardProps {
   luta: LutaComLutadores;
@@ -43,6 +30,7 @@ export function LutaCard({
 
   const isFinished = luta.status === 'finalizada';
   const canPredict = luta.status === 'agendada';
+  const displayRounds = (luta.tipo === 'main_event' || luta.is_titulo) ? 5 : 3;
 
   const handlePrevisaoSuccess = (previsao: Previsao) => {
     setLocalPrevisao(previsao);
@@ -58,13 +46,6 @@ export function LutaCard({
       early_prelim: 'EARLY PRELIM',
     };
     return labels[tipo] || tipo.toUpperCase();
-  };
-
-  const getResultadoClass = (lutadorId: string) => {
-    if (!isFinished || !luta.vencedor_id) return '';
-    return luta.vencedor_id === lutadorId
-      ? 'ring-2 ring-green-500'
-      : 'opacity-60';
   };
 
   return (
@@ -90,7 +71,7 @@ export function LutaCard({
           )}
         </div>
         <span className="text-xs text-dark-textMuted">
-          {luta.categoria_peso} - {luta.rounds} rounds
+          {luta.categoria_peso} - {displayRounds} rounds
         </span>
       </div>
 
@@ -295,18 +276,6 @@ function LutadorDisplay({
         {(lutador as any).pais && (
           <p className="text-xs text-dark-textMuted">{(lutador as any).pais}</p>
         )}
-        {/* Link Tapology */}
-        <a
-          href={getTapologyUrl(lutador.nome)}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-1 mt-1 text-xs text-blue-400 hover:text-blue-300 transition-colors"
-        >
-          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-          </svg>
-          Estatisticas
-        </a>
       </div>
     </div>
   );

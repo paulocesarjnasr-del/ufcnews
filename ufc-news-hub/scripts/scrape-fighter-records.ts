@@ -11,7 +11,7 @@ const pool = new Pool({
 const SCRAPER_CONFIG = {
   baseUrl: 'https://www.ufc.com',
   delayBetweenRequests: 1500, // 1.5 segundos entre requests
-  maxFightersPerRun: 500, // Processar todos os lutadores
+  maxFightersPerRun: 5000, // Processar todos os lutadores
   userAgent: 'UFCNewsHub-Bot/1.0 (News Aggregator; educational project)',
 };
 

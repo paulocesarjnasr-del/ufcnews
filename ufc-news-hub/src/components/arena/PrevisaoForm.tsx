@@ -208,8 +208,8 @@ function LutadorOption({ lutador, isSelected, onClick }: LutadorOptionProps) {
             className="object-cover object-top"
           />
         ) : (
-          <div className="flex h-full w-full items-center justify-center bg-dark-border text-lg font-bold text-dark-textMuted">
-            {lutador.nome.charAt(0)}
+          <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-[#3a1c1c] via-[#2a2a2a] to-[#1a1a2e] text-lg font-bold text-white/40 select-none">
+            {lutador.nome.split(' ').map(w => w[0]).filter(Boolean).slice(0, 2).join('').toUpperCase()}
           </div>
         )}
       </div>

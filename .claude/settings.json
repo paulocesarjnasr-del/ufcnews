@@ -1,0 +1,81 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run dev:*)",
+      "Bash(npm run build:*)",
+      "Bash(npm run lint:*)",
+      "Bash(npm run sync:*)",
+      "Bash(npm run auto-sync:*)",
+      "Bash(npm run db:*)",
+      "Bash(npm run scrape:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npx prisma:*)",
+      "Bash(npx next:*)",
+      "Bash(npx tsx:*)",
+      "Bash(npx playwright:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git branch:*)",
+      "Bash(git checkout:*)",
+      "Bash(git stash:*)",
+      "Bash(npm install:*)",
+      "Bash(npm ls:*)",
+      "Bash(curl:*)",
+      "Bash(ls:*)",
+      "Bash(find:*)",
+      "Bash(grep:*)",
+      "Bash(tree:*)",
+      "Bash(cat:*)",
+      "Bash(echo:*)",
+      "Bash(head:*)",
+      "Bash(tail:*)",
+      "Bash(wc:*)",
+      "Bash(ps:*)",
+      "Bash(lsof:*)",
+      "Bash(kill:*)",
+      "Bash(pkill:*)",
+      "Bash(docker:*)",
+      "Bash(docker-compose:*)",
+      "Bash(psql:*)",
+      "Bash(node:*)",
+      "WebFetch(domain:localhost)",
+      "WebFetch(domain:www.ufc.com)",
+      "WebSearch",
+      "mcp__context7__resolve-library-id",
+      "mcp__context7__query-docs",
+      "mcp__postgres__query"
+    ],
+    "deny": [
+      "Bash(rm -rf:*)",
+      "Bash(sudo:*)"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if [[ \"$CLAUDE_FILE_PATH\" =~ \\.(ts|tsx)$ ]]; then cd ufc-news-hub && npx next lint --file \"${CLAUDE_FILE_PATH#ufc-news-hub/}\" --fix 2>/dev/null || true; fi"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if echo \"$CLAUDE_TOOL_INPUT\" | grep -q 'git commit'; then cd ufc-news-hub && npx tsc --noEmit --pretty false 2>&1 | head -20; if [ ${PIPESTATUS[0]} -ne 0 ]; then echo 'BLOCK: TypeScript errors found. Fix before committing.' && exit 1; fi; fi; exit 0"
+          }
+        ]
+      }
+    ]
+  }
+}

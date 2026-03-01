@@ -1,0 +1,18 @@
+{
+  "mcpServers": {
+    "context7": {
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp@latest"],
+      "description": "Documentation lookup for Next.js, Prisma, Tailwind, Vercel AI SDK, SWR, Playwright"
+    },
+    "postgres": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-postgres",
+        "postgresql://ufcnews:ufcnews123@localhost:5432/ufc_news_hub"
+      ],
+      "description": "Direct PostgreSQL queries for UFC News Hub database"
+    }
+  }
+}

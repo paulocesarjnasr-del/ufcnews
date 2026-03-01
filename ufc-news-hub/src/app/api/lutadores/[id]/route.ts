@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { query, queryOne } from '@/lib/db';
-import { LutadorExpandido, LutaComLutadores, Lutador } from '@/types';
+import type { LutadorExpandido } from '@/types';
 
 interface Params {
   params: Promise<{ id: string }>;
@@ -118,8 +118,8 @@ export async function GET(request: NextRequest, { params }: Params) {
       };
     });
 
-    // Buscar histórico completo de lutas do UFC.com
-    const historicoUfc = await query<{
+    // Buscar histórico completo de lutas do UFC.com (tabela pode não existir ainda)
+    let historicoUfc: {
       id: string;
       resultado: string;
       oponente_nome: string;
@@ -127,13 +127,19 @@ export async function GET(request: NextRequest, { params }: Params) {
       metodo: string | null;
       round: number | null;
       tempo: string | null;
-    }>(
-      `SELECT id, resultado, oponente_nome, data_luta, metodo, round, tempo
-       FROM historico_lutas_ufc
-       WHERE lutador_id = $1
-       ORDER BY data_luta DESC NULLS LAST`,
-      [id]
-    );
+    }[] = [];
+
+    try {
+      historicoUfc = await query(
+        `SELECT id, resultado, oponente_nome, data_luta, metodo, round, tempo
+         FROM historico_lutas_ufc
+         WHERE lutador_id = $1
+         ORDER BY data_luta DESC NULLS LAST`,
+        [id]
+      );
+    } catch {
+      // Table may not exist yet — return empty history
+    }
 
     // Calcular record
     const record = `${lutador.vitorias || 0}-${lutador.derrotas || 0}-${lutador.empates || 0}`;

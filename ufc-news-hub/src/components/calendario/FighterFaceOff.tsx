@@ -55,10 +55,10 @@ function FighterCard({
               sizes="48px"
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center text-dark-textMuted">
-              <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
-              </svg>
+            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#3a1c1c] via-[#2a2a2a] to-[#1a1a2e]">
+              <span className="text-sm font-bold text-white/40 select-none">
+                {fighter.nome.split(' ').map(w => w[0]).filter(Boolean).slice(0, 2).join('').toUpperCase()}
+              </span>
             </div>
           )}
           {isWinner && (
@@ -112,10 +112,10 @@ function FighterCard({
             sizes="(max-width: 640px) 112px, (max-width: 1024px) 160px, 192px"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-dark-textMuted">
-            <svg className="w-16 h-16 sm:w-24 sm:h-24" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
-            </svg>
+          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#3a1c1c] via-[#2a2a2a] to-[#1a1a2e]">
+            <span className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white/40 select-none">
+              {fighter.nome.split(' ').map(w => w[0]).filter(Boolean).slice(0, 2).join('').toUpperCase()}
+            </span>
           </div>
         )}
 

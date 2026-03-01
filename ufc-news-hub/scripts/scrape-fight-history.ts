@@ -219,8 +219,32 @@ async function scrapeFighterRecord(page: Page, slug: string): Promise<FightRecor
           resultado = 'nc';
         }
 
-        // Fallback: if no class on our side, check if the OTHER side has 'win' (meaning we lost)
-        // or if there's a plaque on our side
+        // Fallback 1: check for plaque text on our side (most reliable)
+        if (resultado === 'unknown') {
+          const mySide = redHref.includes(fighterSlug) ? redImage : blueImage;
+          const myPlaque = mySide ? mySide.querySelector('.c-card-event--athlete-results__plaque') : null;
+          if (myPlaque) {
+            const plaqueText = myPlaque.textContent!.trim().toLowerCase();
+            if (['win', 'loss', 'draw', 'nc'].includes(plaqueText)) {
+              resultado = plaqueText;
+            }
+          }
+        }
+
+        // Fallback 2: check opponent's plaque (inverse logic)
+        if (resultado === 'unknown') {
+          const otherSide = redHref.includes(fighterSlug) ? blueImage : redImage;
+          const otherPlaque = otherSide ? otherSide.querySelector('.c-card-event--athlete-results__plaque') : null;
+          if (otherPlaque) {
+            const otherText = otherPlaque.textContent!.trim().toLowerCase();
+            if (otherText === 'win') resultado = 'loss';
+            else if (otherText === 'loss') resultado = 'win';
+            else if (otherText === 'draw') resultado = 'draw';
+            else if (otherText === 'nc') resultado = 'nc';
+          }
+        }
+
+        // Fallback 3: check CSS classes on opponent side
         if (resultado === 'unknown') {
           const otherSideClasses = redHref.includes(fighterSlug)
             ? (blueImage ? blueImage.className : '')
@@ -229,14 +253,6 @@ async function scrapeFighterRecord(page: Page, slug: string): Promise<FightRecor
             resultado = 'loss';
           } else if (otherSideClasses.includes(' loss')) {
             resultado = 'win';
-          }
-          // Last resort: check for plaque on our side
-          if (resultado === 'unknown') {
-            const mySide = redHref.includes(fighterSlug) ? redImage : blueImage;
-            const myPlaque = mySide ? mySide.querySelector('.c-card-event--athlete-results__plaque') : null;
-            if (myPlaque) {
-              resultado = myPlaque.textContent!.trim().toLowerCase();
-            }
           }
         }
 

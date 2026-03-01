@@ -33,7 +33,8 @@ export async function GET(request: NextRequest) {
         GROUP BY noticia_id
       ) c ON c.noticia_id = n.id
       WHERE n.eh_sobre_ufc = true
-        AND n.publicado_em >= NOW() - INTERVAL '24 hours'
+        AND n.imagem_url IS NOT NULL
+        AND n.publicado_em >= NOW() - INTERVAL '72 hours'
       ORDER BY n.publicado_em DESC`,
       [fingerprint]
     );

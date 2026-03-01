@@ -110,11 +110,11 @@ export function ReelsContainer() {
         </div>
       </div>
 
-      {/* Desktop Arrow Navigation */}
+      {/* Desktop Arrow Navigation — positioned outside the slide card */}
       {currentIndex > 0 && (
         <button
           onClick={goPrev}
-          className="absolute left-3 top-1/2 z-10 hidden -translate-y-1/2 rounded-full bg-black/50 p-2 text-white backdrop-blur-sm transition-all hover:bg-black/70 hover:scale-110 md:flex"
+          className="absolute -left-14 top-1/2 z-10 hidden -translate-y-1/2 rounded-full bg-dark-card p-2.5 text-dark-textMuted shadow-lg transition-all hover:text-white hover:scale-110 lg:flex"
           aria-label="Notícia anterior"
         >
           <ChevronLeft className="h-6 w-6" />
@@ -123,7 +123,7 @@ export function ReelsContainer() {
       {currentIndex < totalSlides && (
         <button
           onClick={goNext}
-          className="absolute right-3 top-1/2 z-10 hidden -translate-y-1/2 rounded-full bg-black/50 p-2 text-white backdrop-blur-sm transition-all hover:bg-black/70 hover:scale-110 md:flex"
+          className="absolute -right-14 top-1/2 z-10 hidden -translate-y-1/2 rounded-full bg-dark-card p-2.5 text-dark-textMuted shadow-lg transition-all hover:text-white hover:scale-110 lg:flex"
           aria-label="Próxima notícia"
         >
           <ChevronRight className="h-6 w-6" />

@@ -75,10 +75,10 @@ function FighterCorner({
               sizes="40px"
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center text-dark-textMuted">
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
-              </svg>
+            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#3a1c1c] via-[#2a2a2a] to-[#1a1a2e]">
+              <span className="text-xs font-bold text-white/40 select-none">
+                {fighter.nome.split(' ').map(w => w[0]).filter(Boolean).slice(0, 2).join('').toUpperCase()}
+              </span>
             </div>
           )}
         </div>

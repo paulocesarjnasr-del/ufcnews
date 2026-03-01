@@ -11,7 +11,7 @@ export function ReelCaption({ noticia }: ReelCaptionProps) {
   const timeAgo = getTimeAgo(noticia.publicado_em);
 
   return (
-    <div className="absolute bottom-16 left-4 right-20 z-10 md:bottom-20 md:left-8">
+    <div className="absolute bottom-6 left-4 right-20 z-10 md:bottom-10 md:left-8">
       <p className="text-lg font-bold leading-tight text-white drop-shadow-lg md:text-2xl">
         {caption}
       </p>

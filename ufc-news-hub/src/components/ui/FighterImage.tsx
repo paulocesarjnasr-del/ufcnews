@@ -60,7 +60,10 @@ export default function FighterImage({ src, alt, fill, width, height, sizes, cla
           height: '100%',
           objectFit: 'cover',
           objectPosition: 'top',
-        } : undefined}
+        } : {
+          objectFit: 'cover',
+          objectPosition: 'top',
+        }}
         width={!fill ? width : undefined}
         height={!fill ? height : undefined}
       />

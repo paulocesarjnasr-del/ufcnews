@@ -102,7 +102,15 @@
       "Bash(npm --version:*)",
       "Bash(ps:*)",
       "Bash(/Applications/Postgres.app/Contents/Versions/latest/bin/psql:*)",
-      "Bash(npx next lint:*)"
+      "Bash(npx next lint:*)",
+      "Bash(npx eslint:*)",
+      "Bash(git merge:*)",
+      "Bash(git fetch:*)",
+      "Bash(DATABASE_URL=postgresql://ufcnews:ufcnews123@localhost:5432/ufc_news_hub npx tsx:*)"
     ]
-  }
+  },
+  "enabledMcpjsonServers": [
+    "context7",
+    "postgres"
+  ]
 }

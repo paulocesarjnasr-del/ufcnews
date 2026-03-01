@@ -15,30 +15,29 @@ interface Fighter {
 }
 
 async function scrapeFighters(): Promise<Fighter[]> {
-  console.log('🥊 Iniciando scraping dos lutadores ativos do UFC...\n');
+  console.log('🥊 Iniciando scraping de TODOS os lutadores do UFC (~3100+)...\n');
 
   const browser = await chromium.launch({
-    headless: false,
-    slowMo: 20
+    headless: true,
+    args: ['--no-sandbox', '--disable-setuid-sandbox']
   });
 
   const page = await browser.newPage();
   const allFighters: Fighter[] = [];
 
   try {
-    // Base URL com filtro de status ativo
+    // Base URL SEM filtro de status — pega TODOS os lutadores (ativos, retirados, etc.)
     const baseUrl = 'https://www.ufc.com/athletes/all';
-    const filter = 'filters%5B0%5D=status%3A23';
 
     let pageNum = 0;
     let emptyPages = 0;
-    const maxEmptyPages = 3;
+    const maxEmptyPages = 5;  // UFC.com pode ter gaps entre páginas
     let timeoutErrors = 0;
-    const maxTimeoutErrors = 5;
+    const maxTimeoutErrors = 8;
 
     while (emptyPages < maxEmptyPages && timeoutErrors < maxTimeoutErrors) {
-      // Constrói URL com número da página
-      const url = `${baseUrl}?${filter}&page=${pageNum}`;
+      // Constrói URL com número da página — sem filtro de status
+      const url = `${baseUrl}?page=${pageNum}`;
       console.log(`📄 Carregando página ${pageNum + 1}...`);
 
       try {
@@ -80,9 +79,9 @@ async function scrapeFighters(): Promise<Fighter[]> {
 
       pageNum++;
 
-      // Limite de segurança
-      if (pageNum > 100) {
-        console.log('⚠️  Limite de páginas atingido');
+      // Limite de segurança — 3118 lutadores / 11 por página ≈ 284 páginas
+      if (pageNum > 350) {
+        console.log('⚠️  Limite de segurança de páginas atingido');
         break;
       }
     }
@@ -162,15 +161,9 @@ async function saveFightersToDatabase(fighters: Fighter[]): Promise<void> {
   });
 
   try {
-    console.log('   → Preparando banco de dados...');
+    console.log('   → Preparando banco de dados (upsert — sem deletar)...');
 
-    // Remove lutadores antigos sem relacionamento com notícias
-    await pool.query(`
-      DELETE FROM lutadores
-      WHERE id NOT IN (SELECT DISTINCT lutador_id FROM noticia_entidades WHERE lutador_id IS NOT NULL)
-    `);
-
-    // Insere novos lutadores (evitando duplicatas por nome)
+    // NÃO deleta lutadores — apenas insere novos e atualiza existentes
     let inserted = 0;
     let updated = 0;
 

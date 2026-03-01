@@ -164,9 +164,9 @@ function FighterPhoto({
           />
         ) : (
           <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-[#3a1c1c] via-[#2a2a2a] to-[#1a1a2e]">
-            <svg className="h-16 w-16 text-dark-textMuted" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
-            </svg>
+            <span className="text-3xl md:text-5xl font-bold text-white/40 select-none">
+              {nome.split(' ').map(w => w[0]).filter(Boolean).slice(0, 2).join('').toUpperCase()}
+            </span>
           </div>
         )}
       </div>

@@ -1,6 +1,6 @@
 'use client';
 
-import { MessageCircle, ExternalLink } from 'lucide-react';
+import { MessageCircle, Bookmark } from 'lucide-react';
 import { ReelNoticia } from '@/types';
 import { ReelLikeButton } from './ReelLikeButton';
 
@@ -12,7 +12,7 @@ interface ReelActionsProps {
 
 export function ReelActions({ noticia, onToggleLike, onOpenComments }: ReelActionsProps) {
   return (
-    <div className="absolute bottom-16 right-4 z-10 flex flex-col items-center gap-5 md:bottom-20 md:right-8">
+    <div className="absolute right-4 top-1/2 z-10 flex -translate-y-1/4 flex-col items-center gap-6 md:right-6">
       <ReelLikeButton
         liked={noticia.user_liked}
         count={noticia.likes_count}
@@ -33,9 +33,10 @@ export function ReelActions({ noticia, onToggleLike, onOpenComments }: ReelActio
         target="_blank"
         rel="noopener noreferrer"
         className="flex flex-col items-center gap-1 transition-transform active:scale-90"
-        aria-label="Abrir fonte original"
+        aria-label="Ler notícia completa"
       >
-        <ExternalLink className="h-6 w-6 text-white hover:text-ufc-gold transition-colors" />
+        <Bookmark className="h-6 w-6 text-white hover:text-ufc-gold transition-colors" />
+        <span className="text-[10px] font-medium text-white/70">Fonte</span>
       </a>
     </div>
   );

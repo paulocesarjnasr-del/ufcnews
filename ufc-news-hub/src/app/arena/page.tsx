@@ -42,7 +42,7 @@ export default function ArenaPage() {
 
   async function fetchProximoEvento() {
     try {
-      const res = await fetch('/api/eventos/proximo');
+      const res = await fetch('/api/eventos/semanal');
       if (res.ok) {
         const data = await res.json();
         setProximoEvento(data);

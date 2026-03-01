@@ -59,7 +59,7 @@ interface UseEnqueteReturn {
   isLoading: boolean;
   jaVotou: 'a' | 'b' | null;
   votar: (opcao: 'a' | 'b') => Promise<{ success: boolean; error?: string }>;
-  comentar: (conteudo: string, guestNome?: string) => Promise<{ success: boolean; error?: string }>;
+  comentar: (conteudo: string, guestNome?: string, usuarioId?: string) => Promise<{ success: boolean; error?: string }>;
   refreshComentarios: () => void;
 }
 
@@ -164,7 +164,7 @@ export function useEnquete(): UseEnqueteReturn {
 
   // Comment function
   const comentar = useCallback(
-    async (conteudo: string, guestNome?: string): Promise<{ success: boolean; error?: string }> => {
+    async (conteudo: string, guestNome?: string, usuarioId?: string): Promise<{ success: boolean; error?: string }> => {
       if (!enquete) return { success: false, error: 'Nenhuma enquete ativa' };
       if (isCommenting) return { success: false, error: 'Aguarde...' };
 
@@ -174,7 +174,7 @@ export function useEnquete(): UseEnqueteReturn {
         const response = await fetch(`/api/enquetes/${enquete.id}/comentarios`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ conteudo, guestNome }),
+          body: JSON.stringify({ conteudo, guestNome, usuarioId }),
         });
 
         const result = await response.json();

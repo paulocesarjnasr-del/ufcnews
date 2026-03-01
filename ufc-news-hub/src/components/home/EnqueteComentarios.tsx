@@ -13,7 +13,7 @@ interface EnqueteComentariosProps {
   enqueteId: string;
   comentarios: ComentarioEnquete[];
   totalComentarios: number;
-  onComentar: (conteudo: string, guestNome?: string) => Promise<{ success: boolean; error?: string }>;
+  onComentar: (conteudo: string, guestNome?: string, usuarioId?: string) => Promise<{ success: boolean; error?: string }>;
   usuarioLogado: {
     id: string;
     displayName: string;
@@ -118,20 +118,15 @@ export function EnqueteComentarios({
     if (!trimmed) return;
     if (trimmed.length > MAX_CHARS) return;
 
-    if (!usuarioLogado && !guestNome.trim()) {
-      setError('Digite seu nome para comentar');
-      return;
-    }
-
     setIsSubmitting(true);
     setError(null);
 
-    const guestName = !usuarioLogado ? guestNome.trim() : undefined;
+    const guestName = !usuarioLogado ? (guestNome.trim() || undefined) : undefined;
     if (guestName) {
       storeGuestName(guestName);
     }
 
-    const result = await onComentar(trimmed, guestName);
+    const result = await onComentar(trimmed, guestName, usuarioLogado?.id);
 
     if (result.success) {
       setConteudo('');
@@ -196,7 +191,7 @@ export function EnqueteComentarios({
             type="text"
             value={guestNome}
             onChange={(e) => setGuestNome(e.target.value)}
-            placeholder="Seu nome"
+            placeholder="Seu nome (opcional)"
             maxLength={60}
             className={cn(
               'neu-inset rounded-lg px-3 py-2 text-sm text-dark-text',

@@ -105,13 +105,8 @@ export async function POST(request: NextRequest, { params }: Params) {
       );
     }
 
-    // Require guestNome if no usuarioId
-    if (!body.usuarioId && (!body.guestNome || body.guestNome.trim().length === 0)) {
-      return NextResponse.json(
-        { error: 'Nome e obrigatorio para visitantes' },
-        { status: 400 }
-      );
-    }
+    // Default guest name to "Anonimo" if not provided
+    const guestNome = body.guestNome?.trim() || (body.usuarioId ? null : 'Anonimo');
 
     // Verify enquete exists
     const enquete = await queryOne<{ id: string }>(
@@ -147,7 +142,7 @@ export async function POST(request: NextRequest, { params }: Params) {
       [
         id,
         body.usuarioId || null,
-        body.guestNome?.trim() || null,
+        guestNome,
         conteudo,
       ]
     );

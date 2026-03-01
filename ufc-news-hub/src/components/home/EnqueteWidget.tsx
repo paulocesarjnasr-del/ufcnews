@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useCallback } from 'react';
+import useSWR from 'swr';
+import Link from 'next/link';
 import { useEnquete } from '@/hooks/useEnquete';
 import { useArenaAuth } from '@/hooks/useArenaAuth';
 import { EnqueteVotacao } from './EnqueteVotacao';
@@ -44,6 +46,12 @@ function EnqueteSkeleton() {
 }
 
 // ═══════════════════════════════════════════════════════
+// Fetcher
+// ═══════════════════════════════════════════════════════
+
+const fetcher = (url: string) => fetch(url).then((res) => res.ok ? res.json() : null);
+
+// ═══════════════════════════════════════════════════════
 // Main Component
 // ═══════════════════════════════════════════════════════
 
@@ -60,6 +68,13 @@ export default function EnqueteWidget() {
   } = useEnquete();
 
   const { usuario } = useArenaAuth();
+
+  // Fetch analysis for this event (if exists)
+  const { data: analiseData } = useSWR<{ slug: string; titulo: string } | null>(
+    enquete ? `/api/analises?evento_id=${enquete.evento_id}` : null,
+    fetcher,
+    { revalidateOnFocus: false }
+  );
 
   // Track if user just voted (to switch to resultado immediately)
   const [justVoted, setJustVoted] = useState<'a' | 'b' | null>(null);
@@ -129,6 +144,36 @@ export default function EnqueteWidget() {
         onComentar={comentar}
         usuarioLogado={usuarioLogado}
       />
+
+      {/* Analysis link */}
+      <div className="mt-6 border-t border-dark-border/50 pt-6">
+        <Link
+          href={analiseData?.slug ? `/analise/${analiseData.slug}` : '/analises'}
+          className="group flex items-center justify-center gap-3 rounded-xl border border-dark-border bg-dark-card/50 px-6 py-4 transition-all duration-200 hover:border-ufc-gold/40 hover:bg-dark-card"
+        >
+          <svg
+            className="h-5 w-5 text-ufc-gold transition-transform duration-200 group-hover:scale-110"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={2}
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+          </svg>
+          <span className="font-display text-sm uppercase tracking-wider text-dark-text transition-colors duration-200 group-hover:text-ufc-gold md:text-base">
+            Ver analise desse fight card
+          </span>
+          <svg
+            className="h-4 w-4 text-dark-textMuted transition-all duration-200 group-hover:translate-x-1 group-hover:text-ufc-gold"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={2}
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+          </svg>
+        </Link>
+      </div>
     </section>
   );
 }

@@ -4,15 +4,13 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import FighterImage from '@/components/ui/FighterImage';
-import { ArenaMenu } from '@/components/arena/ArenaMenu';
-import { UserAvatar } from '@/components/arena/UserAvatar';
 import { Countdown } from '@/components/calendario/Countdown';
 import { useArenaAuth } from '@/hooks/useArenaAuth';
 import { verificarStatusPrevisoes, PrevisoesStatus } from '@/lib/arena/previsoes-horario';
 import { EventoComLutas } from '@/types';
 
 export default function ArenaPage() {
-  const { usuario, isAuthenticated, isLoading: authLoading, logout } = useArenaAuth();
+  const { isAuthenticated } = useArenaAuth();
   const [proximoEvento, setProximoEvento] = useState<EventoComLutas & { poster_url?: string; horario_main_card?: string } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [previsoesStatus, setPrevisoesStatus] = useState<PrevisoesStatus | null>(null);
@@ -91,34 +89,8 @@ export default function ArenaPage() {
         </div>
       )}
 
-      {/* Content */}
-      <div className="relative z-10">
-        {/* Header fixo */}
-        <header className="sticky top-0 z-50 bg-dark-bg/80 backdrop-blur-md border-b border-dark-border/50">
-          <div className="container mx-auto px-4 py-3">
-            <div className="flex items-center justify-between">
-              {/* Menu hamburguer */}
-              <ArenaMenu isLoggedIn={isAuthenticated} />
-
-              {/* Logo central */}
-              <Link href="/arena" className="font-display text-xl uppercase tracking-wider">
-                <span className="text-white">Arena</span>
-                <span className="text-ufc-red ml-1">UFC</span>
-              </Link>
-
-              {/* Avatar / Login */}
-              {!authLoading && (
-                <UserAvatar usuario={usuario} onLogout={logout} />
-              )}
-              {authLoading && (
-                <div className="w-10 h-10 rounded-full bg-dark-card animate-pulse" />
-              )}
-            </div>
-          </div>
-        </header>
-
-        {/* Main content */}
-        <main className="container mx-auto px-4">
+      {/* Main content */}
+      <main className="relative z-10 container mx-auto px-4">
           {isLoading ? (
             <div className="flex items-center justify-center min-h-[60vh]">
               <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-ufc-red" />
@@ -186,7 +158,7 @@ export default function ArenaPage() {
 
                 {/* Botao secundario - Ver Fight Card do nosso site */}
                 <Link
-                  href={`/calendario/evento/${proximoEvento.id}`}
+                  href={`/arena/evento/${proximoEvento.id}`}
                   className="w-full py-3 px-8 bg-dark-card/80 hover:bg-dark-card border border-dark-border hover:border-ufc-gold/50 text-white font-medium rounded-lg transition-colors flex items-center justify-center gap-3"
                 >
                   <svg className="w-5 h-5 text-ufc-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -227,10 +199,10 @@ export default function ArenaPage() {
                                   className="w-full h-full object-cover object-top"
                                 />
                               ) : (
-                                <div className="w-full h-full flex items-center justify-center text-dark-textMuted">
-                                  <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
-                                  </svg>
+                                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#3a1c1c] via-[#2a2a2a] to-[#1a1a2e]">
+                                  <span className="text-xl font-bold text-white/40 select-none">
+                                    {mainEvent.lutador1?.nome?.split(' ').map((w: string) => w[0]).filter(Boolean).slice(0, 2).join('').toUpperCase()}
+                                  </span>
                                 </div>
                               )}
                             </div>
@@ -262,10 +234,10 @@ export default function ArenaPage() {
                                   className="w-full h-full object-cover object-top"
                                 />
                               ) : (
-                                <div className="w-full h-full flex items-center justify-center text-dark-textMuted">
-                                  <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
-                                  </svg>
+                                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#3a1c1c] via-[#2a2a2a] to-[#1a1a2e]">
+                                  <span className="text-xl font-bold text-white/40 select-none">
+                                    {mainEvent.lutador2?.nome?.split(' ').map((w: string) => w[0]).filter(Boolean).slice(0, 2).join('').toUpperCase()}
+                                  </span>
                                 </div>
                               )}
                             </div>
@@ -317,9 +289,7 @@ export default function ArenaPage() {
               </p>
             </div>
           )}
-        </main>
-
-      </div>
+      </main>
     </div>
   );
 }

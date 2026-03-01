@@ -91,15 +91,14 @@ export default function AvatarSelectionPage() {
 
   if (authLoading || !isAuthenticated) {
     return (
-      <div className="min-h-screen bg-dark-bg flex items-center justify-center">
+      <div className="flex items-center justify-center min-h-[60vh]">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-ufc-red" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-dark-bg">
-      {/* Content */}
+    <div>
       <main className="container mx-auto px-4 py-8 max-w-2xl">
         <div className="mb-8">
           <Link href={`/arena/perfil/${usuario?.username}`} className="text-dark-textMuted hover:text-white text-sm">
@@ -220,7 +219,7 @@ export default function AvatarSelectionPage() {
                   <button
                     key={lutador.id}
                     onClick={() => setSelectedFighter(lutador.id)}
-                    className={`relative aspect-square rounded-lg overflow-hidden border-2 transition-all ${
+                    className={`relative aspect-[3/4] rounded-lg overflow-hidden border-2 transition-all ${
                       selectedFighter === lutador.id
                         ? 'border-ufc-red ring-2 ring-ufc-red/50'
                         : 'border-dark-border hover:border-dark-border/80'

@@ -2,9 +2,11 @@
 
 import { useState, useEffect, use } from 'react';
 import Link from 'next/link';
+import { Trophy, Target, TrendingUp, Flame, Zap, Lock, Scale, Star } from 'lucide-react';
 
 import { useArenaAuth } from '@/hooks/useArenaAuth';
-import { NIVEL_CONFIG, CONQUISTAS_DEFINICOES, TipoConquista } from '@/types/arena';
+import { NIVEL_CONFIG, CONQUISTAS_DEFINICOES } from '@/types/arena';
+import type { TipoConquista } from '@/types/arena';
 
 interface PerfilUsuario {
   id: string;
@@ -47,7 +49,6 @@ export default function PerfilPage({ params }: PageProps) {
   const [conquistas, setConquistas] = useState<Conquista[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
-  const [activeTab, setActiveTab] = useState<'stats' | 'conquistas'>('stats');
 
   const isOwnProfile = isAuthenticated && usuarioAtual?.username === username;
 
@@ -107,274 +108,242 @@ export default function PerfilPage({ params }: PageProps) {
   const conquistasTipos = conquistas.map(c => c.tipo);
 
   return (
-    <div>
-      <div className="container mx-auto px-4 py-8">
-        {/* Breadcrumb */}
-        <div className="flex items-center gap-2 text-sm text-dark-textMuted mb-6">
-          <Link href="/arena" className="hover:text-ufc-red">
-            Arena
-          </Link>
-          <span>/</span>
-          <span className="text-dark-text">Perfil</span>
-        </div>
+    <div className="container mx-auto px-4 py-8 space-y-6">
+      {/* Breadcrumb */}
+      <div className="flex items-center gap-2 text-sm text-dark-textMuted">
+        <Link href="/arena" className="hover:text-ufc-red transition-colors">
+          Arena
+        </Link>
+        <span>/</span>
+        <span className="text-dark-text">Perfil</span>
+      </div>
 
-        {/* Profile Header */}
-        <div className="rounded-lg border border-dark-border bg-dark-card p-6 mb-6">
-          <div className="flex flex-col md:flex-row md:items-start gap-6">
-            {/* Avatar */}
-            <div className="flex-shrink-0">
-              <div
-                className="w-24 h-24 rounded-full flex items-center justify-center text-4xl"
-                style={{ backgroundColor: nivelConfig?.cor + '20' }}
-              >
-                {perfil.avatar_url ? (
-                  <img
-                    src={perfil.avatar_url}
-                    alt={perfil.username}
-                    className="w-full h-full rounded-full object-cover"
-                  />
-                ) : (
-                  <span style={{ color: nivelConfig?.cor }}>
-                    {nivelConfig?.icone}
-                  </span>
-                )}
-              </div>
-            </div>
-
-            {/* Info */}
-            <div className="flex-grow">
-              <div className="flex items-start justify-between">
-                <div>
-                  <h1 className="font-display text-3xl text-dark-text">
-                    {perfil.display_name || perfil.username}
-                  </h1>
-                  <p className="text-dark-textMuted">@{perfil.username}</p>
-                </div>
-                {isOwnProfile && (
-                  <Link
-                    href="/arena/perfil/editar"
-                    className="rounded border border-dark-border px-4 py-2 text-sm text-dark-textMuted hover:border-ufc-red hover:text-ufc-red transition-colors"
-                  >
-                    Editar Perfil
-                  </Link>
-                )}
-              </div>
-
-              {/* Level */}
-              <div className="mt-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-xl" style={{ color: nivelConfig?.cor }}>
-                    {nivelConfig?.icone}
-                  </span>
-                  <span
-                    className="font-display uppercase"
-                    style={{ color: nivelConfig?.cor }}
-                  >
-                    {perfil.nivel.replace('_', ' ')}
-                  </span>
-                  <span className="text-sm text-dark-textMuted">
-                    {perfil.xp_total} / {xpParaProximoNivel} XP
-                  </span>
-                </div>
-                <div className="h-2 rounded-full bg-dark-border overflow-hidden max-w-xs">
-                  <div
-                    className="h-full rounded-full"
-                    style={{
-                      width: `${progressoXP}%`,
-                      backgroundColor: nivelConfig?.cor
-                    }}
-                  />
-                </div>
-              </div>
-
-              {perfil.bio && (
-                <p className="mt-4 text-dark-textMuted">{perfil.bio}</p>
+      {/* ═══════════════════════════════════════════════ */}
+      {/* 1. Header Card */}
+      {/* ═══════════════════════════════════════════════ */}
+      <div className="neu-card p-6">
+        <div className="flex flex-col sm:flex-row sm:items-start gap-5">
+          {/* Avatar */}
+          <div className="flex-shrink-0">
+            <div
+              className="w-20 h-20 rounded-full flex items-center justify-center text-3xl border-2"
+              style={{
+                backgroundColor: (nivelConfig?.cor || '#808080') + '20',
+                borderColor: nivelConfig?.cor || '#808080',
+              }}
+            >
+              {perfil.avatar_url ? (
+                <img
+                  src={perfil.avatar_url}
+                  alt={perfil.username}
+                  className="w-full h-full rounded-full object-cover"
+                />
+              ) : (
+                <span style={{ color: nivelConfig?.cor }}>
+                  {nivelConfig?.icone}
+                </span>
               )}
+            </div>
+          </div>
 
-              <p className="mt-4 text-xs text-dark-textMuted">
-                Membro desde {perfil.created_at && !isNaN(new Date(perfil.created_at).getTime()) ? new Date(perfil.created_at).toLocaleDateString('pt-BR', {
-                  month: 'long',
-                  year: 'numeric'
-                }) : '—'}
-              </p>
+          {/* Info */}
+          <div className="flex-grow min-w-0">
+            <div className="flex items-start justify-between gap-4">
+              <div className="min-w-0">
+                <h1 className="font-display text-2xl sm:text-3xl text-dark-text truncate">
+                  {perfil.display_name || perfil.username}
+                </h1>
+                <p className="text-dark-textMuted text-sm">@{perfil.username}</p>
+              </div>
+              {isOwnProfile && (
+                <Link
+                  href="/arena/perfil/editar"
+                  className="neu-button flex-shrink-0 px-4 py-2 text-sm text-dark-textMuted hover:text-ufc-red transition-colors"
+                >
+                  Editar Perfil
+                </Link>
+              )}
             </div>
 
-            {/* Quick Stats */}
-            <div className="flex-shrink-0 grid grid-cols-2 gap-4">
-              <div className="text-center p-4 rounded bg-dark-bg">
-                <p className="font-display text-3xl text-ufc-red">
-                  {perfil.pontos_totais}
-                </p>
-                <p className="text-xs text-dark-textMuted">Pontos</p>
+            {/* Nivel Badge + XP Bar */}
+            <div className="mt-3">
+              <div className="flex items-center gap-2 mb-1.5">
+                <span
+                  className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-sm font-display uppercase"
+                  style={{
+                    backgroundColor: (nivelConfig?.cor || '#808080') + '15',
+                    color: nivelConfig?.cor,
+                    border: `1px solid ${(nivelConfig?.cor || '#808080')}40`,
+                  }}
+                >
+                  {nivelConfig?.icone} {perfil.nivel.replace('_', ' ')}
+                </span>
+                <span className="text-xs text-dark-textMuted">
+                  {perfil.xp_total} / {xpParaProximoNivel} XP
+                </span>
               </div>
-              <div className="text-center p-4 rounded bg-dark-bg">
-                <p className="font-display text-3xl text-green-400">
-                  {taxaAcerto}%
-                </p>
-                <p className="text-xs text-dark-textMuted">Taxa Acerto</p>
+              <div className="h-2 rounded-full bg-dark-border overflow-hidden max-w-xs">
+                <div
+                  className="h-full rounded-full transition-all duration-500"
+                  style={{
+                    width: `${progressoXP}%`,
+                    backgroundColor: nivelConfig?.cor,
+                  }}
+                />
               </div>
-              <div className="text-center p-4 rounded bg-dark-bg">
-                <p className="font-display text-3xl text-ufc-gold">
-                  {perfil.streak_atual}
-                </p>
-                <p className="text-xs text-dark-textMuted">Sequencia</p>
-              </div>
-              <div className="text-center p-4 rounded bg-dark-bg">
-                <p className="font-display text-3xl text-purple-400">
-                  {perfil.total_conquistas}
-                </p>
-                <p className="text-xs text-dark-textMuted">Conquistas</p>
-              </div>
+            </div>
+
+            {perfil.bio && (
+              <p className="mt-3 text-dark-textMuted text-sm">{perfil.bio}</p>
+            )}
+
+            <p className="mt-3 text-xs text-dark-textMuted">
+              Membro desde{' '}
+              {perfil.created_at && !isNaN(new Date(perfil.created_at).getTime())
+                ? new Date(perfil.created_at).toLocaleDateString('pt-BR', {
+                    month: 'long',
+                    year: 'numeric',
+                  })
+                : '—'}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* ═══════════════════════════════════════════════ */}
+      {/* 2. Stats Row - 3 compact cards */}
+      {/* ═══════════════════════════════════════════════ */}
+      <div className="grid grid-cols-3 gap-3">
+        <div className="neu-card p-4 text-center">
+          <Trophy className="w-5 h-5 text-ufc-red mx-auto mb-1.5" />
+          <p className="font-display text-2xl text-ufc-red">{perfil.pontos_totais}</p>
+          <p className="text-xs text-dark-textMuted">Pontos</p>
+        </div>
+        <div className="neu-card p-4 text-center">
+          <Target className="w-5 h-5 text-green-400 mx-auto mb-1.5" />
+          <p className="font-display text-2xl text-green-400">{perfil.previsoes_corretas}</p>
+          <p className="text-xs text-dark-textMuted">Acertos</p>
+        </div>
+        <div className="neu-card p-4 text-center">
+          <TrendingUp className="w-5 h-5 text-ufc-gold mx-auto mb-1.5" />
+          <p className="font-display text-2xl text-ufc-gold">{taxaAcerto}%</p>
+          <p className="text-xs text-dark-textMuted">Taxa de Acerto</p>
+        </div>
+      </div>
+
+      {/* ═══════════════════════════════════════════════ */}
+      {/* 3. Sequences Card */}
+      {/* ═══════════════════════════════════════════════ */}
+      <div className="neu-card p-6">
+        <div className="flex items-center gap-2 mb-4">
+          <Flame className="w-5 h-5 text-orange-400" />
+          <h2 className="font-display text-lg uppercase text-dark-text">Sequencias</h2>
+        </div>
+        <div className="grid grid-cols-3 gap-4">
+          <div className="neu-inset rounded-lg p-3 text-center">
+            <p className="font-display text-2xl text-ufc-gold">{perfil.streak_atual}</p>
+            <p className="text-xs text-dark-textMuted mt-1">Atual</p>
+          </div>
+          <div className="neu-inset rounded-lg p-3 text-center">
+            <p className="font-display text-2xl text-green-400">{perfil.melhor_streak}</p>
+            <p className="text-xs text-dark-textMuted mt-1">Melhor</p>
+          </div>
+          <div className="neu-inset rounded-lg p-3 text-center">
+            <p className="font-display text-2xl text-ufc-red">{perfil.streak_main_event}</p>
+            <p className="text-xs text-dark-textMuted mt-1">Main Event</p>
+          </div>
+        </div>
+      </div>
+
+      {/* ═══════════════════════════════════════════════ */}
+      {/* 4. Specialties Card */}
+      {/* ═══════════════════════════════════════════════ */}
+      <div className="neu-card p-6">
+        <h2 className="font-display text-lg uppercase text-dark-text mb-4">Especialidades</h2>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <div className="flex items-center gap-3 neu-inset rounded-lg p-3">
+            <Zap className="w-5 h-5 text-red-400 flex-shrink-0" />
+            <div>
+              <p className="font-display text-xl text-red-400">{perfil.kos_acertados}</p>
+              <p className="text-xs text-dark-textMuted">KOs</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-3 neu-inset rounded-lg p-3">
+            <Lock className="w-5 h-5 text-blue-400 flex-shrink-0" />
+            <div>
+              <p className="font-display text-xl text-blue-400">{perfil.subs_acertados}</p>
+              <p className="text-xs text-dark-textMuted">Subs</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-3 neu-inset rounded-lg p-3">
+            <Scale className="w-5 h-5 text-yellow-400 flex-shrink-0" />
+            <div>
+              <p className="font-display text-xl text-yellow-400">{perfil.decisoes_acertadas}</p>
+              <p className="text-xs text-dark-textMuted">Decisoes</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-3 neu-inset rounded-lg p-3">
+            <Star className="w-5 h-5 text-purple-400 flex-shrink-0" />
+            <div>
+              <p className="font-display text-xl text-purple-400">{perfil.underdogs_acertados}</p>
+              <p className="text-xs text-dark-textMuted">Underdogs</p>
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Tabs */}
-        <div className="flex gap-1 mb-6 border-b border-dark-border">
-          <button
-            onClick={() => setActiveTab('stats')}
-            className={`px-4 py-3 font-medium transition-colors relative ${
-              activeTab === 'stats'
-                ? 'text-ufc-red'
-                : 'text-dark-textMuted hover:text-dark-text'
-            }`}
-          >
-            Estatisticas
-            {activeTab === 'stats' && (
-              <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-ufc-red" />
-            )}
-          </button>
-          <button
-            onClick={() => setActiveTab('conquistas')}
-            className={`px-4 py-3 font-medium transition-colors relative ${
-              activeTab === 'conquistas'
-                ? 'text-ufc-gold'
-                : 'text-dark-textMuted hover:text-dark-text'
-            }`}
-          >
-            Conquistas
-            {activeTab === 'conquistas' && (
-              <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-ufc-gold" />
-            )}
-          </button>
-        </div>
+      {/* ═══════════════════════════════════════════════ */}
+      {/* 5. Achievements Grid - All 18 */}
+      {/* ═══════════════════════════════════════════════ */}
+      <div>
+        <h2 className="font-display text-lg uppercase text-dark-text mb-4">
+          Conquistas ({perfil.total_conquistas} / {CONQUISTAS_DEFINICOES.length})
+        </h2>
+        <div className="grid gap-3 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4">
+          {CONQUISTAS_DEFINICOES.map((conquista) => {
+            const desbloqueada = conquistasTipos.includes(conquista.tipo);
+            const conquistaData = conquistas.find(c => c.tipo === conquista.tipo);
 
-        {/* Content */}
-        {activeTab === 'stats' ? (
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {/* Previsoes */}
-            <div className="rounded-lg border border-dark-border bg-dark-card p-6">
-              <h3 className="font-display text-lg uppercase text-dark-text mb-4">
-                Previsoes
-              </h3>
-              <div className="space-y-3">
-                <div className="flex justify-between">
-                  <span className="text-dark-textMuted">Total</span>
-                  <span className="font-medium text-dark-text">{perfil.total_previsoes}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-dark-textMuted">Corretas</span>
-                  <span className="font-medium text-green-400">{perfil.previsoes_corretas}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-dark-textMuted">Perfeitas</span>
-                  <span className="font-medium text-ufc-gold">{perfil.previsoes_perfeitas}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-dark-textMuted">Taxa de Acerto</span>
-                  <span className="font-medium text-dark-text">{taxaAcerto}%</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Sequencias */}
-            <div className="rounded-lg border border-dark-border bg-dark-card p-6">
-              <h3 className="font-display text-lg uppercase text-dark-text mb-4">
-                Sequencias
-              </h3>
-              <div className="space-y-3">
-                <div className="flex justify-between">
-                  <span className="text-dark-textMuted">Atual</span>
-                  <span className="font-medium text-ufc-gold">{perfil.streak_atual}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-dark-textMuted">Melhor</span>
-                  <span className="font-medium text-green-400">{perfil.melhor_streak}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-dark-textMuted">Main Events Atual</span>
-                  <span className="font-medium text-ufc-red">{perfil.streak_main_event}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-dark-textMuted">Main Events Melhor</span>
-                  <span className="font-medium text-purple-400">{perfil.melhor_streak_main_event}</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Especialidades */}
-            <div className="rounded-lg border border-dark-border bg-dark-card p-6">
-              <h3 className="font-display text-lg uppercase text-dark-text mb-4">
-                Especialidades
-              </h3>
-              <div className="space-y-3">
-                <div className="flex justify-between">
-                  <span className="text-dark-textMuted">KOs Acertados</span>
-                  <span className="font-medium text-red-400">{perfil.kos_acertados}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-dark-textMuted">Subs Acertados</span>
-                  <span className="font-medium text-blue-400">{perfil.subs_acertados}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-dark-textMuted">Decisoes Acertadas</span>
-                  <span className="font-medium text-yellow-400">{perfil.decisoes_acertadas}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-dark-textMuted">Underdogs</span>
-                  <span className="font-medium text-purple-400">{perfil.underdogs_acertados}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        ) : (
-          <div>
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {CONQUISTAS_DEFINICOES.map((conquista) => {
-                const desbloqueada = conquistasTipos.includes(conquista.tipo);
-                const conquistaData = conquistas.find(c => c.tipo === conquista.tipo);
-
-                return (
-                  <div
-                    key={conquista.tipo}
-                    className={`rounded-lg border p-4 transition-all ${
-                      desbloqueada
-                        ? 'border-ufc-gold/50 bg-ufc-gold/5'
-                        : 'border-dark-border bg-dark-card opacity-50'
-                    }`}
-                  >
-                    <div className="flex items-start gap-3">
-                      <span className="text-3xl">{conquista.icone}</span>
-                      <div>
-                        <h4 className="font-display text-dark-text">
-                          {conquista.nome}
-                        </h4>
-                        <p className="text-sm text-dark-textMuted">
-                          {conquista.descricao}
-                        </p>
-                        {desbloqueada && conquistaData && (
-                          <p className="mt-2 text-xs text-ufc-gold">
-                            Desbloqueada em {conquistaData.desbloqueada_em && !isNaN(new Date(conquistaData.desbloqueada_em).getTime()) ? new Date(conquistaData.desbloqueada_em).toLocaleDateString('pt-BR') : '—'}
-                          </p>
-                        )}
-                      </div>
-                    </div>
+            return (
+              <div
+                key={conquista.tipo}
+                className={`neu-card p-4 transition-all ${
+                  desbloqueada
+                    ? 'border-l-4'
+                    : 'opacity-40'
+                }`}
+                style={desbloqueada ? { borderLeftColor: conquista.cor } : undefined}
+              >
+                <div className="flex items-start gap-3">
+                  {desbloqueada ? (
+                    <span className="text-2xl flex-shrink-0">{conquista.icone}</span>
+                  ) : (
+                    <Lock className="w-6 h-6 text-dark-textMuted flex-shrink-0 mt-0.5" />
+                  )}
+                  <div className="min-w-0">
+                    <h4 className="font-display text-sm text-dark-text truncate">
+                      {conquista.nome}
+                    </h4>
+                    <p className="text-xs text-dark-textMuted mt-0.5 line-clamp-2">
+                      {conquista.descricao}
+                    </p>
+                    {desbloqueada && conquistaData && (
+                      <p
+                        className="mt-1.5 text-xs"
+                        style={{ color: conquista.cor }}
+                      >
+                        {conquistaData.desbloqueada_em &&
+                        !isNaN(new Date(conquistaData.desbloqueada_em).getTime())
+                          ? new Date(conquistaData.desbloqueada_em).toLocaleDateString('pt-BR')
+                          : '—'}
+                      </p>
+                    )}
                   </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </div>
     </div>
   );

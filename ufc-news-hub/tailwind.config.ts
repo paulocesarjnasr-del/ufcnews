@@ -52,6 +52,10 @@ const config: Config = {
         'ping-slow': 'ping 2s cubic-bezier(0, 0, 0.2, 1) infinite',
         'bounce-subtle': 'bounceSubtle 2s ease-in-out infinite',
         'scale-in': 'scaleIn 0.3s ease-out',
+        // Reels animations
+        'like-pop': 'like-pop 0.3s ease-out',
+        'slide-from-bottom': 'slide-from-bottom 0.3s ease-out',
+        'draw-octagon': 'draw-octagon 2s ease-out forwards',
       },
       keyframes: {
         'pulse-red': {
@@ -107,6 +111,20 @@ const config: Config = {
         scaleIn: {
           '0%': { transform: 'scale(0.9)', opacity: '0' },
           '100%': { transform: 'scale(1)', opacity: '1' },
+        },
+        // Reels keyframes
+        'like-pop': {
+          '0%': { transform: 'scale(1)' },
+          '50%': { transform: 'scale(1.3)' },
+          '100%': { transform: 'scale(1)' },
+        },
+        'slide-from-bottom': {
+          '0%': { transform: 'translateY(100%)' },
+          '100%': { transform: 'translateY(0)' },
+        },
+        'draw-octagon': {
+          '0%': { strokeDashoffset: '800' },
+          '100%': { strokeDashoffset: '0' },
         },
       },
     },

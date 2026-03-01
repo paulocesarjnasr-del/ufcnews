@@ -14,7 +14,6 @@ interface PrevisaoFormProps {
   fingerprint: string;
   userName: string;
   onSuccess: (previsao: Previsao) => void;
-  onCancel: () => void;
 }
 
 const METODOS = [

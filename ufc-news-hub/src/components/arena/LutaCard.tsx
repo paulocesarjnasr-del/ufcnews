@@ -1,8 +1,9 @@
 'use client';
 
 import { useState } from 'react';
+import { ChevronDown, Check } from 'lucide-react';
 import FighterImage from '@/components/ui/FighterImage';
-import { LutaComLutadores, Lutador, Previsao } from '@/types';
+import type { LutaComLutadores, Lutador, Previsao } from '@/types';
 import { PrevisaoForm } from './PrevisaoForm';
 import { ConsensoBar } from './ConsensoBar';
 
@@ -169,21 +170,11 @@ export function LutaCard({
             className="flex w-full items-center justify-center gap-2 rounded bg-ufc-red px-4 py-2 font-bold text-white transition-colors hover:bg-ufc-redLight"
           >
             Fazer Previsao
-            <svg
+            <ChevronDown
               className={`h-4 w-4 transition-transform ${
                 isExpanded ? 'rotate-180' : ''
               }`}
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M19 9l-7 7-7-7"
-              />
-            </svg>
+            />
           </button>
         </div>
       )}
@@ -195,7 +186,6 @@ export function LutaCard({
             fingerprint={fingerprint}
             userName={userName}
             onSuccess={handlePrevisaoSuccess}
-            onCancel={() => setIsExpanded(false)}
           />
         </div>
       )}
@@ -218,7 +208,7 @@ function LutadorDisplay({
   isSelected,
   align,
 }: LutadorDisplayProps) {
-  const record = `${(lutador as any).vitorias || 0}-${(lutador as any).derrotas || 0}-${(lutador as any).empates || 0}`;
+  const record = `${lutador.vitorias ?? 0}-${lutador.derrotas ?? 0}-${lutador.empates ?? 0}`;
 
   return (
     <div
@@ -249,19 +239,7 @@ function LutadorDisplay({
         )}
         {isWinner && (
           <div className="absolute inset-0 flex items-center justify-center bg-green-500/30">
-            <svg
-              className="h-8 w-8 text-green-400"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={3}
-                d="M5 13l4 4L19 7"
-              />
-            </svg>
+            <Check className="h-8 w-8 text-green-400" strokeWidth={3} />
           </div>
         )}
       </div>
@@ -273,8 +251,8 @@ function LutadorDisplay({
           <p className="text-xs text-ufc-red">"{lutador.apelido}"</p>
         )}
         <p className="text-xs text-dark-textMuted">{record}</p>
-        {(lutador as any).pais && (
-          <p className="text-xs text-dark-textMuted">{(lutador as any).pais}</p>
+        {lutador.pais && (
+          <p className="text-xs text-dark-textMuted">{lutador.pais}</p>
         )}
       </div>
     </div>

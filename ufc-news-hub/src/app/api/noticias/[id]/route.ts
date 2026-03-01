@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { queryOne, query } from '@/lib/db';
+import { query, queryOne } from '@/lib/db';
 import { Noticia, Lutador, NoticiaComLutadores } from '@/types';
 
 export async function GET(

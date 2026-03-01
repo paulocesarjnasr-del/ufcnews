@@ -7,13 +7,30 @@ import FighterImage from '@/components/ui/FighterImage';
 import { Countdown } from '@/components/calendario/Countdown';
 import { useArenaAuth } from '@/hooks/useArenaAuth';
 import { verificarStatusPrevisoes, PrevisoesStatus } from '@/lib/arena/previsoes-horario';
+import { CheckCircle, Circle, Clock, Zap, Lock as LockIcon, Scale } from 'lucide-react';
 import { EventoComLutas } from '@/types';
+
+interface LiveFight {
+  id: string;
+  ordem: number;
+  tipo: string;
+  status: string;
+  vencedor_id: string | null;
+  metodo: string | null;
+  round_final: number | null;
+  tempo_final: string | null;
+  lutador1_nome: string;
+  lutador2_nome: string;
+  lutador1_id: string;
+  lutador2_id: string;
+}
 
 export default function ArenaPage() {
   const { isAuthenticated } = useArenaAuth();
   const [proximoEvento, setProximoEvento] = useState<EventoComLutas & { poster_url?: string; horario_main_card?: string } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [previsoesStatus, setPrevisoesStatus] = useState<PrevisoesStatus | null>(null);
+  const [liveResults, setLiveResults] = useState<LiveFight[] | null>(null);
 
   useEffect(() => {
     fetchProximoEvento();
@@ -38,6 +55,27 @@ export default function ArenaPage() {
 
       return () => clearInterval(interval);
     }
+  }, [proximoEvento]);
+
+  // Live results polling (30s) when event is ao_vivo
+  useEffect(() => {
+    if (!proximoEvento || proximoEvento.status !== 'ao_vivo') return;
+
+    const poll = async () => {
+      try {
+        const res = await fetch(`/api/eventos/${proximoEvento.id}/live`);
+        if (res.ok) {
+          const data = await res.json() as { lutas: LiveFight[] };
+          setLiveResults(data.lutas);
+        }
+      } catch (err) {
+        console.error('[ARENA] Erro ao buscar resultados ao vivo:', err);
+      }
+    };
+
+    poll();
+    const interval = setInterval(poll, 30000);
+    return () => clearInterval(interval);
   }, [proximoEvento]);
 
   async function fetchProximoEvento() {
@@ -142,16 +180,12 @@ export default function ArenaPage() {
                     href={isAuthenticated ? `/arena/evento/${proximoEvento.id}` : '/arena/login'}
                     className="w-full py-4 px-8 bg-ufc-red hover:bg-ufc-redLight text-white font-display text-lg uppercase tracking-wider rounded-lg transition-all transform hover:scale-105 flex items-center justify-center gap-3 shadow-lg shadow-ufc-red/30"
                   >
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                    </svg>
+                    <Zap className="w-6 h-6" />
                     <span>Faca suas Previsoes</span>
                   </Link>
                 ) : (
                   <div className="w-full py-4 px-8 bg-dark-card border border-dark-border text-dark-textMuted font-display text-lg uppercase tracking-wider rounded-lg flex items-center justify-center gap-3 cursor-not-allowed">
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                    </svg>
+                    <LockIcon className="w-6 h-6" />
                     <span>Previsoes Fechadas</span>
                   </div>
                 )}
@@ -161,9 +195,7 @@ export default function ArenaPage() {
                   href={`/arena/evento/${proximoEvento.id}`}
                   className="w-full py-3 px-8 bg-dark-card/80 hover:bg-dark-card border border-dark-border hover:border-ufc-gold/50 text-white font-medium rounded-lg transition-colors flex items-center justify-center gap-3"
                 >
-                  <svg className="w-5 h-5 text-ufc-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                  </svg>
+                  <Scale className="w-5 h-5 text-ufc-gold" />
                   <span>Ver Fight Card Completo</span>
                 </Link>
               </div>
@@ -260,6 +292,99 @@ export default function ArenaPage() {
                           Card completo
                         </span>
                       )}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Live Results Card */}
+              {proximoEvento.status === 'ao_vivo' && liveResults && liveResults.length > 0 && (
+                <div className="mt-8 w-full max-w-2xl">
+                  <div className="bg-dark-card/60 backdrop-blur-sm border border-dark-border rounded-xl overflow-hidden">
+                    {/* Live header */}
+                    <div className="px-6 py-3 bg-ufc-red/10 border-b border-ufc-red/20 flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-ufc-red animate-pulse" />
+                        <span className="font-display text-sm uppercase text-ufc-red tracking-wider">
+                          Ao Vivo
+                        </span>
+                      </div>
+                      <span className="text-xs text-dark-textMuted">
+                        Atualiza a cada 30s
+                      </span>
+                    </div>
+
+                    {/* Fight results list */}
+                    <div className="divide-y divide-dark-border/50">
+                      {liveResults.map((luta) => {
+                        const isFinished = luta.status === 'finalizada';
+                        const isLive = luta.status === 'ao_vivo';
+
+                        return (
+                          <div key={luta.id} className={`px-6 py-4 ${isLive ? 'bg-ufc-red/5' : ''}`}>
+                            <div className="flex items-center justify-between">
+                              {/* Fighters */}
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2">
+                                  <span className={`text-sm font-medium ${
+                                    isFinished && luta.vencedor_id === luta.lutador1_id
+                                      ? 'text-green-400'
+                                      : isFinished && luta.vencedor_id
+                                        ? 'text-dark-textMuted'
+                                        : 'text-white'
+                                  }`}>
+                                    {luta.lutador1_nome}
+                                  </span>
+                                  {isFinished && luta.vencedor_id === luta.lutador1_id && (
+                                    <CheckCircle className="w-4 h-4 text-green-400 flex-shrink-0" />
+                                  )}
+                                </div>
+                                <div className="flex items-center gap-2 mt-1">
+                                  <span className={`text-sm font-medium ${
+                                    isFinished && luta.vencedor_id === luta.lutador2_id
+                                      ? 'text-green-400'
+                                      : isFinished && luta.vencedor_id
+                                        ? 'text-dark-textMuted'
+                                        : 'text-white'
+                                  }`}>
+                                    {luta.lutador2_nome}
+                                  </span>
+                                  {isFinished && luta.vencedor_id === luta.lutador2_id && (
+                                    <CheckCircle className="w-4 h-4 text-green-400 flex-shrink-0" />
+                                  )}
+                                </div>
+                              </div>
+
+                              {/* Status */}
+                              <div className="flex-shrink-0 text-right">
+                                {isFinished ? (
+                                  <div>
+                                    <p className="text-xs text-green-400 font-medium">
+                                      {luta.metodo?.replace(/-/g, ' ') || 'Finalizada'}
+                                    </p>
+                                    {luta.round_final && (
+                                      <p className="text-xs text-dark-textMuted">
+                                        R{luta.round_final}
+                                        {luta.tempo_final && ` ${luta.tempo_final}`}
+                                      </p>
+                                    )}
+                                  </div>
+                                ) : isLive ? (
+                                  <div className="flex items-center gap-1.5">
+                                    <Circle className="w-3 h-3 text-ufc-red fill-ufc-red animate-pulse" />
+                                    <span className="text-xs text-ufc-red font-medium">Em andamento</span>
+                                  </div>
+                                ) : (
+                                  <div className="flex items-center gap-1.5">
+                                    <Clock className="w-3 h-3 text-dark-textMuted" />
+                                    <span className="text-xs text-dark-textMuted">Pendente</span>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
                 </div>

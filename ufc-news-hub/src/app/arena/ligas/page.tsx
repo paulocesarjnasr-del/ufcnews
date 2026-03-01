@@ -124,7 +124,7 @@ export default function LigasPage() {
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
           <div>
             <div className="flex items-center gap-2 text-sm text-dark-textMuted mb-2">
-              <Link href="/arena/dashboard" className="hover:text-ufc-red">
+              <Link href="/arena" className="hover:text-ufc-red">
                 Arena
               </Link>
               <span>/</span>

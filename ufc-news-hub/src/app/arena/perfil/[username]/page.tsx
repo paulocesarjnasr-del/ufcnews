@@ -111,7 +111,7 @@ export default function PerfilPage({ params }: PageProps) {
       <div className="container mx-auto px-4 py-8">
         {/* Breadcrumb */}
         <div className="flex items-center gap-2 text-sm text-dark-textMuted mb-6">
-          <Link href="/arena/dashboard" className="hover:text-ufc-red">
+          <Link href="/arena" className="hover:text-ufc-red">
             Arena
           </Link>
           <span>/</span>

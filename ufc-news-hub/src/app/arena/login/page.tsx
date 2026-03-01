@@ -17,7 +17,7 @@ export default function ArenaLoginPage() {
 
   useEffect(() => {
     if (isAuthenticated && !authLoading) {
-      router.push('/arena/dashboard');
+      router.push('/arena');
     }
   }, [isAuthenticated, authLoading, router]);
 
@@ -29,7 +29,7 @@ export default function ArenaLoginPage() {
     const result = await login(email, senha);
 
     if (result.success) {
-      router.push('/arena/dashboard');
+      router.push('/arena');
     } else {
       setError(result.error || 'Erro ao fazer login');
     }

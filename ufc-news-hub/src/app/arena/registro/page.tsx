@@ -22,7 +22,7 @@ export default function ArenaRegistroPage() {
 
   useEffect(() => {
     if (isAuthenticated && !authLoading) {
-      router.push('/arena/dashboard');
+      router.push('/arena');
     }
   }, [isAuthenticated, authLoading, router]);
 
@@ -67,7 +67,7 @@ export default function ArenaRegistroPage() {
     );
 
     if (result.success) {
-      router.push('/arena/dashboard');
+      router.push('/arena');
     } else {
       setError(result.error || 'Erro ao criar conta');
     }

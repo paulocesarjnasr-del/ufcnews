@@ -34,7 +34,7 @@ export default function ArenaLayout({ children }: { children: React.ReactNode })
               <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-ufc-gold/10 border border-ufc-gold/20">
                 <Trophy className="w-3.5 h-3.5 text-ufc-gold" />
                 <span className="text-sm font-semibold text-ufc-gold">
-                  {usuario.pontos_totais.toLocaleString()} pts
+                  {(usuario.pontos_totais ?? 0).toLocaleString()} pts
                 </span>
               </div>
             )}

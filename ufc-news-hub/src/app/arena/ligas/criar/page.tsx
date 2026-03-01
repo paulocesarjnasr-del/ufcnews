@@ -80,7 +80,7 @@ export default function CriarLigaPage() {
         <div className="max-w-lg mx-auto">
           {/* Breadcrumb */}
           <div className="flex items-center gap-2 text-sm text-dark-textMuted mb-4">
-            <Link href="/arena/dashboard" className="hover:text-ufc-red">
+            <Link href="/arena" className="hover:text-ufc-red">
               Arena
             </Link>
             <span>/</span>

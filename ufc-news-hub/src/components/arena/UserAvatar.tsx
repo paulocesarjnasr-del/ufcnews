@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { User, Trophy, History, ImageIcon, LogOut } from 'lucide-react';
 import { UsuarioArena, NivelUsuario, NIVEL_CONFIG } from '@/types/arena';
 
 interface UserAvatarProps {
@@ -151,43 +152,52 @@ export function UserAvatar({ usuario, onLogout }: UserAvatarProps) {
           <nav className="py-2">
             <Link
               href={`/arena/perfil/${usuario.username}`}
-              className="flex items-center gap-3 px-4 py-3 text-white hover:bg-dark-border/50 transition-colors"
+              className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm text-dark-textMuted hover:text-dark-text hover:bg-dark-bg transition-colors"
               onClick={() => setIsOpen(false)}
             >
-              <span className="text-lg">👤</span>
-              <span className="text-sm">Meu Perfil</span>
+              <User className="w-4 h-4" />
+              <span>Meu Perfil</span>
             </Link>
 
             <Link
-              href="/arena/perfil/config"
-              className="flex items-center gap-3 px-4 py-3 text-white hover:bg-dark-border/50 transition-colors"
+              href="/arena/ligas"
+              className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm text-dark-textMuted hover:text-dark-text hover:bg-dark-bg transition-colors"
               onClick={() => setIsOpen(false)}
             >
-              <span className="text-lg">⚙️</span>
-              <span className="text-sm">Configuracoes</span>
+              <Trophy className="w-4 h-4" />
+              <span>Minhas Ligas</span>
+            </Link>
+
+            <Link
+              href="/arena/historico"
+              className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm text-dark-textMuted hover:text-dark-text hover:bg-dark-bg transition-colors"
+              onClick={() => setIsOpen(false)}
+            >
+              <History className="w-4 h-4" />
+              <span>Historico</span>
             </Link>
 
             <Link
               href="/arena/perfil/avatar"
-              className="flex items-center gap-3 px-4 py-3 text-white hover:bg-dark-border/50 transition-colors"
+              className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm text-dark-textMuted hover:text-dark-text hover:bg-dark-bg transition-colors"
               onClick={() => setIsOpen(false)}
             >
-              <span className="text-lg">🖼️</span>
-              <span className="text-sm">Mudar Avatar</span>
+              <ImageIcon className="w-4 h-4" />
+              <span>Mudar Avatar</span>
             </Link>
           </nav>
 
-          {/* Logout */}
+          {/* Separator + Logout */}
           <div className="border-t border-dark-border py-2">
             <button
               onClick={() => {
                 setIsOpen(false);
                 onLogout?.();
               }}
-              className="flex items-center gap-3 px-4 py-3 w-full text-left text-red-400 hover:bg-red-400/10 transition-colors"
+              className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm w-full text-left text-red-400 hover:text-red-300 hover:bg-red-400/10 transition-colors"
             >
-              <span className="text-lg">🚪</span>
-              <span className="text-sm">Sair</span>
+              <LogOut className="w-4 h-4" />
+              <span>Sair</span>
             </button>
           </div>
         </div>

@@ -5,8 +5,6 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import FighterImage from '@/components/ui/FighterImage';
 import { useArenaAuth } from '@/hooks/useArenaAuth';
-import { ArenaMenu } from '@/components/arena/ArenaMenu';
-import { UserAvatar } from '@/components/arena/UserAvatar';
 
 interface Lutador {
   id: string;
@@ -20,7 +18,7 @@ type AvatarType = 'initials' | 'upload' | 'fighter';
 
 export default function AvatarSelectionPage() {
   const router = useRouter();
-  const { usuario, isAuthenticated, isLoading: authLoading, logout, refreshUsuario } = useArenaAuth();
+  const { usuario, isAuthenticated, isLoading: authLoading, refreshUsuario } = useArenaAuth();
   const [avatarType, setAvatarType] = useState<AvatarType>('initials');
   const [selectedFighter, setSelectedFighter] = useState<string | null>(null);
   const [lutadores, setLutadores] = useState<Lutador[]>([]);
@@ -101,20 +99,6 @@ export default function AvatarSelectionPage() {
 
   return (
     <div className="min-h-screen bg-dark-bg">
-      {/* Header */}
-      <header className="sticky top-0 z-50 bg-dark-bg/80 backdrop-blur-md border-b border-dark-border/50">
-        <div className="container mx-auto px-4 py-3">
-          <div className="flex items-center justify-between">
-            <ArenaMenu isLoggedIn={isAuthenticated} />
-            <Link href="/arena" className="font-display text-xl uppercase tracking-wider">
-              <span className="text-white">Arena</span>
-              <span className="text-ufc-red ml-1">UFC</span>
-            </Link>
-            <UserAvatar usuario={usuario} onLogout={logout} />
-          </div>
-        </div>
-      </header>
-
       {/* Content */}
       <main className="container mx-auto px-4 py-8 max-w-2xl">
         <div className="mb-8">

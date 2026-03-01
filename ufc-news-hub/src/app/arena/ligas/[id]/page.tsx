@@ -4,7 +4,6 @@ import { useState, useEffect, use } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { ArenaMenu } from '@/components/arena/ArenaMenu';
 import { UserAvatar } from '@/components/arena/UserAvatar';
 import { useArenaAuth } from '@/hooks/useArenaAuth';
 import { Liga, LigaMembro, NIVEL_CONFIG } from '@/types/arena';
@@ -222,7 +221,6 @@ export default function LigaPage({ params }: PageProps) {
         <header className="sticky top-0 z-50 bg-dark-bg/80 backdrop-blur-md border-b border-dark-border/50">
           <div className="container mx-auto px-4 py-3">
             <div className="flex items-center justify-between">
-              <ArenaMenu isLoggedIn={isAuthenticated} />
               <Link href="/arena" className="font-display text-xl uppercase tracking-wider">
                 <span className="text-white">Arena</span>
                 <span className="text-ufc-red ml-1">UFC</span>
@@ -244,7 +242,6 @@ export default function LigaPage({ params }: PageProps) {
         <header className="sticky top-0 z-50 bg-dark-bg/80 backdrop-blur-md border-b border-dark-border/50">
           <div className="container mx-auto px-4 py-3">
             <div className="flex items-center justify-between">
-              <ArenaMenu isLoggedIn={isAuthenticated} />
               <Link href="/arena" className="font-display text-xl uppercase tracking-wider">
                 <span className="text-white">Arena</span>
                 <span className="text-ufc-red ml-1">UFC</span>
@@ -271,7 +268,6 @@ export default function LigaPage({ params }: PageProps) {
       <header className="sticky top-0 z-50 bg-dark-bg/80 backdrop-blur-md border-b border-dark-border/50">
         <div className="container mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
-            <ArenaMenu isLoggedIn={isAuthenticated} />
             <Link href="/arena" className="font-display text-xl uppercase tracking-wider">
               <span className="text-white">Arena</span>
               <span className="text-ufc-red ml-1">UFC</span>

@@ -1,8 +1,13 @@
 'use client';
 
 import { useState } from 'react';
+import { Zap, Lock, Scale } from 'lucide-react';
 import FighterImage from '@/components/ui/FighterImage';
-import { LutaComLutadores, Lutador, MetodoVitoria, Previsao } from '@/types';
+import type { LutaComLutadores, Lutador, Previsao } from '@/types';
+
+// ═══════════════════════════════════════════════
+// Types & Constants
+// ═══════════════════════════════════════════════
 
 interface PrevisaoFormProps {
   luta: LutaComLutadores;
@@ -12,26 +17,31 @@ interface PrevisaoFormProps {
   onCancel: () => void;
 }
 
-const METODOS: { value: MetodoVitoria; label: string }[] = [
-  { value: 'KO/TKO', label: 'KO/TKO' },
-  { value: 'Submission', label: 'Finalizacao' },
-  { value: 'Decision - Unanimous', label: 'Decisao Unanime' },
-  { value: 'Decision - Split', label: 'Decisao Dividida' },
-  { value: 'Decision - Majority', label: 'Decisao Majoritaria' },
-];
+const METODOS = [
+  { value: 'KO/TKO' as const, label: 'KO/TKO', icon: Zap },
+  { value: 'Submission' as const, label: 'Finalizacao', icon: Lock },
+  { value: 'Decision' as const, label: 'Decisao', icon: Scale },
+] as const;
+
+type MetodoValue = (typeof METODOS)[number]['value'];
+
+// ═══════════════════════════════════════════════
+// Component
+// ═══════════════════════════════════════════════
 
 export function PrevisaoForm({
   luta,
   fingerprint,
   userName,
   onSuccess,
-  onCancel,
 }: PrevisaoFormProps) {
   const [selectedLutador, setSelectedLutador] = useState<string | null>(null);
-  const [metodo, setMetodo] = useState<MetodoVitoria | ''>('');
-  const [round, setRound] = useState<number | ''>('');
+  const [metodo, setMetodo] = useState<MetodoValue | null>(null);
+  const [round, setRound] = useState<number | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const maxRounds = luta.tipo === 'main_event' || luta.is_titulo ? 5 : 3;
 
   const handleSubmit = async () => {
     if (!selectedLutador) {
@@ -43,16 +53,23 @@ export function PrevisaoForm({
     setError(null);
 
     try {
-      const response = await fetch('/api/previsoes', {
+      // Map "Decision" to the full DB value
+      const metodoPrevisto =
+        metodo === 'Decision' ? 'Decision - Unanimous' : metodo;
+
+      const response = await fetch('/api/arena/previsoes', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          luta_id: luta.id,
-          usuario_fingerprint: fingerprint,
-          usuario_nome: userName,
-          lutador_escolhido_id: selectedLutador,
-          metodo_previsto: metodo || undefined,
-          round_previsto: round || undefined,
+          previsoes: [
+            {
+              luta_id: luta.id,
+              vencedor_previsto_id: selectedLutador,
+              metodo_previsto: metodoPrevisto || undefined,
+              round_previsto: round || undefined,
+              pontos_confianca: 100,
+            },
+          ],
         }),
       });
 
@@ -62,7 +79,28 @@ export function PrevisaoForm({
         throw new Error(data.error || 'Erro ao salvar previsao');
       }
 
-      onSuccess(data.previsao);
+      if (data.erros && data.erros.length > 0) {
+        throw new Error(data.erros[0]);
+      }
+
+      // Construct a Previsao object for the parent component
+      const previsao: Previsao = {
+        id: crypto.randomUUID(),
+        luta_id: luta.id,
+        usuario_fingerprint: fingerprint,
+        usuario_nome: userName,
+        lutador_escolhido_id: selectedLutador,
+        metodo_previsto: metodoPrevisto || null,
+        round_previsto: round || null,
+        pontos_ganhos: 0,
+        acertou_vencedor: null,
+        acertou_metodo: null,
+        acertou_round: null,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+
+      onSuccess(previsao);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro desconhecido');
     } finally {
@@ -72,8 +110,8 @@ export function PrevisaoForm({
 
   return (
     <div className="space-y-4">
-      {/* Selecao de lutador */}
-      <div>
+      {/* Fighter selection */}
+      <div className="slide-up-fade" style={{ animationDelay: '0ms' }}>
         <label className="mb-2 block text-sm font-medium text-dark-text">
           Quem vai vencer?
         </label>
@@ -91,97 +129,90 @@ export function PrevisaoForm({
         </div>
       </div>
 
-      {/* Metodo (opcional) */}
-      <div>
-        <label className="mb-2 block text-sm font-medium text-dark-text">
-          Metodo da vitoria{' '}
-          <span className="text-dark-textMuted">(+5 pontos)</span>
-        </label>
-        <select
-          value={metodo}
-          onChange={(e) => setMetodo(e.target.value as MetodoVitoria | '')}
-          className="w-full rounded border border-dark-border bg-dark-bg px-3 py-2 text-dark-text focus:border-ufc-red focus:outline-none"
-        >
-          <option value="">Nao sei / Qualquer</option>
-          {METODOS.map((m) => (
-            <option key={m.value} value={m.value}>
-              {m.label}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      {/* Round (opcional) */}
-      <div>
-        <label className="mb-2 block text-sm font-medium text-dark-text">
-          Em qual round?{' '}
-          <span className="text-dark-textMuted">(+10 pontos)</span>
-        </label>
-        <select
-          value={round}
-          onChange={(e) =>
-            setRound(e.target.value ? parseInt(e.target.value) : '')
-          }
-          className="w-full rounded border border-dark-border bg-dark-bg px-3 py-2 text-dark-text focus:border-ufc-red focus:outline-none"
-        >
-          <option value="">Nao sei / Qualquer</option>
-          {Array.from({ length: luta.rounds }, (_, i) => i + 1).map((r) => (
-            <option key={r} value={r}>
-              Round {r}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      {/* Resumo de pontos */}
-      <div className="rounded bg-dark-bg/50 p-3">
-        <p className="text-sm text-dark-textMuted">Pontos possiveis:</p>
-        <div className="mt-1 flex flex-wrap gap-2">
-          <span className="rounded bg-ufc-red/20 px-2 py-1 text-xs text-ufc-red">
-            Vencedor: +10 pts
-          </span>
-          {metodo && (
-            <span className="rounded bg-ufc-gold/20 px-2 py-1 text-xs text-ufc-gold">
-              Metodo: +5 pts
-            </span>
-          )}
-          {round && (
-            <span className="rounded bg-green-500/20 px-2 py-1 text-xs text-green-400">
-              Round: +10 pts
-            </span>
-          )}
+      {/* Method selection - visible after fighter is selected */}
+      {selectedLutador && (
+        <div className="slide-up-fade" style={{ animationDelay: '50ms' }}>
+          <label className="mb-2 block text-sm font-medium text-dark-text">
+            Metodo da vitoria{' '}
+            <span className="text-dark-textMuted">(opcional)</span>
+          </label>
+          <div className="grid grid-cols-3 gap-2">
+            {METODOS.map((m) => {
+              const Icon = m.icon;
+              const isSelected = metodo === m.value;
+              return (
+                <button
+                  key={m.value}
+                  onClick={() => setMetodo(isSelected ? null : m.value)}
+                  className={`flex flex-col items-center gap-1.5 rounded-xl border-2 px-3 py-3 transition-all ${
+                    isSelected
+                      ? 'border-ufc-red bg-ufc-red/10 text-ufc-red'
+                      : 'border-dark-border bg-dark-bg text-dark-textMuted hover:border-dark-textMuted'
+                  }`}
+                >
+                  <Icon className="h-5 w-5" />
+                  <span className="text-xs font-medium">{m.label}</span>
+                </button>
+              );
+            })}
+          </div>
         </div>
-        <p className="mt-2 text-sm font-bold text-dark-text">
-          Total possivel: {10 + (metodo ? 5 : 0) + (round ? 10 : 0)} pontos
-        </p>
-      </div>
+      )}
+
+      {/* Round selection - visible after method is selected */}
+      {selectedLutador && metodo && (
+        <div className="slide-up-fade" style={{ animationDelay: '100ms' }}>
+          <label className="mb-2 block text-sm font-medium text-dark-text">
+            Em qual round?{' '}
+            <span className="text-dark-textMuted">(opcional)</span>
+          </label>
+          <div className="flex gap-2">
+            {Array.from({ length: maxRounds }, (_, i) => i + 1).map((r) => {
+              const isSelected = round === r;
+              return (
+                <button
+                  key={r}
+                  onClick={() => setRound(isSelected ? null : r)}
+                  className={`flex h-10 w-10 items-center justify-center rounded-full border-2 text-sm font-bold transition-all ${
+                    isSelected
+                      ? 'border-ufc-red bg-ufc-red text-white'
+                      : 'border-dark-border bg-dark-bg text-dark-textMuted hover:border-dark-textMuted'
+                  }`}
+                >
+                  {r}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Error */}
       {error && (
-        <div className="rounded bg-red-500/20 p-3 text-sm text-red-400">
+        <div className="rounded-xl bg-red-500/20 p-3 text-sm text-red-400">
           {error}
         </div>
       )}
 
-      {/* Botoes */}
-      <div className="flex gap-3">
-        <button
-          onClick={onCancel}
-          className="flex-1 rounded border border-dark-border px-4 py-2 text-dark-textMuted transition-colors hover:bg-dark-border"
-        >
-          Cancelar
-        </button>
-        <button
-          onClick={handleSubmit}
-          disabled={!selectedLutador || isSubmitting}
-          className="flex-1 rounded bg-ufc-red px-4 py-2 font-bold text-white transition-colors hover:bg-ufc-redLight disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          {isSubmitting ? 'Salvando...' : 'Confirmar Previsao'}
-        </button>
-      </div>
+      {/* Submit button */}
+      {selectedLutador && (
+        <div className="slide-up-fade" style={{ animationDelay: '150ms' }}>
+          <button
+            onClick={handleSubmit}
+            disabled={!selectedLutador || isSubmitting}
+            className="w-full rounded-xl bg-ufc-red py-3 font-display uppercase tracking-wider text-white transition-all hover:bg-ufc-redLight hover:shadow-[0_0_20px_rgba(210,10,10,0.3)] disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {isSubmitting ? 'Salvando...' : 'Confirmar Previsao'}
+          </button>
+        </div>
+      )}
     </div>
   );
 }
+
+// ═══════════════════════════════════════════════
+// Fighter Option Sub-component
+// ═══════════════════════════════════════════════
 
 interface LutadorOptionProps {
   lutador: Lutador;
@@ -209,7 +240,13 @@ function LutadorOption({ lutador, isSelected, onClick }: LutadorOptionProps) {
           />
         ) : (
           <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-[#3a1c1c] via-[#2a2a2a] to-[#1a1a2e] text-lg font-bold text-white/40 select-none">
-            {lutador.nome.split(' ').map(w => w[0]).filter(Boolean).slice(0, 2).join('').toUpperCase()}
+            {lutador.nome
+              .split(' ')
+              .map((w) => w[0])
+              .filter(Boolean)
+              .slice(0, 2)
+              .join('')
+              .toUpperCase()}
           </div>
         )}
       </div>

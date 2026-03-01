@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Header } from '@/components/ui/Header';
+import { Octagon } from 'lucide-react';
+import { OctagonPortalLayout } from '@/components/arena/OctagonPortalLayout';
 import { useArenaAuth } from '@/hooks/useArenaAuth';
 
 export default function ArenaRegistroPage() {
@@ -36,7 +37,6 @@ export default function ArenaRegistroPage() {
     e.preventDefault();
     setError('');
 
-    // Validacoes
     if (formData.username.length < 3 || formData.username.length > 20) {
       setError('Username deve ter entre 3 e 20 caracteres');
       return;
@@ -77,180 +77,171 @@ export default function ArenaRegistroPage() {
 
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-dark-bg">
-        <Header />
-        <div className="flex items-center justify-center min-h-[60vh]">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-ufc-red"></div>
+      <OctagonPortalLayout>
+        <div className="flex items-center justify-center min-h-[40vh]">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-ufc-red" />
         </div>
-      </div>
+      </OctagonPortalLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-dark-bg">
-      <Header />
+    <OctagonPortalLayout>
+      <div className="neu-card p-8 animate-glow-pulse-border">
+        {/* Form Header */}
+        <div className="flex flex-col items-center mb-8 slide-up-fade">
+          <div className="text-ufc-red mb-4">
+            <Octagon className="h-10 w-10" />
+          </div>
+          <h2 className="font-display text-3xl uppercase tracking-wide text-dark-text">
+            Criar Conta
+          </h2>
+          <p className="mt-1 text-sm text-dark-textMuted">
+            Junte-se à Arena e comece a competir
+          </p>
+        </div>
 
-      <div className="container mx-auto px-4 py-12">
-        <div className="max-w-md mx-auto">
-          {/* Header */}
-          <div className="text-center mb-8">
-            <h1 className="font-display text-4xl uppercase text-dark-text">
-              Criar <span className="text-ufc-red">Conta</span>
-            </h1>
-            <p className="mt-2 text-dark-textMuted">
-              Junte-se a Arena e comece a competir com seus amigos
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4" noValidate>
+          {error && (
+            <div className="rounded-lg border border-red-500/50 bg-red-500/10 p-3 text-sm text-red-400 slide-up-fade">
+              {error}
+            </div>
+          )}
+
+          <div className="slide-up-fade" style={{ animationDelay: '50ms' }}>
+            <label htmlFor="username" className="block text-sm font-medium text-dark-textMuted mb-2">
+              Username *
+            </label>
+            <input
+              type="text"
+              id="username"
+              name="username"
+              value={formData.username}
+              onChange={handleChange}
+              required
+              minLength={3}
+              maxLength={20}
+              className="neu-inset w-full px-4 py-3 text-dark-text placeholder-dark-textMuted focus:outline-none focus:ring-1 focus:ring-ufc-red text-sm"
+              placeholder="seu_username"
+            />
+            <p className="mt-1 text-xs text-dark-textMuted">
+              3-20 caracteres, apenas letras, numeros e _
             </p>
           </div>
 
-          {/* Form */}
-          <div className="rounded-lg border border-dark-border bg-dark-card p-6">
-            <form onSubmit={handleSubmit} className="space-y-4">
-              {error && (
-                <div className="rounded border border-red-500/50 bg-red-500/10 p-3 text-sm text-red-400">
-                  {error}
-                </div>
-              )}
-
-              <div>
-                <label htmlFor="username" className="block text-sm font-medium text-dark-textMuted mb-1">
-                  Username *
-                </label>
-                <input
-                  type="text"
-                  id="username"
-                  name="username"
-                  value={formData.username}
-                  onChange={handleChange}
-                  required
-                  minLength={3}
-                  maxLength={20}
-                  className="w-full rounded border border-dark-border bg-dark-bg px-4 py-3 text-dark-text placeholder-dark-textMuted focus:border-ufc-red focus:outline-none"
-                  placeholder="seu_username"
-                />
-                <p className="mt-1 text-xs text-dark-textMuted">
-                  3-20 caracteres, apenas letras, numeros e _
-                </p>
-              </div>
-
-              <div>
-                <label htmlFor="displayName" className="block text-sm font-medium text-dark-textMuted mb-1">
-                  Nome de Exibicao
-                </label>
-                <input
-                  type="text"
-                  id="displayName"
-                  name="displayName"
-                  value={formData.displayName}
-                  onChange={handleChange}
-                  maxLength={50}
-                  className="w-full rounded border border-dark-border bg-dark-bg px-4 py-3 text-dark-text placeholder-dark-textMuted focus:border-ufc-red focus:outline-none"
-                  placeholder="Como voce quer ser chamado"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium text-dark-textMuted mb-1">
-                  Email *
-                </label>
-                <input
-                  type="email"
-                  id="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  required
-                  className="w-full rounded border border-dark-border bg-dark-bg px-4 py-3 text-dark-text placeholder-dark-textMuted focus:border-ufc-red focus:outline-none"
-                  placeholder="seu@email.com"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="senha" className="block text-sm font-medium text-dark-textMuted mb-1">
-                  Senha *
-                </label>
-                <input
-                  type="password"
-                  id="senha"
-                  name="senha"
-                  value={formData.senha}
-                  onChange={handleChange}
-                  required
-                  minLength={6}
-                  className="w-full rounded border border-dark-border bg-dark-bg px-4 py-3 text-dark-text placeholder-dark-textMuted focus:border-ufc-red focus:outline-none"
-                  placeholder="********"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="confirmarSenha" className="block text-sm font-medium text-dark-textMuted mb-1">
-                  Confirmar Senha *
-                </label>
-                <input
-                  type="password"
-                  id="confirmarSenha"
-                  name="confirmarSenha"
-                  value={formData.confirmarSenha}
-                  onChange={handleChange}
-                  required
-                  className="w-full rounded border border-dark-border bg-dark-bg px-4 py-3 text-dark-text placeholder-dark-textMuted focus:border-ufc-red focus:outline-none"
-                  placeholder="********"
-                />
-              </div>
-
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="w-full rounded bg-ufc-red py-3 font-display uppercase text-white hover:bg-ufc-redLight transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isLoading ? 'Criando conta...' : 'Criar Conta'}
-              </button>
-            </form>
-
-            <div className="mt-6 text-center text-sm text-dark-textMuted">
-              Ja tem uma conta?{' '}
-              <Link href="/arena/login" className="text-ufc-red hover:text-ufc-redLight">
-                Fazer login
-              </Link>
-            </div>
+          <div className="slide-up-fade" style={{ animationDelay: '100ms' }}>
+            <label htmlFor="displayName" className="block text-sm font-medium text-dark-textMuted mb-2">
+              Nome de Exibição
+            </label>
+            <input
+              type="text"
+              id="displayName"
+              name="displayName"
+              value={formData.displayName}
+              onChange={handleChange}
+              maxLength={50}
+              className="neu-inset w-full px-4 py-3 text-dark-text placeholder-dark-textMuted focus:outline-none focus:ring-1 focus:ring-ufc-red text-sm"
+              placeholder="Como voce quer ser chamado"
+            />
           </div>
 
-          {/* Benefits */}
-          <div className="mt-8 rounded-lg border border-dark-border bg-dark-card p-6">
-            <h3 className="font-display text-lg uppercase text-dark-text mb-4">
-              Por que criar uma conta?
-            </h3>
-            <ul className="space-y-3 text-sm text-dark-textMuted">
-              <li className="flex items-center gap-2">
-                <span className="text-ufc-red">✓</span>
-                Faca previsoes e ganhe pontos
-              </li>
-              <li className="flex items-center gap-2">
-                <span className="text-ufc-gold">✓</span>
-                Crie e participe de ligas com amigos
-              </li>
-              <li className="flex items-center gap-2">
-                <span className="text-green-400">✓</span>
-                Desafie amigos para duelos 1v1
-              </li>
-              <li className="flex items-center gap-2">
-                <span className="text-blue-400">✓</span>
-                Desbloqueie conquistas e suba de nivel
-              </li>
-              <li className="flex items-center gap-2">
-                <span className="text-purple-400">✓</span>
-                Apareca no ranking global
-              </li>
-            </ul>
+          <div className="slide-up-fade" style={{ animationDelay: '150ms' }}>
+            <label htmlFor="email" className="block text-sm font-medium text-dark-textMuted mb-2">
+              Email *
+            </label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              required
+              className="neu-inset w-full px-4 py-3 text-dark-text placeholder-dark-textMuted focus:outline-none focus:ring-1 focus:ring-ufc-red text-sm"
+              placeholder="seu@email.com"
+            />
           </div>
 
-          {/* Back to Arena */}
-          <div className="mt-6 text-center">
-            <Link href="/arena" className="text-sm text-dark-textMuted hover:text-ufc-red">
-              ← Voltar para Arena
+          <div className="slide-up-fade" style={{ animationDelay: '200ms' }}>
+            <label htmlFor="senha" className="block text-sm font-medium text-dark-textMuted mb-2">
+              Senha *
+            </label>
+            <input
+              type="password"
+              id="senha"
+              name="senha"
+              value={formData.senha}
+              onChange={handleChange}
+              required
+              minLength={6}
+              className="neu-inset w-full px-4 py-3 text-dark-text placeholder-dark-textMuted focus:outline-none focus:ring-1 focus:ring-ufc-red text-sm"
+              placeholder="********"
+            />
+          </div>
+
+          <div className="slide-up-fade" style={{ animationDelay: '250ms' }}>
+            <label htmlFor="confirmarSenha" className="block text-sm font-medium text-dark-textMuted mb-2">
+              Confirmar Senha *
+            </label>
+            <input
+              type="password"
+              id="confirmarSenha"
+              name="confirmarSenha"
+              value={formData.confirmarSenha}
+              onChange={handleChange}
+              required
+              className="neu-inset w-full px-4 py-3 text-dark-text placeholder-dark-textMuted focus:outline-none focus:ring-1 focus:ring-ufc-red text-sm"
+              placeholder="********"
+            />
+          </div>
+
+          <div className="slide-up-fade" style={{ animationDelay: '300ms' }}>
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="w-full rounded-xl bg-ufc-red py-3 font-display uppercase text-white hover:bg-ufc-redLight transition-all hover:shadow-[0_0_20px_rgba(210,10,10,0.4)] disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isLoading ? 'Criando conta...' : 'Criar Conta'}
+            </button>
+          </div>
+
+          <div className="text-center text-sm text-dark-textMuted slide-up-fade" style={{ animationDelay: '350ms' }}>
+            Já tem uma conta?{' '}
+            <Link href="/arena/login" className="text-ufc-red hover:text-ufc-redLight font-medium">
+              Fazer login
             </Link>
           </div>
-        </div>
+        </form>
       </div>
-    </div>
+
+      {/* Benefits */}
+      <div className="neu-card mt-6 p-6 slide-up-fade" style={{ animationDelay: '400ms' }}>
+        <h3 className="font-display text-lg uppercase text-dark-text mb-4">
+          Por que criar uma conta?
+        </h3>
+        <ul className="space-y-3 text-sm text-dark-textMuted">
+          <li className="flex items-center gap-2">
+            <span className="text-ufc-red">✓</span>
+            Faça previsões e ganhe pontos
+          </li>
+          <li className="flex items-center gap-2">
+            <span className="text-ufc-gold">✓</span>
+            Crie e participe de ligas com amigos
+          </li>
+          <li className="flex items-center gap-2">
+            <span className="text-green-400">✓</span>
+            Desafie amigos para duelos 1v1
+          </li>
+          <li className="flex items-center gap-2">
+            <span className="text-blue-400">✓</span>
+            Desbloqueie conquistas e suba de nível
+          </li>
+          <li className="flex items-center gap-2">
+            <span className="text-purple-400">✓</span>
+            Apareça no ranking global
+          </li>
+        </ul>
+      </div>
+    </OctagonPortalLayout>
   );
 }

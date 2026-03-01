@@ -1,7 +1,6 @@
 'use client';
 
 import Link from 'next/link';
-import { ArenaMenu } from '@/components/arena/ArenaMenu';
 import { UserAvatar } from '@/components/arena/UserAvatar';
 import { useArenaAuth } from '@/hooks/useArenaAuth';
 import { PONTUACAO_CONFIG, NIVEL_CONFIG, CONQUISTAS_DEFINICOES } from '@/types/arena';
@@ -15,7 +14,6 @@ export default function ComoFuncionaPage() {
       <header className="sticky top-0 z-50 bg-dark-bg/80 backdrop-blur-md border-b border-dark-border/50">
         <div className="container mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
-            <ArenaMenu isLoggedIn={isAuthenticated} />
             <Link href="/arena" className="font-display text-xl uppercase tracking-wider">
               <span className="text-white">Arena</span>
               <span className="text-ufc-red ml-1">UFC</span>

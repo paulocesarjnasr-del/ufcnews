@@ -12,7 +12,6 @@ export default function ArenaRegistroPage() {
   const { registro, isAuthenticated, isLoading: authLoading } = useArenaAuth();
   const [formData, setFormData] = useState({
     username: '',
-    displayName: '',
     email: '',
     senha: '',
     confirmarSenha: '',
@@ -63,7 +62,7 @@ export default function ArenaRegistroPage() {
       formData.username,
       formData.email,
       formData.senha,
-      formData.displayName || undefined
+      undefined
     );
 
     if (result.success) {
@@ -131,22 +130,6 @@ export default function ArenaRegistroPage() {
           </div>
 
           <div className="slide-up-fade" style={{ animationDelay: '100ms' }}>
-            <label htmlFor="displayName" className="block text-sm font-medium text-dark-textMuted mb-2">
-              Nome de Exibição
-            </label>
-            <input
-              type="text"
-              id="displayName"
-              name="displayName"
-              value={formData.displayName}
-              onChange={handleChange}
-              maxLength={50}
-              className="neu-inset w-full px-4 py-3 text-dark-text placeholder-dark-textMuted focus:outline-none focus:ring-1 focus:ring-ufc-red text-sm"
-              placeholder="Como voce quer ser chamado"
-            />
-          </div>
-
-          <div className="slide-up-fade" style={{ animationDelay: '150ms' }}>
             <label htmlFor="email" className="block text-sm font-medium text-dark-textMuted mb-2">
               Email *
             </label>
@@ -162,7 +145,7 @@ export default function ArenaRegistroPage() {
             />
           </div>
 
-          <div className="slide-up-fade" style={{ animationDelay: '200ms' }}>
+          <div className="slide-up-fade" style={{ animationDelay: '150ms' }}>
             <label htmlFor="senha" className="block text-sm font-medium text-dark-textMuted mb-2">
               Senha *
             </label>
@@ -179,7 +162,7 @@ export default function ArenaRegistroPage() {
             />
           </div>
 
-          <div className="slide-up-fade" style={{ animationDelay: '250ms' }}>
+          <div className="slide-up-fade" style={{ animationDelay: '200ms' }}>
             <label htmlFor="confirmarSenha" className="block text-sm font-medium text-dark-textMuted mb-2">
               Confirmar Senha *
             </label>
@@ -195,7 +178,7 @@ export default function ArenaRegistroPage() {
             />
           </div>
 
-          <div className="slide-up-fade" style={{ animationDelay: '300ms' }}>
+          <div className="slide-up-fade" style={{ animationDelay: '250ms' }}>
             <button
               type="submit"
               disabled={isLoading}
@@ -205,7 +188,7 @@ export default function ArenaRegistroPage() {
             </button>
           </div>
 
-          <div className="text-center text-sm text-dark-textMuted slide-up-fade" style={{ animationDelay: '350ms' }}>
+          <div className="text-center text-sm text-dark-textMuted slide-up-fade" style={{ animationDelay: '300ms' }}>
             Já tem uma conta?{' '}
             <Link href="/arena/login" className="text-ufc-red hover:text-ufc-redLight font-medium">
               Fazer login
@@ -214,34 +197,6 @@ export default function ArenaRegistroPage() {
         </form>
       </div>
 
-      {/* Benefits */}
-      <div className="neu-card mt-6 p-6 slide-up-fade" style={{ animationDelay: '400ms' }}>
-        <h3 className="font-display text-lg uppercase text-dark-text mb-4">
-          Por que criar uma conta?
-        </h3>
-        <ul className="space-y-3 text-sm text-dark-textMuted">
-          <li className="flex items-center gap-2">
-            <span className="text-ufc-red">✓</span>
-            Faça previsões e ganhe pontos
-          </li>
-          <li className="flex items-center gap-2">
-            <span className="text-ufc-gold">✓</span>
-            Crie e participe de ligas com amigos
-          </li>
-          <li className="flex items-center gap-2">
-            <span className="text-green-400">✓</span>
-            Desafie amigos para duelos 1v1
-          </li>
-          <li className="flex items-center gap-2">
-            <span className="text-blue-400">✓</span>
-            Desbloqueie conquistas e suba de nível
-          </li>
-          <li className="flex items-center gap-2">
-            <span className="text-purple-400">✓</span>
-            Apareça no ranking global
-          </li>
-        </ul>
-      </div>
     </OctagonPortalLayout>
   );
 }

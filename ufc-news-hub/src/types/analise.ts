@@ -204,8 +204,19 @@ export function isCardAnalise(analise: Analise): analise is CardAnalise {
 }
 
 // ==========================================
-// Full Single Analysis (15 Sections) Types
+// Full Single Analysis Types (15-section system)
 // ==========================================
+
+// --- Hero Section ---
+export interface HeroFighterData {
+  nome_completo: string;
+  apelido: string;
+  sobrenome: string;
+  record: string;
+  ranking: string;
+  info_extra: string;
+  imagem_fullbody_url: string | null;
+}
 
 export interface HeroSectionData {
   evento_nome: string;
@@ -213,49 +224,34 @@ export interface HeroSectionData {
   evento_local: string;
   categoria_peso: string;
   num_rounds: number;
-  titulo_em_jogo: string | null; // e.g. "Titulo BMF"
+  titulo_em_jogo: string | null;
   tagline: string;
   tagline_sub: string;
-  fighter1: {
-    nome_completo: string;
-    apelido: string;
-    sobrenome: string;
-    record: string;
-    ranking: string;
-    info_extra: string; // e.g. "Waianae, Hawaii | 34 anos"
-    imagem_fullbody_url: string | null;
-  };
-  fighter2: {
-    nome_completo: string;
-    apelido: string;
-    sobrenome: string;
-    record: string;
-    ranking: string;
-    info_extra: string;
-    imagem_fullbody_url: string | null;
-  };
+  fighter1: HeroFighterData;
+  fighter2: HeroFighterData;
 }
 
+// --- Narrativa Section ---
 export interface StakeRow {
   dimensao: string;
   fighter1: string;
   fighter2: string;
 }
 
-export interface FuturoConsequencia {
-  tag: string; // e.g. "LEGADO", "RANKING", "PROXIMA LUTA"
+export interface FuturoCenarioConsequencia {
+  tag: string;
   texto: string;
 }
 
 export interface FuturoCenario {
-  titulo: string; // dramatic headline e.g. "A COROACAO DO BLESSED"
-  subtitulo: string; // one-liner summary
-  consequencias: FuturoConsequencia[];
-  proxima_luta: string; // what fight comes next
+  titulo: string;
+  subtitulo: string;
+  consequencias: FuturoCenarioConsequencia[];
+  proxima_luta: string;
 }
 
 export interface NarrativaSectionData {
-  html_content: string; // HTML prose with the fight narrative
+  html_content: string;
   stakes: StakeRow[];
   prognostico?: {
     fighter1_vence: FuturoCenario;
@@ -263,14 +259,15 @@ export interface NarrativaSectionData {
   };
 }
 
+// --- Momento Atual Section ---
 export interface RecentFight {
   date: string;
   opponent: string;
   result: 'W' | 'L' | 'D' | 'NC';
   method: string;
   opponent_rank: string;
-  quality_score: number; // 1-5 (1=Ruim, 2=Medio, 3=Bom, 4=Muito Bom, 5=Excelente)
-  quality_label?: string; // "Ruim" | "Medio" | "Bom" | "Muito Bom" | "Excelente"
+  quality_score: number;
+  quality_label?: string;
   note: string;
 }
 
@@ -280,7 +277,7 @@ export interface MomentoAtualFighter {
   recent_fights: RecentFight[];
   full_fight_history?: RecentFight[];
   layoff_warning?: string | null;
-  momentum_score: number; // 0-10
+  momentum_score: number;
   momentum_label: string;
   momentum_trend: 'ascending' | 'descending' | 'stable' | 'resilient';
   momentum_note: string;
@@ -291,12 +288,13 @@ export interface MomentoAtualSectionData {
   fighter2: MomentoAtualFighter;
 }
 
+// --- Nivel Competicao Section ---
 export interface NivelCompeticaoFighter {
   nome: string;
-  media_oponentes: number; // 1-5 (1=Ruim, 2=Medio, 3=Bom, 4=Muito Bom, 5=Excelente)
-  media_oponentes_label?: string; // "Ruim" | "Medio" | "Bom" | "Muito Bom" | "Excelente"
-  aproveitamento: string; // e.g. "4W-1L (80%)"
-  contra_top5: string; // e.g. "2W-1L"
+  media_oponentes: number;
+  media_oponentes_label?: string;
+  aproveitamento: string;
+  contra_top5: string;
 }
 
 export interface NivelCompeticaoSectionData {
@@ -306,6 +304,7 @@ export interface NivelCompeticaoSectionData {
   oponentes_em_comum_note: string;
 }
 
+// --- Oponente Comum Section ---
 export interface OponenteComumResult {
   resultado: string;
   metodo: string;
@@ -323,6 +322,7 @@ export interface OponenteComumSectionData {
   insight: string;
 }
 
+// --- Comparacao Estatistica Section ---
 export interface StatBarData {
   label: string;
   valueA: number;
@@ -345,12 +345,13 @@ export interface ComparacaoEstatisticaSectionData {
   tale_of_tape: TaleOfTapeRow[];
 }
 
+// --- Perfil Habilidades Section ---
 export interface SkillBarData {
   label: string;
-  valueA: number; // 0-100 (drives bar width, displayed as label via valueToLabel)
-  valueB: number; // 0-100
-  labelA?: string; // "Ruim" | "Medio" | "Bom" | "Muito Bom" | "Excelente"
-  labelB?: string; // "Ruim" | "Medio" | "Bom" | "Muito Bom" | "Excelente"
+  valueA: number;
+  valueB: number;
+  labelA?: string;
+  labelB?: string;
   advantage?: 'fighter1' | 'fighter2' | 'even';
   advantage_note?: string;
 }
@@ -358,27 +359,33 @@ export interface SkillBarData {
 export interface PerfilHabilidadesSectionData {
   skills: SkillBarData[];
   insight?: string;
-  fighter1_total?: number;
-  fighter2_total?: number;
 }
 
+// --- Distribuicao Vitorias Section ---
 export interface WinMethodBreakdown {
-  ko_tko: { count: number; percent: number };
-  submission: { count: number; percent: number };
-  decision: { count: number; percent: number };
+  count: number;
+  percent: number;
+}
+
+export interface DistribuicaoVitoriasFighter {
+  nome: string;
+  ko_tko: WinMethodBreakdown;
+  submission: WinMethodBreakdown;
+  decision: WinMethodBreakdown;
   total_wins: number;
 }
 
 export interface DistribuicaoVitoriasSectionData {
-  fighter1: { nome: string } & WinMethodBreakdown;
-  fighter2: { nome: string } & WinMethodBreakdown;
+  fighter1: DistribuicaoVitoriasFighter;
+  fighter2: DistribuicaoVitoriasFighter;
   insight: string;
 }
 
+// --- Danger Zones Section ---
 export interface DangerZoneCard {
-  rounds: string; // e.g. "R1-R2"
-  danger_level: number; // 1-10
-  danger_label: string; // e.g. "VANTAGEM HOLLOWAY", "EQUILIBRADO"
+  rounds: string;
+  danger_level: number;
+  danger_label: string;
   color: 'red' | 'gold' | 'green';
   title: string;
   description: string;
@@ -388,11 +395,12 @@ export interface DangerZonesSectionData {
   zones: DangerZoneCard[];
 }
 
+// --- Intangiveis Section ---
 export interface IntangivelItem {
-  icon: string; // Lucide icon name
+  icon: string;
   title: string;
   fighter: string;
-  risk_level: string; // e.g. "RISCO ALTO", "POSITIVO", "NEUTRO"
+  risk_level: string;
   risk_color: 'red' | 'yellow' | 'green' | 'neutral';
   description: string;
 }
@@ -401,32 +409,39 @@ export interface IntangiveisSectionData {
   items: IntangivelItem[];
 }
 
+// --- Caminhos Vitoria Section ---
 export interface CaminhoVitoria {
   name: string;
-  probability: number; // percent
+  probability: number;
   method: string;
   description: string;
 }
 
+export interface CaminhosVitoriaFighter {
+  nome: string;
+  total_probability: number;
+  scenarios: CaminhoVitoria[];
+}
+
 export interface CaminhosVitoriaSectionData {
-  fighter1: {
-    nome: string;
-    total_probability: number;
-    scenarios: CaminhoVitoria[];
-  };
-  fighter2: {
-    nome: string;
-    total_probability: number;
-    scenarios: CaminhoVitoria[];
-  };
+  fighter1: CaminhosVitoriaFighter;
+  fighter2: CaminhosVitoriaFighter;
+}
+
+// --- Previsao Final Section ---
+export interface PrevisaoFinalValuePicks {
+  moneyline: { pick: string; reasoning: string };
+  method: { pick: string; reasoning: string };
+  over_under: { pick: string; rounds: number; reasoning: string };
+  best_value: string;
 }
 
 export interface PrevisaoFinalSectionData {
   winner_name: string;
   winner_side: 'fighter1' | 'fighter2';
   predicted_method: string;
-  confidence_score: number; // 1-10
-  confidence_label: string; // e.g. "MEDIA-ALTA"
+  confidence_score: number;
+  confidence_label: string;
   explanation: string;
   x_factor: { title: string; description: string };
   upset_alert: { title: string; description: string };
@@ -435,18 +450,14 @@ export interface PrevisaoFinalSectionData {
     fighter2: { nome: string; percent: number };
     draw: number;
   };
-  value_picks?: {
-    moneyline: { pick: string; reasoning: string };
-    method: { pick: string; reasoning: string };
-    over_under: { pick: string; rounds: number; reasoning: string };
-    best_value: string;
-  };
+  value_picks?: PrevisaoFinalValuePicks;
 }
 
+// --- O Que Observar Section ---
 export interface TalkingPoint {
   num: number;
   title: string;
-  icon: string; // Lucide icon name
+  icon: string;
   description: string;
 }
 
@@ -454,6 +465,7 @@ export interface OQueObservarSectionData {
   points: TalkingPoint[];
 }
 
+// --- Creator Kit Section ---
 export interface InstagramSlide {
   slide_number: number;
   title: string;
@@ -462,12 +474,12 @@ export interface InstagramSlide {
 }
 
 export interface Tweet {
-  num: string; // e.g. "1/6"
+  num: string;
   text: string;
 }
 
 export interface VideoScriptSection {
-  time: string; // e.g. "0-10s"
+  time: string;
   title: string;
   text: string;
 }
@@ -486,32 +498,8 @@ export interface CreatorKitSectionData {
   headlines?: string[];
 }
 
-export interface BettingValueSectionData {
-  moneyline: {
-    pick: 'fighter1' | 'fighter2';
-    fighter_name: string;
-    confidence: number;
-    reasoning: string;
-  };
-  method: {
-    pick: string;
-    value_rating: number;
-    reasoning: string;
-  };
-  over_under: {
-    pick: 'over' | 'under';
-    rounds: number;
-    reasoning: string;
-  };
-  bestBet: string;
-  avoidBet: string;
-}
-
-// ==========================================
-// Radar do Apostador (Betting Insights)
-// ==========================================
-
-export interface OddsDisplay {
+// --- Radar Apostador Section ---
+export interface OddsData {
   fighter1_odds: string;
   fighter2_odds: string;
   fighter1_name: string;
@@ -539,22 +527,20 @@ export interface ValuePick {
 }
 
 export interface RadarApostadorSectionData {
-  odds: OddsDisplay;
+  odds: OddsData;
   edges: EstatisticoEdge[];
   value_picks: ValuePick[];
-  armadilha: {
-    titulo: string;
-    descricao: string;
-  };
+  armadilha: { titulo: string; descricao: string };
   disclaimer: string;
 }
 
+// --- Full Analysis Data (all 15 sections) ---
 export interface FullAnalysisData {
   hero: HeroSectionData;
   narrativa: NarrativaSectionData;
   momento_atual: MomentoAtualSectionData;
   nivel_competicao: NivelCompeticaoSectionData;
-  oponente_comum: OponenteComumSectionData | null; // optional
+  oponente_comum: OponenteComumSectionData | null;
   comparacao_estatistica: ComparacaoEstatisticaSectionData;
   perfil_habilidades: PerfilHabilidadesSectionData;
   distribuicao_vitorias: DistribuicaoVitoriasSectionData;
@@ -564,70 +550,18 @@ export interface FullAnalysisData {
   previsao_final: PrevisaoFinalSectionData;
   o_que_observar: OQueObservarSectionData;
   creator_kit: CreatorKitSectionData;
-  betting_value?: BettingValueSectionData | null;
-  radar_apostador?: RadarApostadorSectionData | null;
+  betting_value: null;
+  radar_apostador: RadarApostadorSectionData;
 }
 
+// --- Full Single Analise (extends base Analise) ---
 export interface FullSingleAnalise extends Analise {
-  full_analysis: FullAnalysisData;
   analysis_type: 'full_single';
+  full_analysis: FullAnalysisData;
 }
 
 export function isFullSingleAnalise(analise: Analise): analise is FullSingleAnalise {
   return analise.analysis_type === 'full_single'
     && 'full_analysis' in analise
     && (analise as FullSingleAnalise).full_analysis != null;
-}
-
-// ==========================================
-// Prelims Analysis Types (6 Sections)
-// ==========================================
-
-export interface PrelimsHeroData {
-  evento_nome: string;
-  evento_data: string;
-  categoria_peso: string;
-  num_rounds: number;
-  is_titulo: boolean;
-  fighter1: {
-    nome: string;
-    record: string;
-    ranking?: string;
-  };
-  fighter2: {
-    nome: string;
-    record: string;
-    ranking?: string;
-  };
-}
-
-export interface PrelimsHistoricoData {
-  fighter1: {
-    nome: string;
-    recent_fights: RecentFight[];
-  };
-  fighter2: {
-    nome: string;
-    recent_fights: RecentFight[];
-  };
-}
-
-export interface PrelimsAnalysisData {
-  hero: PrelimsHeroData;
-  comparacao_estatistica: ComparacaoEstatisticaSectionData;
-  historico_lutas: PrelimsHistoricoData;
-  perfil_habilidades: PerfilHabilidadesSectionData;
-  distribuicao_vitorias: DistribuicaoVitoriasSectionData;
-  previsao_final: PrevisaoFinalSectionData;
-}
-
-export interface PrelimsAnalise extends Analise {
-  prelims_analysis: PrelimsAnalysisData;
-  analysis_type: 'prelims';
-}
-
-export function isPrelimsAnalise(analise: Analise): analise is PrelimsAnalise {
-  return analise.analysis_type === 'prelims'
-    && 'prelims_analysis' in analise
-    && (analise as PrelimsAnalise).prelims_analysis != null;
 }

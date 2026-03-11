@@ -7,11 +7,12 @@ import { Header } from '@/components/ui/Header';
 import { TacticalBreakdownDynamic } from '@/components/analise/TacticalBreakdownDynamic';
 import { FightPredictionDynamic } from '@/components/analise/FightPredictionDynamic';
 import { FighterCard } from '@/components/analise/FighterCard';
-import { Analise, isCardAnalise, CardAnalise, FightAnalysisItem } from '@/types/analise';
+import { Analise, isCardAnalise, isFullSingleAnalise, CardAnalise, FullSingleAnalise, FightAnalysisItem } from '@/types/analise';
 import { CardOverviewHero } from '@/components/analise/CardOverviewHero';
 import { BestBetsSection } from '@/components/analise/BestBetsSection';
 import { FightBreakdownCard } from '@/components/analise/FightBreakdownCard';
 import { BettingValueSection } from '@/components/analise/BettingValueSection';
+import { FullAnalysisView } from '@/components/analise/FullAnalysisView';
 import { AlertCircle } from 'lucide-react';
 
 // ---------------------------------------------------------------------------
@@ -244,7 +245,7 @@ function FullCardView({ analise }: { analise: CardAnalise }) {
 export default function AnalisePage() {
   const params = useParams();
   const slug = params.slug as string;
-  const [analise, setAnalise] = useState<Analise | CardAnalise | null>(null);
+  const [analise, setAnalise] = useState<Analise | CardAnalise | FullSingleAnalise | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -267,18 +268,38 @@ export default function AnalisePage() {
     fetchAnalise();
   }, [slug]);
 
+  // SEO: update document title
+  useEffect(() => {
+    if (analise) {
+      document.title = `${analise.titulo} | UFC News Hub`;
+    }
+  }, [analise]);
+
   if (loading) {
     return (
       <div className="min-h-screen bg-dark-bg">
         <Header />
-        <main className="container mx-auto px-4 py-6">
-          <div className="animate-pulse space-y-6">
-            <div className="h-48 rounded-xl bg-dark-card" />
-            <div className="grid gap-6 md:grid-cols-2">
-              <div className="h-64 rounded-lg bg-dark-card" />
-              <div className="h-64 rounded-lg bg-dark-card" />
+        {/* Hero skeleton */}
+        <div className="animate-pulse border-b border-dark-border">
+          <div className="container mx-auto px-4 py-12">
+            <div className="mx-auto mb-4 h-4 w-48 rounded bg-dark-card" />
+            <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-4">
+              <div className="ml-auto h-[300px] w-[200px] rounded bg-dark-card" />
+              <div className="h-16 w-16 rounded-full bg-dark-card" />
+              <div className="h-[300px] w-[200px] rounded bg-dark-card" />
             </div>
           </div>
+        </div>
+        <main className="container mx-auto px-4 py-12 space-y-12">
+          {Array.from({ length: 6 }, (_, i) => (
+            <div key={i} className="space-y-4">
+              <div className="flex items-center gap-4">
+                <div className="h-10 w-10 rounded-lg bg-dark-card" />
+                <div className="h-6 w-48 rounded bg-dark-card" />
+              </div>
+              <div className="h-48 rounded-lg bg-dark-card" />
+            </div>
+          ))}
         </main>
       </div>
     );
@@ -299,9 +320,11 @@ export default function AnalisePage() {
   }
 
   return (
-    <div className="min-h-screen bg-dark-bg">
+    <div className="min-h-screen bg-dark-bg font-body text-dark-text">
       <Header />
-      {isCardAnalise(analise) ? (
+      {isFullSingleAnalise(analise) ? (
+        <FullAnalysisView analise={analise as FullSingleAnalise} />
+      ) : isCardAnalise(analise) ? (
         <FullCardView analise={analise as CardAnalise} />
       ) : (
         <LegacySingleFightView analise={analise} />

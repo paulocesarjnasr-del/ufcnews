@@ -1,0 +1,366 @@
+import { PrelimsAnalysisView } from '@/components/analise/PrelimsAnalysisView';
+import type { PrelimsAnalise } from '@/types/analise';
+
+const analise: PrelimsAnalise = {
+  id: 'montes-vs-turcios',
+  evento_id: null,
+  slug: 'montes-vs-turcios',
+  titulo: 'Montes vs Turcios',
+  subtitulo: null,
+  lutador1_id: null,
+  lutador2_id: null,
+  artigo_conteudo: '',
+  tactical_breakdown: {
+    stats: [],
+    radarData: [],
+    taleOfTape: {
+      fighter1: { altura: '5\'7"', envergadura: '69"', idade: 31, academia: 'MMA Masters' },
+      fighter2: { altura: '5\'9"', envergadura: '71"', idade: 33, academia: 'American Top Team Portland' },
+    },
+    pathsToVictory: { fighter1: [], fighter2: [] },
+    dangerZones: [],
+  },
+  fight_prediction: {
+    predictedWinner: 'fighter1',
+    predictedMethod: 'Finalizacao R2',
+    confidence: 'MEDIA-ALTA',
+    fighter1Scenarios: [],
+    fighter2Scenarios: [],
+    keyFactors: [],
+    xFactor: { title: 'Jiu-Jitsu de elite', description: 'Montes tenta quase 10 finalizacoes a cada 15 minutos, um numero absurdo para qualquer divisao.' },
+  },
+  fighter1_info: {
+    nome: 'Alberto Montes',
+    record: '11-1-0',
+    ultimasLutas: [
+      { result: 'W', opponent: 'Carlos Calderon', method: 'Sub R2', event: 'DWCS 2024' },
+      { result: 'W', opponent: 'Kevin Garcia', method: 'Sub R2', event: 'Combate Global' },
+      { result: 'W', opponent: 'Adam Ortiz', method: 'Sub R1', event: 'Combate Global' },
+    ],
+  },
+  fighter2_info: {
+    nome: 'Ricky Turcios',
+    record: '13-5-0',
+    ultimasLutas: [
+      { result: 'L', opponent: 'Bernardo Sopaj', method: 'Dec Unanime', event: 'UFC 311' },
+      { result: 'L', opponent: 'Raul Rosas Jr.', method: 'Sub R2', event: 'UFC on ESPN 57' },
+      { result: 'W', opponent: 'Kevin Natividad', method: 'Dec Dividida', event: 'UFC Fight Night' },
+    ],
+  },
+  evento_nome: 'UFC 326',
+  evento_data: '7 de Marco, 2026',
+  evento_local: 'T-Mobile Arena, Las Vegas',
+  categoria_peso: 'Peso Pena',
+  num_rounds: 3,
+  is_titulo: false,
+  broadcast: null,
+  status: 'published',
+  analysis_type: 'prelims' as const,
+  created_at: new Date().toISOString(),
+  updated_at: new Date().toISOString(),
+
+  prelims_analysis: {
+    // ─── SECTION 1: HERO ───
+    hero: {
+      evento_nome: 'UFC 326',
+      evento_data: '7 de Marco, 2026',
+      categoria_peso: 'Peso Pena',
+      num_rounds: 3,
+      is_titulo: false,
+      fighter1: {
+        nome: 'Montes',
+        record: '11-1-0',
+      },
+      fighter2: {
+        nome: 'Turcios',
+        record: '13-5-0',
+      },
+    },
+
+    // ─── SECTION 2: COMPARACAO ESTATISTICA ───
+    comparacao_estatistica: {
+      stats: [
+        {
+          label: 'Sig. Strikes por Minuto',
+          valueA: 4.98,
+          valueB: 4.73,
+          maxVal: 7,
+          format: 'decimal',
+        },
+        {
+          label: 'Precisao de Strikes (%)',
+          valueA: 66,
+          valueB: 40,
+          maxVal: 100,
+          format: 'percent',
+          note: 'Montes acerta quase o dobro proporcionalmente. Diferenca brutal.',
+        },
+        {
+          label: 'Strikes Absorvidos/Min',
+          valueA: 4.85,
+          valueB: 3.72,
+          maxVal: 6,
+          format: 'decimal',
+          reverseWinner: true,
+        },
+        {
+          label: 'Defesa de Strikes (%)',
+          valueA: 57,
+          valueB: 52,
+          maxVal: 100,
+          format: 'percent',
+        },
+        {
+          label: 'Takedowns por 15 Min',
+          valueA: 0.45,
+          valueB: 0.91,
+          maxVal: 5,
+          format: 'decimal',
+          note: 'Nenhum dos dois e takedown artist. A luta no chao vem de scrambles e clinch.',
+        },
+        {
+          label: 'Precisao de Takedown (%)',
+          valueA: 0,
+          valueB: 20,
+          maxVal: 100,
+          format: 'percent',
+        },
+        {
+          label: 'Defesa de Takedown (%)',
+          valueA: 44,
+          valueB: 44,
+          maxVal: 100,
+          format: 'percent',
+        },
+      ],
+      tale_of_tape: [
+        { label: 'Idade', fighter1: '31', fighter2: '33', note: null },
+        { label: 'Altura', fighter1: '5\'7" (170 cm)', fighter2: '5\'9" (175 cm)', note: 'Turcios tem 2 polegadas a mais' },
+        { label: 'Envergadura', fighter1: '69"', fighter2: '71"', note: 'Vantagem de 2 polegadas para Turcios' },
+        { label: 'Stance', fighter1: 'Ortodoxo', fighter2: 'Ortodoxo', note: null },
+        { label: 'Academia', fighter1: 'MMA Masters', fighter2: 'American Top Team Portland', note: null },
+      ],
+    },
+
+    // ─── SECTION 3: HISTORICO DE LUTAS ───
+    historico_lutas: {
+      fighter1: {
+        nome: 'Montes',
+        recent_fights: [
+          {
+            date: 'Out 2024',
+            opponent: 'Carlos Calderon',
+            result: 'W',
+            method: 'Sub R2 (Anaconda Choke)',
+            opponent_rank: 'N/R',
+            quality_score: 2,
+            quality_label: 'Medio',
+            note: 'Performance dominante no Contender Series. Encontrou o choke que tentou no primeiro round e finalizou no segundo.',
+          },
+          {
+            date: 'Jun 2024',
+            opponent: 'Kevin Garcia',
+            result: 'W',
+            method: 'Sub R2',
+            opponent_rank: 'N/R',
+            quality_score: 1,
+            quality_label: 'Ruim',
+            note: 'Vitoria por finalizacao no circuito regional. Nivel de oposicao limitado.',
+          },
+          {
+            date: 'Set 2023',
+            opponent: 'Adam Ortiz',
+            result: 'W',
+            method: 'Sub R1 (D\'Arce Choke)',
+            opponent_rank: 'N/R',
+            quality_score: 1,
+            quality_label: 'Ruim',
+            note: 'Finalizacao rapida. Ortiz nao conseguiu defender a transicao para o choke.',
+          },
+          {
+            date: 'Dez 2021',
+            opponent: 'Ira Lukowsky',
+            result: 'L',
+            method: 'KO/TKO R2',
+            opponent_rank: 'N/R',
+            quality_score: 1,
+            quality_label: 'Ruim',
+            note: 'Unica derrota da carreira. Foi nocauteado no segundo round, expondo vulnerabilidade na trocacao.',
+          },
+          {
+            date: 'Fev 2021',
+            opponent: 'Richie Santiago',
+            result: 'W',
+            method: 'Sub R1 (Anaconda Choke)',
+            opponent_rank: 'N/R',
+            quality_score: 1,
+            quality_label: 'Ruim',
+            note: 'Finalizacao rapida no Titan FC. Mais uma anaconda choke no curriculo.',
+          },
+        ],
+      },
+      fighter2: {
+        nome: 'Turcios',
+        recent_fights: [
+          {
+            date: 'Jan 2025',
+            opponent: 'Bernardo Sopaj',
+            result: 'L',
+            method: 'Decisao Unanime',
+            opponent_rank: 'N/R',
+            quality_score: 2,
+            quality_label: 'Medio',
+            note: 'Derrota clara por 27-30, 27-30, 28-29. Sopaj dominou todos os aspectos da luta.',
+          },
+          {
+            date: 'Jun 2024',
+            opponent: 'Raul Rosas Jr.',
+            result: 'L',
+            method: 'Sub R2 (RNC)',
+            opponent_rank: 'N/R',
+            quality_score: 3,
+            quality_label: 'Bom',
+            note: 'Finalizado por rear-naked choke aos 2:22 do segundo round. Rosas Jr. e um prospecto top do UFC.',
+          },
+          {
+            date: 'Nov 2022',
+            opponent: 'Kevin Natividad',
+            result: 'W',
+            method: 'Decisao Dividida',
+            opponent_rank: 'N/R',
+            quality_score: 1,
+            quality_label: 'Ruim',
+            note: 'Vitoria apertada. Dois juizes deram para Turcios em luta equilibrada.',
+          },
+          {
+            date: 'Jul 2022',
+            opponent: 'Aiemann Zahabi',
+            result: 'L',
+            method: 'Decisao Unanime',
+            opponent_rank: 'N/R',
+            quality_score: 2,
+            quality_label: 'Medio',
+            note: 'Zahabi controlou o ritmo da luta. Turcios nao conseguiu impor seu estilo.',
+          },
+          {
+            date: 'Ago 2021',
+            opponent: 'Brady Hiestand',
+            result: 'W',
+            method: 'Decisao Dividida',
+            opponent_rank: 'N/R',
+            quality_score: 2,
+            quality_label: 'Medio',
+            note: 'Final do TUF 29. Vitoria por split decision que garantiu o contrato no UFC.',
+          },
+        ],
+      },
+    },
+
+    // ─── SECTION 4: PERFIL DE HABILIDADES ───
+    perfil_habilidades: {
+      skills: [
+        {
+          label: 'Striking em Pe',
+          valueA: 60,
+          valueB: 55,
+          labelA: 'Bom',
+          labelB: 'Bom',
+          advantage: 'fighter1',
+          advantage_note: 'Montes tem precisao muito superior (66% vs 40%). Volume similar, mas Montes conecta mais.',
+        },
+        {
+          label: 'Jiu-Jitsu / Finalizacoes',
+          valueA: 92,
+          valueB: 30,
+          labelA: 'Excelente',
+          labelB: 'Ruim',
+          advantage: 'fighter1',
+          advantage_note: 'Abismo tecnico. Montes e faixa preta com 9.8 tentativas de sub por 15 min. Turcios foi finalizado por Rosas Jr.',
+        },
+        {
+          label: 'Defesa de Takedown',
+          valueA: 45,
+          valueB: 45,
+          labelA: 'Medio',
+          labelB: 'Medio',
+          advantage: 'even',
+          advantage_note: 'Ambos com 44% de defesa de takedown. Nenhum dos dois e forte nesse quesito.',
+        },
+        {
+          label: 'Cardio / Resistencia',
+          valueA: 65,
+          valueB: 70,
+          labelA: 'Bom',
+          labelB: 'Bom',
+          advantage: 'fighter2',
+          advantage_note: 'Turcios e conhecido pelo ritmo alto e cardio consistente. Estilo frentico que mantem por 3 rounds.',
+        },
+        {
+          label: 'Experiencia no UFC',
+          valueA: 25,
+          valueB: 55,
+          labelA: 'Ruim',
+          labelB: 'Bom',
+          advantage: 'fighter2',
+          advantage_note: 'Estreia de Montes no octogono. Turcios tem 5 lutas no UFC, incluindo final do TUF.',
+        },
+        {
+          label: 'Controle de Clinch',
+          valueA: 75,
+          valueB: 40,
+          labelA: 'Muito Bom',
+          labelB: 'Medio',
+          advantage: 'fighter1',
+          advantage_note: 'Montes usa o clinch para criar scrambles e encontrar estrangulamentos. Arma principal do seu jogo.',
+        },
+      ],
+      insight: 'A vantagem gritante de Montes no jiu-jitsu pode ser o fator decisivo. Turcios ja mostrou vulnerabilidade a finalizacoes contra Raul Rosas Jr., e Montes e um cacador de chokes com taxa de atividade absurda no chao.',
+    },
+
+    // ─── SECTION 5: DISTRIBUICAO DE VITORIAS ───
+    distribuicao_vitorias: {
+      fighter1: {
+        nome: 'Montes',
+        ko_tko: { count: 1, percent: 9 },
+        submission: { count: 6, percent: 55 },
+        decision: { count: 4, percent: 36 },
+        total_wins: 11,
+      },
+      fighter2: {
+        nome: 'Turcios',
+        ko_tko: { count: 3, percent: 23 },
+        submission: { count: 1, percent: 8 },
+        decision: { count: 9, percent: 69 },
+        total_wins: 13,
+      },
+      insight: 'Perfis completamente opostos. Montes finaliza mais da metade das suas lutas, especializado em estrangulamentos (anaconda choke e D\'Arce). Turcios depende dos juizes, com 69% das vitorias por decisao. Se a luta for para o chao, a estatistica favorece fortemente o venezuelano.',
+    },
+
+    // ─── SECTION 6: PREVISAO FINAL ───
+    previsao_final: {
+      winner_name: 'Montes',
+      winner_side: 'fighter1',
+      predicted_method: 'Finalizacao R2',
+      confidence_score: 7,
+      confidence_label: 'MEDIA-ALTA',
+      explanation: 'Montes tem um jiu-jitsu de nivel completamente diferente do que Turcios ja enfrentou. Com 9.8 tentativas de finalizacao por 15 minutos, o venezuelano vai criar oportunidades constantes no chao. Turcios ja mostrou que e vulneravel a submissions (finalizado por Rosas Jr.) e nao tem a defesa de takedown para manter a luta em pe por 15 minutos.',
+      x_factor: {
+        title: 'A fabrica de estrangulamentos',
+        description: 'Montes tenta quase 10 finalizacoes a cada 15 minutos, um numero absurdo ate para especialistas em jiu-jitsu. Se ele conseguir o clinch ou qualquer contato prolongado no chao, o perigo e constante.',
+      },
+      upset_alert: {
+        title: 'Experiencia no octogono',
+        description: 'Montes nunca lutou no UFC. A pressao do octogono, a diferenca de nivel dos arbitros, e o ritmo da luta podem afetar o estreante. Turcios ja esteve nesse palco 5 vezes.',
+      },
+      probabilities: {
+        fighter1: { nome: 'Montes', percent: 62 },
+        fighter2: { nome: 'Turcios', percent: 36 },
+        draw: 2,
+      },
+    },
+  },
+};
+
+export default function Page() {
+  return <PrelimsAnalysisView analise={analise} />;
+}

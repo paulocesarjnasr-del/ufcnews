@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { queryOne } from '@/lib/db';
-import { Noticia } from '@/types';
+import { queryOne, query } from '@/lib/db';
+import { Noticia, Lutador, NoticiaComLutadores } from '@/types';
 
 export async function GET(
   request: NextRequest,

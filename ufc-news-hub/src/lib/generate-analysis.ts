@@ -1,5 +1,15 @@
 import Anthropic from '@anthropic-ai/sdk';
-import { getFighterStatsByName, UFCFighterStats } from './ufcstats-scraper';
+import { getFighterStatsByName, getEnhancedFighterProfile, UFCFighterStats } from './ufcstats-scraper';
+import {
+  calculateDerivedMetrics,
+  compareFighters,
+  formatEnhancedDataPackage,
+  formatHeadToHeadComparison,
+} from './derived-metrics';
+import { computeStatComparison, computeWinDistribution, computeCommonOpponent } from './compute-analysis-data';
+import { getFighterImageUrls, buildUfcSlug } from './ufc-images';
+import { conductFightResearch, formatResearchBriefing, extractEventCorrections } from './web-research';
+import type { FullAnalysisData } from '@/types/analise';
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -451,7 +461,7 @@ Retorne APENAS JSON válido com esta estrutura exata:
   }
 }
 
-## ESTATÍSTICAS REAIS DO UFCSTATS.COM (USE ESTES NÚMEROS EXATOS)
+## DADOS COMPLETOS DO UFCSTATS.COM (USE ESTES DADOS — NUNCA INVENTE)
 {real_stats_block}
 
 IMPORTANTE:
@@ -461,9 +471,11 @@ IMPORTANTE:
 - Gere pelo menos 3-4 cenários por lutador e 5-7 fatores-chave
 - Gere 3-4 caminhos para vitória por lutador
 - Escreva o artigo e todo texto em Português Brasileiro
-- Faça a análise perspicaz e baseada em dados
+- USE os dados de fight history, trending, distribuição de golpes, grappling, round-by-round patterns e head-to-head comparison para fundamentar sua análise
+- Mencione dados específicos de lutas anteriores no artigo (ex: "Na luta contra X, Y conectou Z golpes significativos...")
 - Os valores do radar chart (radarData) são classificações subjetivas 0-100 que você gera com base nas stats reais
-- Para betting_value: seja CONFIANTE nos picks, justifique com dados, avalie valor real
+- Para betting_value: seja CONFIANTE nos picks, justifique com dados concretos dos fight history, avalie valor real
+- Se houver oponentes em comum na comparação, use isso na análise
 
 RESPONDA APENAS COM O JSON, SEM TEXTO ADICIONAL.`;
 
@@ -610,7 +622,7 @@ Retorne APENAS JSON válido com esta estrutura exata (versão compacta — artig
   }
 }
 
-## ESTATÍSTICAS REAIS DO UFCSTATS.COM (USE ESTES NÚMEROS EXATOS)
+## DADOS COMPLETOS DO UFCSTATS.COM (USE ESTES DADOS — NUNCA INVENTE)
 {real_stats_block}
 
 IMPORTANTE:
@@ -620,9 +632,9 @@ IMPORTANTE:
 - Gere pelo menos 2-3 cenários por lutador e 3-5 fatores-chave
 - Gere 2-3 caminhos para vitória por lutador
 - Escreva o artigo e todo texto em Português Brasileiro
-- Faça a análise perspicaz e baseada em dados
+- USE os dados de fight history, trending e head-to-head comparison para fundamentar sua análise
 - Os valores do radar chart (radarData) são classificações subjetivas 0-100 que você gera com base nas stats reais
-- Para betting_value: seja CONFIANTE nos picks, justifique com dados, avalie valor real
+- Para betting_value: seja CONFIANTE nos picks, justifique com dados concretos, avalie valor real
 - ARTIGO CONCISO: apenas 2-3 parágrafos (esta é uma luta do card, não o main event)
 
 RESPONDA APENAS COM O JSON, SEM TEXTO ADICIONAL.`;
@@ -708,19 +720,40 @@ export async function generateFightWithBetting(
   const f1 = fight.lutador1;
   const f2 = fight.lutador2;
 
-  // Scrape real stats from ufcstats.com
-  console.log(`[CARD-ANALYSIS] Scraping stats for ${f1.nome} and ${f2.nome}...`);
-  const [f1Stats, f2Stats] = await Promise.all([
-    getFighterStatsByName(f1.nome),
-    getFighterStatsByName(f2.nome),
+  // Scrape ENHANCED profiles with fight-by-fight history
+  const maxFights = isMainEvent ? 8 : 5;
+  console.log(`[CARD-ANALYSIS] Scraping enhanced profiles for ${f1.nome} and ${f2.nome} (last ${maxFights} fights)...`);
+  const [f1Profile, f2Profile] = await Promise.all([
+    getEnhancedFighterProfile(f1.nome, maxFights),
+    getEnhancedFighterProfile(f2.nome, maxFights),
   ]);
-  console.log(`[CARD-ANALYSIS] Stats scraped — F1: ${f1Stats ? 'OK' : 'NOT FOUND'}, F2: ${f2Stats ? 'OK' : 'NOT FOUND'}`);
+  console.log(`[CARD-ANALYSIS] Profiles scraped — F1: ${f1Profile ? `OK (${f1Profile.fightHistory.length} fights)` : 'NOT FOUND'}, F2: ${f2Profile ? `OK (${f2Profile.fightHistory.length} fights)` : 'NOT FOUND'}`);
 
-  const realStatsBlock = [
-    formatRealStats(f1.nome, 'FIGHTER 1 REAL STATS', f1Stats),
-    '',
-    formatRealStats(f2.nome, 'FIGHTER 2 REAL STATS', f2Stats),
-  ].join('\n');
+  // Build the data block for the prompt
+  let realStatsBlock: string;
+
+  if (f1Profile && f2Profile) {
+    // Full enhanced data packages with derived metrics and comparison
+    const metrics1 = calculateDerivedMetrics(f1Profile, { academia: f1.academia, stance: null });
+    const metrics2 = calculateDerivedMetrics(f2Profile, { academia: f2.academia, stance: null });
+    const comparison = compareFighters(f1Profile, metrics1, f2Profile, metrics2);
+
+    realStatsBlock = [
+      formatEnhancedDataPackage('FIGHTER 1', f1Profile, metrics1),
+      '',
+      formatEnhancedDataPackage('FIGHTER 2', f2Profile, metrics2),
+      '',
+      formatHeadToHeadComparison(f1Profile, metrics1, f2Profile, metrics2, comparison),
+    ].join('\n');
+  } else {
+    // Fallback to basic career stats if enhanced scraping fails
+    console.warn(`[CARD-ANALYSIS] Falling back to basic stats for one or both fighters`);
+    realStatsBlock = [
+      formatRealStats(f1.nome, 'FIGHTER 1 REAL STATS', f1Profile),
+      '',
+      formatRealStats(f2.nome, 'FIGHTER 2 REAL STATS', f2Profile),
+    ].join('\n');
+  }
 
   const template = isMainEvent ? CARD_FIGHT_PROMPT : COMPACT_FIGHT_PROMPT;
   const prompt = fillFightPromptTemplate(template, event, fight, realStatsBlock);
@@ -999,4 +1032,466 @@ export async function generateFullCardAnalysis(
     titulo,
     subtitulo,
   };
+}
+
+// ===========================================================================
+// FULL SINGLE ANALYSIS (14 Sections) — Premium product format
+// ===========================================================================
+
+// ---------------------------------------------------------------------------
+// FIGHT ANALYST AGENT SYSTEM PROMPT — defines the AI persona
+// ---------------------------------------------------------------------------
+const FIGHT_ANALYST_SYSTEM = `Voce e o Fight Analyst, o melhor analista de MMA em lingua portuguesa do mundo. Voce pensa como um fa hardcore de MMA, um analista especialista e um criador de conteudo ao mesmo tempo.
+
+Voce NAO e uma maquina de extracao de dados. Voce INTERPRETA, CONTEXTUALIZA e ENTREGA analises que fazem criadores de conteudo dizerem "nao preciso pesquisar mais nada".
+
+## SUA PERSONALIDADE
+- Voce tem opiniao. Nao fica em cima do muro. Se um lutador tem vantagem clara, diz isso com confianca.
+- Voce entende as dinamicas da divisao: quem e o proximo desafiante, quem esta em declinio, quem esta subindo.
+- Voce sabe o que uma vitoria ou derrota SIGNIFICA para a carreira de cada lutador, para a divisao e para o esporte.
+- Voce identifica padroes que a maioria ignora: um lutador que e perigoso apos ser derrubado, outro que perde o gas mental apos sofrer um knockdown.
+- Voce nao repete cliches como "ambos sao perigosos" ou "tudo pode acontecer no MMA". Voce diz EXATAMENTE por que um cenario e mais provavel que outro.
+- Voce escreve como se estivesse explicando para um amigo inteligente que acompanha UFC, nao como uma enciclopedia.
+
+## REGRAS ABSOLUTAS
+1. NUNCA invente estatisticas. Use EXATAMENTE os numeros do UFCStats fornecidos. Se um dado nao existe, diga que nao existe.
+2. NUNCA use travessoes (em dashes — ou en dashes –) no texto escrito. Use virgulas, pontos, dois pontos, ou reestruture a frase. Hifens em dados (records 27-8-0) sao OK.
+3. Tudo em Portugues Brasileiro natural e conversacional.
+4. Se uma frase poderia se aplicar a qualquer luta, delete. Tudo deve ser ESPECIFICO para ESTE confronto.
+5. NUNCA invente ou adivinhe a nacionalidade, pais ou cidade dos lutadores. Use EXATAMENTE os dados fornecidos.
+6. Use SEMPRE o nome real do lutador. NUNCA escreva "Lutador 1", "Lutador 2", "o primeiro", "o segundo". Use o nome ou apelido.
+7. REGRA CRITICA ANTI-ALUCINACAO: Se voce nao tem CERTEZA de um fato (nome de evento, numero do UFC, data de luta), NAO inclua. E melhor ser vago do que errar. Diga "enfrentou Topuria" em vez de "enfrentou Topuria no UFC 305" se nao tiver certeza do numero.
+
+## VOCABULARIO
+PROIBIDO: contendor, contender, penas (para featherweight), leves (para lightweight), pesos-pesados.
+USE EM VEZ DISSO: desafiante, categoria peso-pena, categoria peso-leve, categoria peso-pesado.
+Escreva como se estivesse conversando com um amigo que acompanha UFC, nao como uma enciclopedia.
+
+## O QUE TE DIFERENCIA DE UMA ANALISE GENERICA
+- Na narrativa: voce conta a HISTORIA, nao resume o cartel. Por que essa luta existe? O que levou esses dois a se encontrarem?
+- Nos intangiveis: voce identifica coisas que os numeros nao mostram. Mudanca de treinador, divorcio, pressao da torcida, padrao de comportamento apos derrota.
+- Na previsao: voce explica O QUE ACONTECE DEPOIS. Se X vencer, quem e o proximo? Se Y perder, o que acontece com a carreira dele?
+- No creator kit: voce escreve conteudo que o criador copia e cola direto. Nada generico.
+- Nos caminhos de vitoria: voce nao so diz "KO" ou "decisao", voce descreve o CENARIO ESPECIFICO. "Oliveira puxa para guarda apos um clinch no segundo round e pega as costas, como fez contra Chandler."
+
+## DADOS DE PESQUISA WEB
+Quando receber dados de pesquisa web (secao "INTELIGENCIA DE PESQUISA WEB"), use-os como fonte PRIMARIA. Esses dados foram verificados em tempo real e sao mais confiaveis que seu conhecimento interno. Nunca contradiga fatos verificados pela pesquisa. Use os dados de pesquisa para enriquecer TODAS as secoes, especialmente narrativa, intangiveis, e detalhes do evento.`;
+
+// ---------------------------------------------------------------------------
+// FULL_ANALYSIS_PROMPT — 14-section premium analysis (user message)
+// ---------------------------------------------------------------------------
+const FULL_ANALYSIS_PROMPT = `Analise a luta abaixo e gere uma analise PREMIUM com 14 secoes.
+
+## INFORMACOES DO EVENTO
+Evento: {evento_nome}
+Data: {evento_data}
+Local: {evento_local}
+Peso: {categoria_peso}
+Rounds: {num_rounds}
+Titulo: {titulo_luta}
+
+## LUTADOR 1 (corner vermelho)
+Nome: {f1_nome}
+Apelido: {f1_apelido}
+Pais: {f1_pais}
+Cidade: {f1_cidade}
+Record: {f1_vitorias}-{f1_derrotas}-{f1_empates}
+KOs: {f1_nocautes} | Subs: {f1_finalizacoes} | Dec: {f1_decisoes}
+Altura: {f1_altura} | Alcance: {f1_envergadura} | Idade: {f1_idade}
+Ranking: {f1_ranking} | Academia: {f1_academia} | Estilo: {f1_estilo}
+
+## LUTADOR 2 (corner azul)
+Nome: {f2_nome}
+Apelido: {f2_apelido}
+Pais: {f2_pais}
+Cidade: {f2_cidade}
+Record: {f2_vitorias}-{f2_derrotas}-{f2_empates}
+KOs: {f2_nocautes} | Subs: {f2_finalizacoes} | Dec: {f2_decisoes}
+Altura: {f2_altura} | Alcance: {f2_envergadura} | Idade: {f2_idade}
+Ranking: {f2_ranking} | Academia: {f2_academia} | Estilo: {f2_estilo}
+
+{research_block}
+
+## DADOS COMPLETOS DO UFCSTATS.COM (USE ESTES DADOS, NUNCA INVENTE)
+{real_stats_block}
+
+## INSTRUCOES ESPECIFICAS POR SECAO
+
+### NARRATIVA (secao 2)
+Nao resuma o cartel. Conte a HISTORIA da luta. Por que o UFC montou esse confronto? Qual e o arco de cada lutador? Use detalhes de lutas anteriores para construir a narrativa. Mencione nomes, eventos, metodos especificos. Se for revanche, explore o que mudou desde a primeira luta.
+
+### MOMENTO ATUAL (secao 3)
+Para cada luta recente, nao diga apenas "venceu por decisao". Diga COMO venceu e o que isso revela. "Dominou no wrestling mas nao conseguiu finalizar, mostrando que o jiu-jitsu ofensivo ainda e limitado." O quality_score e uma escala de 1-5 (1=Ruim, 2=Medio, 3=Bom, 4=Muito Bom, 5=Excelente) que reflete a qualidade do oponente na epoca da luta. Inclua tambem quality_label com o texto correspondente.
+
+### FATORES INVISIVEIS (secao 10)
+Aqui e onde voce mostra que entende MMA de verdade. Identifique: mudancas de academia, relacao com treinador, historico em lutas de 5 rounds, como reage apos sofrer knockdown, se muda o gameplan quando esta perdendo, fator altitude/viagem, pressao de contrato. Minimo 5 itens, maximo 8.
+
+### CAMINHOS DE VITORIA (secao 11)
+Descreva CENARIOS ESPECIFICOS, nao categorias genericas. Nao escreva "Vence por KO". Escreva "Pressiona contra a grade nos rounds iniciais, encurta a distancia com jabs ao corpo, e encontra o overhand direito quando o oponente sai da grade. Similar ao que fez contra [Nome]."
+REGRA MATEMATICA: A soma de TODOS os cenarios de fighter1 + fighter2 + draw DEVE somar ~100%. Os cenarios de cada lutador devem somar o total_probability daquele lutador. Ex: fighter1 total=55%, seus cenarios somam 55%. fighter2 total=42%, cenarios somam 42%. draw=3%.
+
+### PREVISAO FINAL (secao 12)
+Alem da previsao, responda: O que essa vitoria significa para o vencedor? Quem seria o proximo adversario? E para o perdedor, qual e o caminho de volta? O X-Factor deve ser algo especifico que pode virar a luta, nao algo generico como "quem conectar primeiro".
+CONFIANCA: Use "ALTA" APENAS se o favorito tem >65% de chance. TKO em round especifico NUNCA e alta confianca. Seja realista.
+VALUE PICKS: Inclua value_picks com moneyline, method, over_under, e best_value. Justifique cada pick com dados concretos.
+
+### O QUE OBSERVAR (secao 13)
+5 pontos que um comentarista inteligente mencionaria durante a transmissao. Coisas como "observe se Holloway muda o stance para southpaw no terceiro round, algo que ele fez nas ultimas 3 lutas quando sente que esta atras nos cartoes." Especifico, observavel, util.
+
+### CREATOR KIT (secao 14)
+Instagram: slides que o criador copia e posta. Com gancho, dados, opiniao forte.
+Twitter: thread que gera engajamento. Primeiro tweet e o gancho controverso. Ultimo e a previsao com emoji de fogo.
+Video: script de 60 segundos com hook nos primeiros 3 segundos. Nao comece com "Fala galera". Comece com dado chocante ou pergunta provocativa.
+TikTok: 3 scripts de 15-30 segundos com hook que prende nos primeiros 2 segundos. Cada script tem hook, body, e cta.
+Headlines: 5-6 titulos prontos para thumbnail de video, capa de carousel, titulo de artigo. Curtos, impactantes, com opiniao.
+
+## FORMATO JSON (14 secoes)
+
+Retorne APENAS JSON valido. As secoes 6 (comparacao estatistica) e 8 (distribuicao de vitorias) serao pre-computadas com dados reais e mescladas separadamente. Gere as demais:
+
+{
+  "hero": {
+    "tagline": "<frase epica de 3-8 palavras que captura a ESSENCIA da luta, nao um resumo generico>",
+    "tagline_sub": "<complemento de 1 linha que adiciona contexto>"
+  },
+  "narrativa": {
+    "html_content": "<HTML rico (4-6 paragrafos com h3 e p tags). Conte a historia REAL por tras desta luta. Use class='font-display text-xl uppercase text-ufc-red mb-4' nos h3 e class='font-display text-xl uppercase text-ufc-red mb-4 mt-8' nos h3 subsequentes. Referencie lutas anteriores com nomes, eventos, metodos e rounds especificos. Explique POR QUE esta luta importa para a divisao.>",
+    "stakes": [
+      {"dimensao": "Objetivo", "fighter1": "<objetivo concreto, nao generico>", "fighter2": "<objetivo concreto>"},
+      {"dimensao": "Narrativa", "fighter1": "<qual historia esta contando>", "fighter2": "<qual historia esta contando>"},
+      {"dimensao": "Risco", "fighter1": "<o que perde se perder>", "fighter2": "<o que perde se perder>"},
+      {"dimensao": "Recompensa", "fighter1": "<o que ganha se vencer>", "fighter2": "<o que ganha se vencer>"}
+    ]
+  },
+  "momento_atual": {
+    "fighter1": {
+      "nome": "{f1_nome}",
+      "color": "red",
+      "recent_fights": [
+        {"date": "<Mes Ano>", "opponent": "<nome>", "result": "W"|"L", "method": "<metodo curto>", "opponent_rank": "<rank na epoca>", "quality_score": <1-5>, "quality_label": "<Ruim|Medio|Bom|Muito Bom|Excelente>", "note": "<observacao que REVELA algo sobre o lutador, nao so o resultado>"}
+      ],
+      "layoff_warning": "<aviso de inatividade se >12 meses, null se nao>",
+      "momentum_score": <0-10 com 1 decimal>,
+      "momentum_label": "<label tipo Ascendente, Resiliente, Em Queda, Irregular>",
+      "momentum_trend": "ascending"|"descending"|"stable"|"resilient",
+      "momentum_note": "<explicacao de 1-2 linhas com OPINIAO sobre o que o momentum indica para esta luta>"
+    },
+    "fighter2": {
+      "nome": "{f2_nome}",
+      "color": "blue",
+      "recent_fights": [<mesma estrutura, ate 5 lutas dos dados fornecidos>],
+      "layoff_warning": null,
+      "momentum_score": <0-10>,
+      "momentum_label": "<label>",
+      "momentum_trend": "ascending"|"descending"|"stable"|"resilient",
+      "momentum_note": "<explicacao com opiniao>"
+    }
+  },
+  "nivel_competicao": {
+    "fighter1": {"nome": "{f1_nome}", "media_oponentes": <1-5>, "media_oponentes_label": "<Ruim|Medio|Bom|Muito Bom|Excelente>", "aproveitamento": "<ex: 4W-1L (80%)>", "contra_top5": "<ex: 2W-1L>"},
+    "fighter2": {"nome": "{f2_nome}", "media_oponentes": <1-5>, "media_oponentes_label": "<Ruim|Medio|Bom|Muito Bom|Excelente>", "aproveitamento": "<ex: 3W-2L (60%)>", "contra_top5": "<ex: 0W-2L>"},
+    "oponentes_em_comum_count": {"fighter1": <num vitorias>, "fighter2": <num vitorias>},
+    "oponentes_em_comum_note": "<analise comparativa: nao so quem lidera, mas o que as diferencas de performance revelam>"
+  },
+  "oponente_comum": {
+    "oponente_nome": "<nome do oponente em comum mais relevante, ou null se nao houver>",
+    "fighter1_result": {"resultado": "<ex: Vitoria>", "metodo": "<KO R3>", "duracao": "<2 rounds + 1:34>", "contexto": "<contexto da luta na epoca>", "performance": "<analise da performance, nao resumo>", "evento": "<nome evento>", "data": "<Mes Ano>"},
+    "fighter2_result": {"resultado": "<ex: Derrota>", "metodo": "<Dec UD>", "duracao": "<5 rounds>", "contexto": "<contexto>", "performance": "<analise>", "evento": "<nome evento>", "data": "<Mes Ano>"},
+    "insight": "<insight comparativo de 2-3 linhas. Nao basta listar. Explique POR QUE a comparacao e relevante. Ex: MMA Math nao funciona, mas esta comparacao revela tendencias de estilo: enquanto X venceu usando grappling, Y perdeu justamente no grappling, sugerindo que... Se a comparacao nao revelar nada util, retorne oponente_comum: null>"
+  },
+  "perfil_habilidades": {
+    "skills": [
+      {"label": "Striking", "valueA": <0-100>, "valueB": <0-100>, "advantage": "fighter1"|"fighter2"|"even", "advantage_note": "<1 linha explicando POR QUE esse lutador tem vantagem nessa area>"},
+      {"label": "Volume", "valueA": <0-100>, "valueB": <0-100>, "advantage": "fighter1"|"fighter2"|"even", "advantage_note": "<1 linha>"},
+      {"label": "Grappling", "valueA": <0-100>, "valueB": <0-100>, "advantage": "fighter1"|"fighter2"|"even", "advantage_note": "<1 linha>"},
+      {"label": "Cardio", "valueA": <0-100>, "valueB": <0-100>, "advantage": "fighter1"|"fighter2"|"even", "advantage_note": "<1 linha>"},
+      {"label": "Defense", "valueA": <0-100>, "valueB": <0-100>, "advantage": "fighter1"|"fighter2"|"even", "advantage_note": "<1 linha>"},
+      {"label": "Finishing", "valueA": <0-100>, "valueB": <0-100>, "advantage": "fighter1"|"fighter2"|"even", "advantage_note": "<1 linha>"}
+    ]
+  },
+  "danger_zones": {
+    "zones": [
+      {"rounds": "R1-R2", "danger_level": <1-10>, "danger_label": "<PERIGO 9/10>", "color": "red"|"gold"|"green", "title": "<titulo especifico para esta luta>", "description": "<2-3 linhas explicando POR QUE esses rounds sao perigosos/seguros, com referencias a lutas anteriores>"},
+      {"rounds": "R3", "danger_level": <1-10>, "danger_label": "<PIVO 7/10>", "color": "gold", "title": "<titulo>", "description": "<2-3 linhas>"},
+      {"rounds": "R4-R5", "danger_level": <1-10>, "danger_label": "<label>", "color": "red"|"gold"|"green", "title": "<titulo>", "description": "<2-3 linhas>"}
+    ]
+  },
+  "intangiveis": {
+    "items": [
+      {"icon": "<AlertTriangle|Clock|TrendingUp|Zap|Brain|MapPin|Shield|Target|Eye|Activity|Heart|Flame|Star|Award|Users>", "title": "<titulo curto e especifico>", "fighter": "<nome lutador ou 'Ambos'>", "risk_level": "<RISCO ALTO|RISCO MEDIO|RISCO BAIXO|POSITIVO|ENORME POSITIVO|NEUTRO>", "risk_color": "red"|"yellow"|"green"|"neutral", "description": "<2-3 linhas com INFORMACAO REAL, nao especulacao vazia>"}
+    ]
+  },
+  "caminhos_vitoria": {
+    "fighter1": {
+      "nome": "{f1_nome}",
+      "total_probability": <soma dos cenarios>,
+      "scenarios": [
+        {"name": "<nome epico do cenario ESPECIFICO>", "probability": <percent>, "method": "<metodo ex: TKO R4-5 ou UD>", "description": "<2-3 linhas descrevendo COMO acontece passo a passo, referenciando lutas anteriores como evidencia>"}
+      ]
+    },
+    "fighter2": {
+      "nome": "{f2_nome}",
+      "total_probability": <soma>,
+      "scenarios": [<mesma estrutura, 3-4 cenarios>]
+    }
+  },
+  "previsao_final": {
+    "winner_name": "<nome completo do vencedor previsto>",
+    "winner_side": "fighter1"|"fighter2",
+    "predicted_method": "<metodo previsto>",
+    "confidence_score": <1-10>,
+    "confidence_label": "<BAIXA|MEDIA|MEDIA-ALTA|ALTA|MUITO ALTA>",
+    "explanation": "<4-6 linhas explicando a previsao com dados concretos E o que esta vitoria/derrota significa para a carreira de cada um e para a divisao>",
+    "x_factor": {"title": "<titulo especifico>", "description": "<algo concreto que pode virar a luta, nao generico>"},
+    "upset_alert": {"title": "<titulo>", "description": "<cenario especifico de como o underdog vence>"},
+    "probabilities": {
+      "fighter1": {"nome": "{f1_nome}", "percent": <0-100>},
+      "fighter2": {"nome": "{f2_nome}", "percent": <0-100>},
+      "draw": <0-5>
+    },
+    "value_picks": {
+      "moneyline": {"pick": "<nome do lutador>", "reasoning": "<justificativa com dados>"},
+      "method": {"pick": "<metodo especifico ex: KO/TKO, Finalizacao, Decisao>", "reasoning": "<justificativa>"},
+      "over_under": {"pick": "<Over ou Under>", "rounds": <numero>, "reasoning": "<justificativa baseada em historico>"},
+      "best_value": "<melhor aposta de valor em 1-2 linhas com justificativa concreta>"
+    }
+  },
+  "o_que_observar": {
+    "points": [
+      {"num": 1, "title": "<titulo>", "icon": "<nome icone Lucide>", "description": "<2-3 linhas com algo ESPECIFICO e OBSERVAVEL durante a luta>"},
+      {"num": 2, "title": "<titulo>", "icon": "<nome icone Lucide>", "description": "<2-3 linhas>"},
+      {"num": 3, "title": "<titulo>", "icon": "<nome icone Lucide>", "description": "<2-3 linhas>"},
+      {"num": 4, "title": "<titulo>", "icon": "<nome icone Lucide>", "description": "<2-3 linhas>"},
+      {"num": 5, "title": "<titulo>", "icon": "<nome icone Lucide>", "description": "<2-3 linhas>"}
+    ]
+  },
+  "creator_kit": {
+    "instagram": [
+      {"slide_number": 1, "title": "<titulo slide com gancho>", "content": "<conteudo PRONTO para postar, com dado impactante>", "color": "red"},
+      {"slide_number": 2, "title": "<titulo>", "content": "<conteudo com analise comparativa>", "color": "blue"},
+      {"slide_number": 3, "title": "<titulo>", "content": "<previsao com opiniao forte>", "color": "gold"}
+    ],
+    "twitter": [
+      {"num": "1/6", "text": "<tweet gancho controverso ou dado surpreendente>"},
+      {"num": "2/6", "text": "<tweet com stats comparativos>"},
+      {"num": "3/6", "text": "<tweet sobre o caminho de vitoria de F1>"},
+      {"num": "4/6", "text": "<tweet sobre o caminho de vitoria de F2>"},
+      {"num": "5/6", "text": "<tweet red flag ou intangivel que ninguem esta falando>"},
+      {"num": "6/6", "text": "<tweet previsao final com confianca>"}
+    ],
+    "video": [
+      {"time": "0-10s", "title": "Hook", "text": "<comece com dado chocante ou pergunta provocativa, NUNCA com 'fala galera'>"},
+      {"time": "10-25s", "title": "Os Numeros", "text": "<2-3 stats que contam uma historia>"},
+      {"time": "25-40s", "title": "A Dinamica", "text": "<o que torna esta luta unica>"},
+      {"time": "40-50s", "title": "Red Flags", "text": "<o que pode dar errado para cada um>"},
+      {"time": "50-60s", "title": "Previsao + CTA", "text": "<previsao confiante + call to action>"}
+    ],
+    "tiktok": [
+      {"hook": "<frase que prende em 2 segundos, dado chocante ou pergunta>", "body": "<conteudo principal 10-20 segundos>", "cta": "<call to action final>"},
+      {"hook": "<gancho diferente>", "body": "<conteudo>", "cta": "<cta>"},
+      {"hook": "<gancho diferente>", "body": "<conteudo>", "cta": "<cta>"}
+    ],
+    "headlines": [
+      "<titulo impactante para thumbnail 1>",
+      "<titulo para capa de carousel 2>",
+      "<titulo para artigo 3>",
+      "<titulo provocativo 4>",
+      "<titulo com dado surpreendente 5>"
+    ]
+  },
+  "betting_value": {
+    "moneyline": {"pick": "fighter1"|"fighter2", "fighter_name": "<nome>", "confidence": <1-10>, "reasoning": "<justificativa com dados>"},
+    "method": {"pick": "<metodo especifico>", "value_rating": <1-10>, "reasoning": "<justificativa>"},
+    "over_under": {"pick": "over"|"under", "rounds": <numero>, "reasoning": "<justificativa baseada em historico>"},
+    "bestBet": "<melhor aposta em 1 linha com justificativa>",
+    "avoidBet": "<aposta a evitar em 1 linha com justificativa>"
+  },
+  "distribuicao_vitorias_insight": "<insight de 2-3 linhas sobre a distribuicao de vitorias comparada, tirando uma CONCLUSAO sobre o que isso significa para esta luta>"
+}
+
+LEMBRETES FINAIS:
+- Probabilidades fighter1 + fighter2 + draw devem somar ~100%.
+- Em caminhos_vitoria, os cenarios de cada lutador devem somar o total_probability daquele lutador.
+- quality_score e media_oponentes usam escala 1-5 com label obrigatorio.
+- perfil_habilidades NAO tem fighter1_total/fighter2_total. Cada skill tem advantage e advantage_note.
+- previsao_final inclui value_picks com moneyline, method, over_under, best_value.
+- creator_kit inclui tiktok (3 scripts) e headlines (5 titulos).
+- Gere ate 5 lutas recentes por lutador no momento_atual (use os dados de fight history fornecidos).
+- Gere 5-8 itens em intangiveis (nenhum generico).
+- Gere 3-4 cenarios por lutador em caminhos_vitoria.
+- Se nao houver oponente em comum relevante nos dados, retorne "oponente_comum": null.
+- Cada secao deve funcionar SOZINHA. Um criador de conteudo deve poder usar qualquer secao isoladamente.
+- NUNCA use "Lutador 1" ou "Lutador 2" no texto. Use o nome real SEMPRE.
+
+RESPONDA APENAS COM O JSON, SEM TEXTO ADICIONAL.`;
+
+// ---------------------------------------------------------------------------
+// generateFullAnalysis — Premium 14-section single fight analysis
+// ---------------------------------------------------------------------------
+
+export async function generateFullAnalysis(
+  event: EventData,
+  fight: FightData
+): Promise<FullAnalysisData> {
+  const f1 = fight.lutador1;
+  const f2 = fight.lutador2;
+
+  console.log(`[FULL-ANALYSIS] Starting premium analysis: ${f1.nome} vs ${f2.nome}`);
+
+  // 1. Scrape enhanced profiles + web research (parallel)
+  console.log(`[FULL-ANALYSIS] Scraping enhanced profiles + web research...`);
+  const [f1Profile, f2Profile, f1Images, f2Images, researchBriefing] = await Promise.all([
+    getEnhancedFighterProfile(f1.nome, 10),
+    getEnhancedFighterProfile(f2.nome, 10),
+    getFighterImageUrls((f1 as FighterData & { ufc_slug?: string }).ufc_slug || buildUfcSlug(f1.nome)),
+    getFighterImageUrls((f2 as FighterData & { ufc_slug?: string }).ufc_slug || buildUfcSlug(f2.nome)),
+    conductFightResearch(f1.nome, f2.nome, event.nome, event.data_evento, fight.categoria_peso, fight.is_titulo),
+  ]);
+
+  if (researchBriefing) {
+    console.log(`[FULL-ANALYSIS] Web research: ${researchBriefing.sources_count} sources, ${researchBriefing.key_facts?.length || 0} key facts`);
+  } else {
+    console.warn(`[FULL-ANALYSIS] Web research unavailable, proceeding with UFCStats only`);
+  }
+
+  if (!f1Profile || !f2Profile) {
+    throw new Error(`Could not scrape enhanced profiles for ${!f1Profile ? f1.nome : f2.nome}`);
+  }
+
+  console.log(`[FULL-ANALYSIS] Profiles: F1 ${f1Profile.fightHistory.length} fights, F2 ${f2Profile.fightHistory.length} fights`);
+
+  // 2. Compute derived metrics
+  const metrics1 = calculateDerivedMetrics(f1Profile, { academia: f1.academia, stance: null });
+  const metrics2 = calculateDerivedMetrics(f2Profile, { academia: f2.academia, stance: null });
+  const comparison = compareFighters(f1Profile, metrics1, f2Profile, metrics2);
+
+  // 3. Pre-compute data sections
+  const precomputedStats = computeStatComparison(f1Profile, f2Profile);
+  const precomputedWins = computeWinDistribution(f1, f2);
+  const precomputedCommon = computeCommonOpponent(comparison, f1.nome, f2.nome);
+
+  // Add tale of tape enrichment from DB data
+  precomputedStats.tale_of_tape.push(
+    { label: 'Idade', fighter1: f1.idade ? `${f1.idade} anos` : 'N/A', fighter2: f2.idade ? `${f2.idade} anos` : 'N/A' },
+    { label: 'Gym', fighter1: f1.academia || 'N/A', fighter2: f2.academia || 'N/A' },
+  );
+
+  // 4. Build enhanced stats block for prompt
+  const realStatsBlock = [
+    formatEnhancedDataPackage('FIGHTER 1', f1Profile, metrics1),
+    '',
+    formatEnhancedDataPackage('FIGHTER 2', f2Profile, metrics2),
+    '',
+    formatHeadToHeadComparison(f1Profile, metrics1, f2Profile, metrics2, comparison),
+  ].join('\n');
+
+  // 5. Build research block and call Claude with full analysis prompt
+  const researchBlock = formatResearchBriefing(researchBriefing, f1.nome, f2.nome);
+  const corrections = extractEventCorrections(researchBriefing);
+
+  // Override fight data with corrections from web research before building prompt
+  const correctedFight = {
+    ...fight,
+    rounds: corrections.num_rounds || fight.rounds,
+    is_titulo: corrections.titulo_em_jogo ? true : fight.is_titulo,
+  };
+
+  const tituloText = corrections.titulo_em_jogo || (fight.is_titulo ? 'Disputa de Titulo' : 'Sem titulo em jogo');
+
+  const prompt = fillFightPromptTemplate(FULL_ANALYSIS_PROMPT, event, correctedFight, realStatsBlock)
+    .replace('{titulo_luta}', tituloText)
+    .replace('{research_block}', researchBlock);
+
+  console.log(`[FULL-ANALYSIS] Calling Claude (Sonnet 4.6 + Fight Analyst persona) for 14-section analysis...`);
+
+  const response = await anthropic.messages.create({
+    model: 'claude-sonnet-4-6',
+    max_tokens: 16384,
+    temperature: 0.4,
+    system: FIGHT_ANALYST_SYSTEM,
+    messages: [{ role: 'user', content: prompt }],
+  });
+
+  const content = response.content[0];
+  if (content.type !== 'text') {
+    throw new Error('Unexpected response format from Claude');
+  }
+
+  const aiResult = parseClaudeJsonResponse(content.text) as Record<string, unknown>;
+  console.log(`[FULL-ANALYSIS] Claude response parsed. Merging pre-computed data...`);
+
+  // 6. Merge pre-computed data + AI output into FullAnalysisData
+  const f1Sobrenome = f1.nome.split(' ').pop() || f1.nome;
+  const f2Sobrenome = f2.nome.split(' ').pop() || f2.nome;
+
+  const heroAI = aiResult.hero as Record<string, unknown> || {};
+  const narrativaAI = aiResult.narrativa as Record<string, unknown> || {};
+  const momentoAI = aiResult.momento_atual as Record<string, unknown> || {};
+  const nivelAI = aiResult.nivel_competicao as Record<string, unknown> || {};
+  const oponenteAI = aiResult.oponente_comum as Record<string, unknown> | null;
+  const habilidadesAI = aiResult.perfil_habilidades as Record<string, unknown> || {};
+  const dangerAI = aiResult.danger_zones as Record<string, unknown> || {};
+  const intangiveisAI = aiResult.intangiveis as Record<string, unknown> || {};
+  const caminhosAI = aiResult.caminhos_vitoria as Record<string, unknown> || {};
+  const previsaoAI = aiResult.previsao_final as Record<string, unknown> || {};
+  const observarAI = aiResult.o_que_observar as Record<string, unknown> || {};
+  const creatorAI = aiResult.creator_kit as Record<string, unknown> || {};
+  const bettingAI = aiResult.betting_value as Record<string, unknown> | undefined;
+
+  const eventoData = new Date(event.data_evento);
+  const eventoDataStr = eventoData.toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' });
+
+  // 6b. Apply event corrections from web research (fix DB errors like wrong rounds/title)
+  const eventCorrections = extractEventCorrections(researchBriefing);
+
+  const fullAnalysis: FullAnalysisData = {
+    hero: {
+      evento_nome: event.nome,
+      evento_data: eventoDataStr,
+      evento_local: [event.local_evento, event.cidade, event.pais].filter(Boolean).join(', '),
+      categoria_peso: fight.categoria_peso,
+      num_rounds: eventCorrections.num_rounds || fight.rounds,
+      titulo_em_jogo: eventCorrections.titulo_em_jogo || (fight.is_titulo ? 'Disputa de Titulo' : null),
+      tagline: (heroAI.tagline as string) || '',
+      tagline_sub: (heroAI.tagline_sub as string) || '',
+      fighter1: {
+        nome_completo: f1.nome,
+        apelido: f1.apelido || '',
+        sobrenome: f1Sobrenome,
+        record: `${f1.vitorias}-${f1.derrotas}-${f1.empates}`,
+        ranking: f1.ranking_divisao ? `#${f1.ranking_divisao} ${fight.categoria_peso}` : fight.categoria_peso,
+        info_extra: [f1.cidade_natal, f1.idade ? `${f1.idade} anos` : null].filter(Boolean).join(' | '),
+        imagem_fullbody_url: f1Images.fullBodyUrl || (f1 as FighterData & { imagem_fullbody_url?: string }).imagem_fullbody_url || null,
+      },
+      fighter2: {
+        nome_completo: f2.nome,
+        apelido: f2.apelido || '',
+        sobrenome: f2Sobrenome,
+        record: `${f2.vitorias}-${f2.derrotas}-${f2.empates}`,
+        ranking: f2.ranking_divisao ? `#${f2.ranking_divisao} ${fight.categoria_peso}` : fight.categoria_peso,
+        info_extra: [f2.cidade_natal, f2.idade ? `${f2.idade} anos` : null].filter(Boolean).join(' | '),
+        imagem_fullbody_url: f2Images.fullBodyUrl || (f2 as FighterData & { imagem_fullbody_url?: string }).imagem_fullbody_url || null,
+      },
+    },
+    narrativa: narrativaAI as unknown as FullAnalysisData['narrativa'],
+    momento_atual: momentoAI as unknown as FullAnalysisData['momento_atual'],
+    nivel_competicao: nivelAI as unknown as FullAnalysisData['nivel_competicao'],
+    oponente_comum: oponenteAI ? (oponenteAI as unknown as FullAnalysisData['oponente_comum']) : (precomputedCommon || null),
+    comparacao_estatistica: precomputedStats,
+    perfil_habilidades: habilidadesAI as unknown as FullAnalysisData['perfil_habilidades'],
+    distribuicao_vitorias: {
+      ...precomputedWins,
+      insight: (aiResult.distribuicao_vitorias_insight as string) || precomputedWins.insight,
+    },
+    danger_zones: dangerAI as unknown as FullAnalysisData['danger_zones'],
+    intangiveis: intangiveisAI as unknown as FullAnalysisData['intangiveis'],
+    caminhos_vitoria: caminhosAI as unknown as FullAnalysisData['caminhos_vitoria'],
+    previsao_final: previsaoAI as unknown as FullAnalysisData['previsao_final'],
+    o_que_observar: observarAI as unknown as FullAnalysisData['o_que_observar'],
+    creator_kit: creatorAI as unknown as FullAnalysisData['creator_kit'],
+    betting_value: bettingAI ? (bettingAI as unknown as FullAnalysisData['betting_value']) : null,
+  };
+
+  console.log(`[FULL-ANALYSIS] Premium analysis complete: ${f1.nome} vs ${f2.nome}`);
+  return fullAnalysis;
 }

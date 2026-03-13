@@ -103,19 +103,24 @@ Write the file at `src/app/analise/evento/[event-slug]/page.tsx`.
 ```tsx
 import { EventAnalysisView } from '@/components/analise/EventAnalysisView';
 import type { EventAnalysisData } from '@/components/analise/EventAnalysisView';
+import { enrichEventWithPhotos } from '@/lib/enrich-event-photos';
 
 const eventData: EventAnalysisData = {
   // ... assembled data from Step 2
 };
 
-export default function Evento[EventName]Page() {
-  return <EventAnalysisView data={eventData} />;
+export default async function Evento[EventName]Page() {
+  const enrichedData = await enrichEventWithPhotos(eventData);
+  return <EventAnalysisView data={enrichedData} />;
 }
 ```
 
+**IMPORTANT: The page MUST be an async server component.** `enrichEventWithPhotos` queries the database for fighter photos by name and injects `foto_url` into each fighter object. The `EventAnalysisView` (client component) then renders photos alongside fighter names. If a fighter's name doesn't match the database exactly, the photo silently falls back to not showing (no error).
+
 **Existing components (DO NOT modify):**
-- `src/components/analise/EventAnalysisView.tsx` - renders the event overview layout
-- `src/components/analise/EventAnalysisCard.tsx` - renders individual fight cards
+- `src/components/analise/EventAnalysisView.tsx` - renders the event overview layout (client component with interactivity)
+- `src/components/analise/EventAnalysisCard.tsx` - renders individual fight cards with fighter photos
+- `src/lib/enrich-event-photos.ts` - queries DB for fighter photos, logs missing matches to console
 
 ### Step 4: Type Check
 

@@ -122,11 +122,38 @@ export default async function Evento[EventName]Page() {
 - `src/components/analise/EventAnalysisCard.tsx` - renders individual fight cards with fighter photos
 - `src/lib/enrich-event-photos.ts` - queries DB for fighter photos, logs missing matches to console
 
-### Step 4: Type Check
+### Step 4: Register Event in Event Registry
 
-Run `npx tsc --noEmit` to verify no TypeScript errors in the generated page.
+Add a new entry to `src/lib/event-registry.ts` in the `EVENT_REGISTRY` array. This controls when the analysis appears on the `/analises` page.
 
-### Step 5: Report
+**How to get `evento_datetime`:** The Card Scraper provides the event date. Use WebSearch to find the exact main card start time (search for "[event name] start time"). Convert to UTC ISO 8601 format. Example: 8pm ET = 1am UTC next day → `2026-03-15T01:00:00Z`.
+
+**Entry format:**
+
+```typescript
+{
+  slug: 'smith-vs-jones',                              // same as event page folder name
+  evento_nome: 'UFC 327: Smith vs Jones',              // from scrapedCard
+  evento_data: '22 de Marco, 2026',                    // from scrapedCard (Portuguese)
+  evento_local: 'T-Mobile Arena, Las Vegas, NV, EUA',  // from scrapedCard
+  evento_datetime: '2026-03-23T03:00:00Z',             // main card start in UTC
+  main_event: { fighter1: 'John Smith', fighter2: 'Tom Jones' },  // main event fighters
+  total_fights: 14,                                     // main_card.length + prelims.length
+},
+```
+
+**IMPORTANT:** Add the entry at the TOP of the array (newest first). Do NOT remove existing entries.
+
+**Publication logic (automatic, do not modify):**
+- `now < (evento - 48h)` → hidden (analysis exists but not shown)
+- `(evento - 48h) < now < (evento + 6h)` → "Analise Semanal" (active)
+- `now > (evento + 6h)` → "Analises Anteriores" (past)
+
+### Step 5: Type Check
+
+Run `npx tsc --noEmit` to verify no TypeScript errors in the generated page AND the registry update.
+
+### Step 6: Report
 
 Output a summary:
 
@@ -137,6 +164,8 @@ PAGINA DO EVENTO GERADA:
   Main Card: [N] lutas
   Prelims: [M] lutas
   Total: [N+M] lutas
+  Registry: entry added to event-registry.ts
+  Publicacao automatica: [datetime - 48h] (UTC)
   TypeScript: [PASS/FAIL]
 ```
 

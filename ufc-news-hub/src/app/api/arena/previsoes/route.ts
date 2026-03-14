@@ -63,6 +63,51 @@ export async function GET(request: NextRequest) {
       params
     );
 
+    // Consenso da comunidade: só disponível após o deadline (1h antes do evento)
+    const comunidade = searchParams.get('comunidade');
+    if (comunidade === 'true' && evento_id) {
+      const evento = await queryOne<{ data_evento: string }>(
+        `SELECT data_evento FROM eventos WHERE id = $1`,
+        [evento_id]
+      );
+
+      if (evento) {
+        const deadline = new Date(evento.data_evento).getTime() - 60 * 60 * 1000;
+        const revelado = Date.now() > deadline;
+
+        if (revelado) {
+          const rows = await query<{ luta_id: string; vencedor_previsto_id: string; count: number }>(
+            `SELECT p.luta_id, p.vencedor_previsto_id, COUNT(*)::int as count
+             FROM previsoes p
+             WHERE p.evento_id = $1
+             GROUP BY p.luta_id, p.vencedor_previsto_id`,
+            [evento_id]
+          );
+
+          // Aggregate by luta_id then compute percentages
+          const totals: Record<string, number> = {};
+          for (const row of rows) {
+            totals[row.luta_id] = (totals[row.luta_id] ?? 0) + row.count;
+          }
+
+          const consenso: Record<string, Array<{ vencedor_previsto_id: string; count: number; percent: number }>> = {};
+          for (const row of rows) {
+            if (!consenso[row.luta_id]) consenso[row.luta_id] = [];
+            const total = totals[row.luta_id] ?? 1;
+            consenso[row.luta_id].push({
+              vencedor_previsto_id: row.vencedor_previsto_id,
+              count: row.count,
+              percent: Math.round((row.count / total) * 100),
+            });
+          }
+
+          return NextResponse.json({ previsoes, consenso, revelado: true });
+        }
+
+        return NextResponse.json({ previsoes, revelado: false });
+      }
+    }
+
     return NextResponse.json({ previsoes });
   } catch (error) {
     console.error('Erro ao buscar previsões:', error);

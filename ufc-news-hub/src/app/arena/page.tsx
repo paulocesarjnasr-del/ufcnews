@@ -1,420 +1,88 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
-import FighterImage from '@/components/ui/FighterImage';
-import { Countdown } from '@/components/calendario/Countdown';
+import { Target, Swords, UserPlus } from 'lucide-react';
 import { useArenaAuth } from '@/hooks/useArenaAuth';
-import { verificarStatusPrevisoes, PrevisoesStatus } from '@/lib/arena/previsoes-horario';
-import { CheckCircle, Circle, Clock, Zap, Lock as LockIcon, Scale } from 'lucide-react';
-import { EventoComLutas } from '@/types';
+import { DashboardTabs } from '@/components/arena/DashboardTabs';
+import { TabEvento } from '@/components/arena/TabEvento';
+import { TabStats } from '@/components/arena/TabStats';
+import { TabSocial } from '@/components/arena/TabSocial';
 
-interface LiveFight {
-  id: string;
-  ordem: number;
-  tipo: string;
-  status: string;
-  vencedor_id: string | null;
-  metodo: string | null;
-  round_final: number | null;
-  tempo_final: string | null;
-  lutador1_nome: string;
-  lutador2_nome: string;
-  lutador1_id: string;
-  lutador2_id: string;
+function LandingPage() {
+  return (
+    <div className="container mx-auto px-4 py-12 text-center">
+      <div className="max-w-lg mx-auto space-y-8">
+        <div>
+          <Target className="w-16 h-16 text-ufc-red mx-auto mb-4" />
+          <h1 className="font-display text-4xl uppercase text-white">
+            Arena <span className="text-ufc-red">UFC</span>
+          </h1>
+          <p className="text-dark-textMuted mt-3 text-lg">
+            Faca suas previsoes, compita com amigos e prove que voce entende de UFC.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-left">
+          <div className="neu-card p-4">
+            <Swords className="w-6 h-6 text-ufc-red mb-2" />
+            <h3 className="font-display text-sm uppercase text-white">Preveja</h3>
+            <p className="text-xs text-dark-textMuted mt-1">Escolha os vencedores de cada luta</p>
+          </div>
+          <div className="neu-card p-4">
+            <Target className="w-6 h-6 text-ufc-gold mb-2" />
+            <h3 className="font-display text-sm uppercase text-white">Pontue</h3>
+            <p className="text-xs text-dark-textMuted mt-1">Ganhe pontos por acertos</p>
+          </div>
+          <div className="neu-card p-4">
+            <UserPlus className="w-6 h-6 text-green-400 mb-2" />
+            <h3 className="font-display text-sm uppercase text-white">Compita</h3>
+            <p className="text-xs text-dark-textMuted mt-1">Crie ligas e desafie amigos</p>
+          </div>
+        </div>
+
+        <div className="flex flex-col sm:flex-row gap-3 justify-center">
+          <Link
+            href="/arena/registro"
+            className="neu-button px-8 py-3 bg-ufc-red hover:bg-ufc-redLight text-white font-display uppercase tracking-wide rounded-xl transition-colors"
+          >
+            Criar Conta
+          </Link>
+          <Link
+            href="/arena/login"
+            className="neu-button px-8 py-3 bg-dark-card hover:bg-dark-border text-dark-text font-display uppercase tracking-wide rounded-xl transition-colors border border-dark-border"
+          >
+            Ja tenho conta
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export default function ArenaPage() {
-  const { isAuthenticated } = useArenaAuth();
-  const [proximoEvento, setProximoEvento] = useState<EventoComLutas & { poster_url?: string; horario_main_card?: string } | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [previsoesStatus, setPrevisoesStatus] = useState<PrevisoesStatus | null>(null);
-  const [liveResults, setLiveResults] = useState<LiveFight[] | null>(null);
+  const { isAuthenticated, isLoading } = useArenaAuth();
 
-  useEffect(() => {
-    fetchProximoEvento();
-  }, []);
-
-  useEffect(() => {
-    if (proximoEvento) {
-      const status = verificarStatusPrevisoes(
-        proximoEvento.data_evento,
-        proximoEvento.horario_main_card
-      );
-      setPrevisoesStatus(status);
-
-      // Atualiza o status a cada minuto
-      const interval = setInterval(() => {
-        const newStatus = verificarStatusPrevisoes(
-          proximoEvento.data_evento,
-          proximoEvento.horario_main_card
-        );
-        setPrevisoesStatus(newStatus);
-      }, 60000);
-
-      return () => clearInterval(interval);
-    }
-  }, [proximoEvento]);
-
-  // Live results polling (30s) when event is ao_vivo
-  useEffect(() => {
-    if (!proximoEvento || proximoEvento.status !== 'ao_vivo') return;
-
-    const poll = async () => {
-      try {
-        const res = await fetch(`/api/eventos/${proximoEvento.id}/live`);
-        if (res.ok) {
-          const data = await res.json() as { lutas: LiveFight[] };
-          setLiveResults(data.lutas);
-        }
-      } catch (err) {
-        console.error('[ARENA] Erro ao buscar resultados ao vivo:', err);
-      }
-    };
-
-    poll();
-    const interval = setInterval(poll, 30000);
-    return () => clearInterval(interval);
-  }, [proximoEvento]);
-
-  async function fetchProximoEvento() {
-    try {
-      const res = await fetch('/api/eventos/semanal');
-      if (res.ok) {
-        const data = await res.json();
-        setProximoEvento(data);
-      }
-    } catch (error) {
-      console.error('Erro ao carregar evento:', error);
-    } finally {
-      setIsLoading(false);
-    }
+  if (isLoading) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="h-64 rounded-xl bg-dark-card animate-pulse" />
+      </div>
+    );
   }
 
-  // Imagem de background (poster do evento ou fallback)
-  // Prioridade: poster_url > imagem_url > fallback genérico
-  const backgroundImage = proximoEvento?.poster_url || proximoEvento?.imagem_url;
-
-  // Fallback: se não tiver imagem, usa um gradient vermelho/escuro temático
-  const hasBackgroundImage = !!backgroundImage;
+  if (!isAuthenticated) {
+    return <LandingPage />;
+  }
 
   return (
-    <div className="min-h-screen bg-dark-bg relative">
-      {/* Background do evento */}
-      {hasBackgroundImage ? (
-        <div className="absolute inset-0 z-0">
-          <Image
-            src={backgroundImage}
-            alt=""
-            fill
-            className="object-cover object-top"
-            priority
-            onError={(e) => {
-              // Se a imagem falhar ao carregar, esconde ela
-              console.log('[ARENA] Erro ao carregar poster, usando fallback');
-              (e.target as HTMLImageElement).style.display = 'none';
-            }}
-          />
-          {/* Overlay gradiente para legibilidade */}
-          <div className="absolute inset-0 bg-gradient-to-b from-dark-bg/70 via-dark-bg/85 to-dark-bg" />
-        </div>
-      ) : (
-        // Fallback: gradient temático quando não há poster
-        <div className="absolute inset-0 z-0">
-          <div className="absolute inset-0 bg-gradient-to-br from-ufc-red/20 via-dark-bg to-dark-bg" />
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-ufc-red/10 via-transparent to-transparent" />
-        </div>
-      )}
-
-      {/* Main content */}
-      <main className="relative z-10 container mx-auto px-4">
-          {isLoading ? (
-            <div className="flex items-center justify-center min-h-[60vh]">
-              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-ufc-red" />
-            </div>
-          ) : proximoEvento ? (
-            <div className="flex flex-col items-center justify-center min-h-[80vh] py-8">
-              {/* Nome do evento */}
-              <div className="text-center mb-6">
-                <p className="text-dark-textMuted uppercase tracking-widest text-sm mb-2">
-                  Proximo Evento
-                </p>
-                <h1 className="font-display text-4xl md:text-6xl uppercase text-white">
-                  {proximoEvento.nome}
-                </h1>
-                {proximoEvento.local_evento && (
-                  <p className="text-dark-textMuted mt-2">
-                    {proximoEvento.local_evento}
-                    {proximoEvento.cidade && `, ${proximoEvento.cidade}`}
-                  </p>
-                )}
-              </div>
-
-              {/* Countdown */}
-              <div className="mb-8">
-                <Countdown targetDate={proximoEvento.data_evento} />
-              </div>
-
-              {/* Status das previsoes */}
-              {previsoesStatus && (
-                <div className={`mb-8 px-6 py-3 rounded-full border ${
-                  previsoesStatus.isOpen
-                    ? 'bg-green-500/10 border-green-500/50 text-green-400'
-                    : 'bg-ufc-red/10 border-ufc-red/50 text-ufc-red'
-                }`}>
-                  <p className="text-sm font-medium flex items-center gap-2">
-                    <span className={`w-2 h-2 rounded-full ${
-                      previsoesStatus.isOpen ? 'bg-green-400 animate-pulse' : 'bg-ufc-red'
-                    }`} />
-                    {previsoesStatus.message}
-                  </p>
-                </div>
-              )}
-
-              {/* Botoes de acao */}
-              <div className="flex flex-col items-center gap-4 w-full max-w-md">
-                {/* Botao principal - Fazer previsoes */}
-                {previsoesStatus?.isOpen ? (
-                  <Link
-                    href={isAuthenticated ? `/arena/evento/${proximoEvento.id}` : '/arena/login'}
-                    className="w-full py-4 px-8 bg-ufc-red hover:bg-ufc-redLight text-white font-display text-lg uppercase tracking-wider rounded-lg transition-all transform hover:scale-105 flex items-center justify-center gap-3 shadow-lg shadow-ufc-red/30"
-                  >
-                    <Zap className="w-6 h-6" />
-                    <span>Faca suas Previsoes</span>
-                  </Link>
-                ) : (
-                  <div className="w-full py-4 px-8 bg-dark-card border border-dark-border text-dark-textMuted font-display text-lg uppercase tracking-wider rounded-lg flex items-center justify-center gap-3 cursor-not-allowed">
-                    <LockIcon className="w-6 h-6" />
-                    <span>Previsoes Fechadas</span>
-                  </div>
-                )}
-
-                {/* Botao secundario - Ver Fight Card do nosso site */}
-                <Link
-                  href={`/arena/evento/${proximoEvento.id}`}
-                  className="w-full py-3 px-8 bg-dark-card/80 hover:bg-dark-card border border-dark-border hover:border-ufc-gold/50 text-white font-medium rounded-lg transition-colors flex items-center justify-center gap-3"
-                >
-                  <Scale className="w-5 h-5 text-ufc-gold" />
-                  <span>Ver Fight Card Completo</span>
-                </Link>
-              </div>
-
-              {/* Info cards - Main Event preview */}
-              {proximoEvento.lutas && proximoEvento.lutas.length > 0 && (
-                <div className="mt-12 w-full max-w-2xl">
-                  <div className="bg-dark-card/60 backdrop-blur-sm border border-dark-border rounded-xl p-6">
-                    <p className="text-center text-dark-textMuted text-sm uppercase tracking-wider mb-4">
-                      Main Event
-                    </p>
-
-                    {/* Main event fighters */}
-                    {(() => {
-                      // Encontrar main event: primeiro por tipo, depois por titulo, depois por maior ordem
-                      const mainEvent =
-                        proximoEvento.lutas.find(l => l.tipo === 'main_event') ||
-                        proximoEvento.lutas.find(l => l.is_titulo) ||
-                        proximoEvento.lutas.reduce((max, l) => (l.ordem > (max?.ordem || 0) ? l : max), proximoEvento.lutas[0]);
-                      if (!mainEvent) return null;
-
-                      return (
-                        <div className="flex items-center justify-between gap-4">
-                          {/* Fighter 1 */}
-                          <div className="flex-1 text-center">
-                            <div className="w-20 h-20 mx-auto mb-2 rounded-full overflow-hidden bg-dark-border">
-                              {mainEvent.lutador1?.imagem_url ? (
-                                <FighterImage
-                                  src={mainEvent.lutador1.imagem_url}
-                                  alt={mainEvent.lutador1.nome}
-                                  width={80}
-                                  height={80}
-                                  className="w-full h-full object-cover object-top"
-                                />
-                              ) : (
-                                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#3a1c1c] via-[#2a2a2a] to-[#1a1a2e]">
-                                  <span className="text-xl font-bold text-white/40 select-none">
-                                    {mainEvent.lutador1?.nome?.split(' ').map((w: string) => w[0]).filter(Boolean).slice(0, 2).join('').toUpperCase()}
-                                  </span>
-                                </div>
-                              )}
-                            </div>
-                            <p className="font-bold text-white text-sm">{mainEvent.lutador1?.nome}</p>
-                            <p className="text-xs text-dark-textMuted">
-                              {mainEvent.lutador1?.vitorias || 0}-{mainEvent.lutador1?.derrotas || 0}
-                            </p>
-                          </div>
-
-                          {/* VS */}
-                          <div className="flex flex-col items-center">
-                            <span className="font-display text-2xl text-ufc-red">VS</span>
-                            {mainEvent.is_titulo && (
-                              <span className="mt-1 px-2 py-0.5 bg-ufc-gold/20 border border-ufc-gold/40 rounded text-xs text-ufc-gold">
-                                TITULO
-                              </span>
-                            )}
-                          </div>
-
-                          {/* Fighter 2 */}
-                          <div className="flex-1 text-center">
-                            <div className="w-20 h-20 mx-auto mb-2 rounded-full overflow-hidden bg-dark-border">
-                              {mainEvent.lutador2?.imagem_url ? (
-                                <FighterImage
-                                  src={mainEvent.lutador2.imagem_url}
-                                  alt={mainEvent.lutador2.nome}
-                                  width={80}
-                                  height={80}
-                                  className="w-full h-full object-cover object-top"
-                                />
-                              ) : (
-                                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#3a1c1c] via-[#2a2a2a] to-[#1a1a2e]">
-                                  <span className="text-xl font-bold text-white/40 select-none">
-                                    {mainEvent.lutador2?.nome?.split(' ').map((w: string) => w[0]).filter(Boolean).slice(0, 2).join('').toUpperCase()}
-                                  </span>
-                                </div>
-                              )}
-                            </div>
-                            <p className="font-bold text-white text-sm">{mainEvent.lutador2?.nome}</p>
-                            <p className="text-xs text-dark-textMuted">
-                              {mainEvent.lutador2?.vitorias || 0}-{mainEvent.lutador2?.derrotas || 0}
-                            </p>
-                          </div>
-                        </div>
-                      );
-                    })()}
-
-                    {/* Card info */}
-                    <div className="mt-4 pt-4 border-t border-dark-border flex items-center justify-center gap-6 text-sm">
-                      <span className="text-dark-textMuted">
-                        <span className="text-white font-medium">{proximoEvento.lutas.length}</span> lutas
-                      </span>
-                      {proximoEvento.total_lutas && proximoEvento.total_lutas > 0 && (
-                        <span className="text-dark-textMuted">
-                          Card completo
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Live Results Card */}
-              {proximoEvento.status === 'ao_vivo' && liveResults && liveResults.length > 0 && (
-                <div className="mt-8 w-full max-w-2xl">
-                  <div className="bg-dark-card/60 backdrop-blur-sm border border-dark-border rounded-xl overflow-hidden">
-                    {/* Live header */}
-                    <div className="px-6 py-3 bg-ufc-red/10 border-b border-ufc-red/20 flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <span className="w-2 h-2 rounded-full bg-ufc-red animate-pulse" />
-                        <span className="font-display text-sm uppercase text-ufc-red tracking-wider">
-                          Ao Vivo
-                        </span>
-                      </div>
-                      <span className="text-xs text-dark-textMuted">
-                        Atualiza a cada 30s
-                      </span>
-                    </div>
-
-                    {/* Fight results list */}
-                    <div className="divide-y divide-dark-border/50">
-                      {liveResults.map((luta) => {
-                        const isFinished = luta.status === 'finalizada';
-                        const isLive = luta.status === 'ao_vivo';
-
-                        return (
-                          <div key={luta.id} className={`px-6 py-4 ${isLive ? 'bg-ufc-red/5' : ''}`}>
-                            <div className="flex items-center justify-between">
-                              {/* Fighters */}
-                              <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-2">
-                                  <span className={`text-sm font-medium ${
-                                    isFinished && luta.vencedor_id === luta.lutador1_id
-                                      ? 'text-green-400'
-                                      : isFinished && luta.vencedor_id
-                                        ? 'text-dark-textMuted'
-                                        : 'text-white'
-                                  }`}>
-                                    {luta.lutador1_nome}
-                                  </span>
-                                  {isFinished && luta.vencedor_id === luta.lutador1_id && (
-                                    <CheckCircle className="w-4 h-4 text-green-400 flex-shrink-0" />
-                                  )}
-                                </div>
-                                <div className="flex items-center gap-2 mt-1">
-                                  <span className={`text-sm font-medium ${
-                                    isFinished && luta.vencedor_id === luta.lutador2_id
-                                      ? 'text-green-400'
-                                      : isFinished && luta.vencedor_id
-                                        ? 'text-dark-textMuted'
-                                        : 'text-white'
-                                  }`}>
-                                    {luta.lutador2_nome}
-                                  </span>
-                                  {isFinished && luta.vencedor_id === luta.lutador2_id && (
-                                    <CheckCircle className="w-4 h-4 text-green-400 flex-shrink-0" />
-                                  )}
-                                </div>
-                              </div>
-
-                              {/* Status */}
-                              <div className="flex-shrink-0 text-right">
-                                {isFinished ? (
-                                  <div>
-                                    <p className="text-xs text-green-400 font-medium">
-                                      {luta.metodo?.replace(/-/g, ' ') || 'Finalizada'}
-                                    </p>
-                                    {luta.round_final && (
-                                      <p className="text-xs text-dark-textMuted">
-                                        R{luta.round_final}
-                                        {luta.tempo_final && ` ${luta.tempo_final}`}
-                                      </p>
-                                    )}
-                                  </div>
-                                ) : isLive ? (
-                                  <div className="flex items-center gap-1.5">
-                                    <Circle className="w-3 h-3 text-ufc-red fill-ufc-red animate-pulse" />
-                                    <span className="text-xs text-ufc-red font-medium">Em andamento</span>
-                                  </div>
-                                ) : (
-                                  <div className="flex items-center gap-1.5">
-                                    <Clock className="w-3 h-3 text-dark-textMuted" />
-                                    <span className="text-xs text-dark-textMuted">Pendente</span>
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Quick links - nao logado */}
-              {!isAuthenticated && (
-                <div className="mt-8 flex items-center gap-4">
-                  <p className="text-dark-textMuted text-sm">Novo por aqui?</p>
-                  <Link
-                    href="/arena/registro"
-                    className="text-ufc-red hover:text-ufc-redLight text-sm font-medium"
-                  >
-                    Criar conta gratis →
-                  </Link>
-                </div>
-              )}
-            </div>
-          ) : (
-            <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
-              <div className="text-6xl mb-4">🥊</div>
-              <h2 className="font-display text-2xl uppercase text-white mb-2">
-                Nenhum evento agendado
-              </h2>
-              <p className="text-dark-textMuted">
-                Volte em breve para fazer suas previsoes!
-              </p>
-            </div>
-          )}
-      </main>
+    <div className="container mx-auto py-4">
+      <DashboardTabs
+        tabs={[
+          { label: 'Evento', content: <TabEvento /> },
+          { label: 'Stats', content: <TabStats /> },
+          { label: 'Social', content: <TabSocial /> },
+        ]}
+      />
     </div>
   );
 }

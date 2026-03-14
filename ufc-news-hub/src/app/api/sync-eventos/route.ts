@@ -122,9 +122,9 @@ function parseEventsList(html: string): Array<{
       const local_raw = $el.find('.c-card-event--result__location, .c-card-event--upcoming__location').text() || '';
       const parts = local_raw.replace(/\s+/g, ' ').trim().split(/[,\n]/).map(p => p.trim()).filter(p => p);
 
-      let local_evento = parts[0] || '';
-      let cidade = parts[1] || '';
-      let pais = parts.slice(2).join(', ') || '';
+      const local_evento = parts[0] || '';
+      const cidade = parts[1] || '';
+      const pais = parts.slice(2).join(', ') || '';
 
       // Tipo
       let tipo: 'PPV' | 'Fight Night' | 'Apex' = 'Fight Night';
@@ -171,9 +171,6 @@ interface FightResult {
   round_final?: number;
   tempo_final?: string;
 }
-
-// URL de fallback para poster genérico do UFC
-const UFC_FALLBACK_POSTER = 'https://www.ufc.com/themes/custom/ufc/assets/img/ufc-logo-white.svg';
 
 // Parsear detalhes de um evento (lutas + poster)
 function parseEventDetails(html: string, eventName?: string): {
@@ -222,7 +219,7 @@ function parseEventDetails(html: string, eventName?: string): {
     const imgEl = $(selector).first();
 
     // Tentar vários atributos de imagem
-    let src = imgEl.attr('src') ||
+    const src = imgEl.attr('src') ||
               imgEl.attr('srcset')?.split(',')[0]?.trim().split(' ')[0] ||
               imgEl.attr('data-src') ||
               imgEl.attr('data-lazy-src');
@@ -372,12 +369,30 @@ function parseEventDetails(html: string, eventName?: string): {
     const resultText = $fight.find('.c-listing-fight__result-text').text();
     const { metodo, tempo } = parseResultText(resultText);
 
-    // Tentar extrair round final
+    // Infer round_final (UFC.com removed .c-listing-fight__result-round selector)
     let round_final: number | undefined;
-    const roundText = $fight.find('.c-listing-fight__result-round').text();
-    if (roundText) {
-      const roundMatch = roundText.match(/R(\d+)/i) || roundText.match(/(\d+)/);
-      if (roundMatch) round_final = parseInt(roundMatch[1]);
+
+    // First try: look for "Round" text in fight card details
+    const fightDetails = $fight.find('.c-listing-fight__result, .c-listing-fight__details').text();
+    const roundDetailMatch = fightDetails.match(/Round\s*(\d+)/i);
+    if (roundDetailMatch) {
+      round_final = parseInt(roundDetailMatch[1]);
+    }
+
+    // Fallback: infer from tempo_final (for finishes only, NOT decisions)
+    if (!round_final && tempo) {
+      const [minStr, secStr] = tempo.split(':');
+      const totalSeconds = parseInt(minStr) * 60 + parseInt(secStr);
+      // 5-minute rounds: round = ceil(totalSeconds / 300)
+      const inferredRound = Math.ceil(totalSeconds / 300);
+      if (inferredRound > 0 && inferredRound <= (rounds || 5)) {
+        round_final = inferredRound;
+      }
+    }
+
+    // For decisions that went the distance, round = total scheduled rounds
+    if (!round_final && metodo?.includes('Decision') && rounds) {
+      round_final = rounds;
     }
 
     return {

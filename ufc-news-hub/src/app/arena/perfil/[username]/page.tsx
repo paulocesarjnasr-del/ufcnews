@@ -2,11 +2,11 @@
 
 import { useState, useEffect, use } from 'react';
 import Link from 'next/link';
-import { Trophy, Target, TrendingUp, Flame, Zap, Lock, Scale, Star } from 'lucide-react';
+import { Trophy, Target, TrendingUp, Flame, Zap, Lock, Scale, Star, Share2, Calendar } from 'lucide-react';
 
 import { useArenaAuth } from '@/hooks/useArenaAuth';
-import { NIVEL_CONFIG, CONQUISTAS_DEFINICOES } from '@/types/arena';
-import type { TipoConquista } from '@/types/arena';
+import { NIVEL_CONFIG, CONQUISTAS_DEFINICOES, type TipoConquista } from '@/types/arena';
+import { EventoHistorico } from '@/components/arena/EventoHistorico';
 
 interface PerfilUsuario {
   id: string;
@@ -53,26 +53,25 @@ export default function PerfilPage({ params }: PageProps) {
   const isOwnProfile = isAuthenticated && usuarioAtual?.username === username;
 
   useEffect(() => {
+    async function fetchPerfil() {
+      try {
+        const res = await fetch(`/api/arena/perfil/${username}`);
+        if (res.ok) {
+          const data = await res.json();
+          setPerfil(data.usuario);
+          setConquistas(data.conquistas || []);
+        } else {
+          const data = await res.json();
+          setError(data.error || 'Usuario nao encontrado');
+        }
+      } catch {
+        setError('Erro ao carregar perfil');
+      } finally {
+        setIsLoading(false);
+      }
+    }
     fetchPerfil();
   }, [username]);
-
-  async function fetchPerfil() {
-    try {
-      const res = await fetch(`/api/arena/perfil/${username}`);
-      if (res.ok) {
-        const data = await res.json();
-        setPerfil(data.usuario);
-        setConquistas(data.conquistas || []);
-      } else {
-        const data = await res.json();
-        setError(data.error || 'Usuario nao encontrado');
-      }
-    } catch {
-      setError('Erro ao carregar perfil');
-    } finally {
-      setIsLoading(false);
-    }
-  }
 
   if (isLoading) {
     return (
@@ -133,6 +132,7 @@ export default function PerfilPage({ params }: PageProps) {
               }}
             >
               {perfil.avatar_url ? (
+                /* eslint-disable-next-line @next/next/no-img-element */
                 <img
                   src={perfil.avatar_url}
                   alt={perfil.username}
@@ -155,14 +155,25 @@ export default function PerfilPage({ params }: PageProps) {
                 </h1>
                 <p className="text-dark-textMuted text-sm">@{perfil.username}</p>
               </div>
-              {isOwnProfile && (
-                <Link
-                  href="/arena/perfil/editar"
-                  className="neu-button flex-shrink-0 px-4 py-2 text-sm text-dark-textMuted hover:text-ufc-red transition-colors"
+              <div className="flex items-center gap-2 flex-shrink-0">
+                {isOwnProfile && (
+                  <Link
+                    href="/arena/perfil/editar"
+                    className="neu-button px-4 py-2 text-sm text-dark-textMuted hover:text-ufc-red transition-colors"
+                  >
+                    Editar Perfil
+                  </Link>
+                )}
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(`${window.location.origin}/arena/perfil/${username}`);
+                  }}
+                  className="flex items-center gap-2 px-4 py-2 rounded-lg bg-dark-card border border-dark-border text-sm text-dark-textMuted hover:text-dark-text transition-colors"
                 >
-                  Editar Perfil
-                </Link>
-              )}
+                  <Share2 className="w-4 h-4" />
+                  Compartilhar
+                </button>
+              </div>
             </div>
 
             {/* Nivel Badge + XP Bar */}
@@ -344,6 +355,15 @@ export default function PerfilPage({ params }: PageProps) {
             );
           })}
         </div>
+      </div>
+
+      {/* Historico de Eventos */}
+      <div className="mt-6">
+        <h3 className="font-display text-lg uppercase text-white mb-3 flex items-center gap-2">
+          <Calendar className="w-5 h-5 text-ufc-red" />
+          Historico de Eventos
+        </h3>
+        <EventoHistorico username={username} />
       </div>
     </div>
   );

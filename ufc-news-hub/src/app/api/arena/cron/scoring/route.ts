@@ -16,6 +16,48 @@ export async function GET(request: NextRequest) {
 
   try {
     // ═══════════════════════════════════════════════════════════════
+    // PHASE 0: Event status management
+    // ═══════════════════════════════════════════════════════════════
+
+    // Fix events stuck in ao_vivo where all fights are done → finalizado
+    const stuckAoVivo = await query<{ id: string; nome: string }>(
+      `SELECT e.id, e.nome FROM eventos e
+       WHERE e.status = 'ao_vivo'
+         AND NOT EXISTS (
+           SELECT 1 FROM lutas l
+           WHERE l.evento_id = e.id AND l.status != 'finalizada'
+         )
+         AND EXISTS (SELECT 1 FROM lutas l WHERE l.evento_id = e.id)`
+    );
+    for (const ev of stuckAoVivo) {
+      await query(`UPDATE eventos SET status = 'finalizado' WHERE id = $1`, [ev.id]);
+      console.log(`[SCORING CRON] Status fix: ${ev.nome} ao_vivo → finalizado`);
+    }
+
+    // Detect events that should be ao_vivo (date passed, has fights, not all done)
+    const shouldBeAoVivo = await query<{ id: string; nome: string }>(
+      `SELECT e.id, e.nome FROM eventos e
+       WHERE e.status = 'agendado'
+         AND e.data_evento <= NOW()
+         AND EXISTS (SELECT 1 FROM lutas l WHERE l.evento_id = e.id)`
+    );
+    for (const ev of shouldBeAoVivo) {
+      await query(`UPDATE eventos SET status = 'ao_vivo' WHERE id = $1`, [ev.id]);
+      console.log(`[SCORING CRON] Status fix: ${ev.nome} agendado → ao_vivo`);
+    }
+
+    // Fix old events still agendado that should be finalizado (>2 days past)
+    const oldAgendado = await query<{ id: string; nome: string }>(
+      `SELECT e.id, e.nome FROM eventos e
+       WHERE e.status = 'agendado'
+         AND e.data_evento < NOW() - INTERVAL '2 days'`
+    );
+    for (const ev of oldAgendado) {
+      await query(`UPDATE eventos SET status = 'finalizado' WHERE id = $1`, [ev.id]);
+      console.log(`[SCORING CRON] Status fix: ${ev.nome} agendado (old) → finalizado`);
+    }
+
+    // ═══════════════════════════════════════════════════════════════
     // PHASE 1: Per-fight scoring (for live events mid-card)
     // ═══════════════════════════════════════════════════════════════
     const lutasParaProcessar = await query<{
@@ -103,7 +145,7 @@ export async function GET(request: NextRequest) {
     // missed by per-fight processing (predictions added after fights,
     // or events marked finalizado without going through ao_vivo)
     // ═══════════════════════════════════════════════════════════════
-    const eventosParaProcessar = await query<{ id: string; nome: string }>(
+    const eventosFallback = await query<{ id: string; nome: string }>(
       `SELECT DISTINCT e.id, e.nome
        FROM eventos e
        JOIN previsoes p ON p.evento_id = e.id
@@ -113,7 +155,7 @@ export async function GET(request: NextRequest) {
 
     const resultadosFallback = [];
 
-    for (const evento of eventosParaProcessar) {
+    for (const evento of eventosFallback) {
       // Skip events already fully handled in Phase 2
       if (eventosFinalizados.includes(evento.id)) continue;
 

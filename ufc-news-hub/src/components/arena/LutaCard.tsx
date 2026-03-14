@@ -5,7 +5,6 @@ import { ChevronDown, Check } from 'lucide-react';
 import FighterImage from '@/components/ui/FighterImage';
 import type { LutaComLutadores, Lutador, Previsao } from '@/types';
 import { PrevisaoForm } from './PrevisaoForm';
-import { ConsensoBar } from './ConsensoBar';
 
 interface LutaCardProps {
   luta: LutaComLutadores;
@@ -115,12 +114,45 @@ export function LutaCard({
       {/* Consenso */}
       {luta.consenso && luta.consenso.length > 0 && (
         <div className="border-t border-dark-border px-4 py-3">
-          <ConsensoBar
-            consenso={luta.consenso}
-            lutador1Id={luta.lutador1.id}
-            lutador2Id={luta.lutador2.id}
-            totalPrevisoes={luta.total_previsoes || 0}
-          />
+          <div className="flex items-center justify-between text-xs text-dark-textMuted">
+            <span>{luta.total_previsoes || 0} previsoes</span>
+            <div className="flex gap-2">
+              {luta.consenso.map((c) => (
+                <span key={c.lutador_escolhido_id} className="font-medium">
+                  {c.lutador_nome}: {c.percentual}%
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Inline pick summary - shows when not expanded */}
+      {localPrevisao && !isExpanded && (
+        <div
+          className={`px-4 py-2 text-sm border-t border-dark-border/30 ${
+            localPrevisao.acertou_vencedor !== null && localPrevisao.acertou_vencedor
+              ? 'bg-green-500/10 text-green-400'
+              : localPrevisao.acertou_vencedor !== null && !localPrevisao.acertou_vencedor
+                ? 'bg-red-500/10 text-red-400'
+                : 'bg-dark-bg/30 text-dark-textMuted'
+          }`}
+        >
+          <div className="flex items-center justify-between">
+            <span>
+              Seu pick:{' '}
+              {localPrevisao.lutador_escolhido_id === luta.lutador1.id
+                ? luta.lutador1.nome
+                : luta.lutador2.nome}
+              {localPrevisao.metodo_previsto ? ` por ${localPrevisao.metodo_previsto}` : ''}
+              {localPrevisao.round_previsto ? ` R${localPrevisao.round_previsto}` : ''}
+            </span>
+            {localPrevisao.acertou_vencedor !== null && localPrevisao.pontos_ganhos != null && (
+              <span className="font-semibold">
+                {localPrevisao.pontos_ganhos > 0 ? `+${localPrevisao.pontos_ganhos} pts` : '0 pts'}
+              </span>
+            )}
+          </div>
         </div>
       )}
 
@@ -248,7 +280,7 @@ function LutadorDisplay({
           {lutador.nome}
         </h4>
         {lutador.apelido && (
-          <p className="text-xs text-ufc-red">"{lutador.apelido}"</p>
+          <p className="text-xs text-ufc-red">&quot;{lutador.apelido}&quot;</p>
         )}
         <p className="text-xs text-dark-textMuted">{record}</p>
         {lutador.pais && (

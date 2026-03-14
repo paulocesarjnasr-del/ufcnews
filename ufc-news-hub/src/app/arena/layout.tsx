@@ -4,10 +4,13 @@ import Link from 'next/link';
 import { Target, Trophy } from 'lucide-react';
 import { Header } from '@/components/ui/Header';
 import { UserAvatar } from '@/components/arena/UserAvatar';
+import { BottomNav } from '@/components/arena/BottomNav';
 import { useArenaAuth } from '@/hooks/useArenaAuth';
+import { useProximoEvento } from '@/hooks/useProximoEvento';
 
 export default function ArenaLayout({ children }: { children: React.ReactNode }) {
   const { usuario, isAuthenticated, logout } = useArenaAuth();
+  const { evento, isAoVivo } = useProximoEvento();
 
   return (
     <>
@@ -18,15 +21,21 @@ export default function ArenaLayout({ children }: { children: React.ReactNode })
       <div className="sticky top-16 z-40 w-full bg-dark-bg/80 backdrop-blur-md border-b border-dark-border/50">
         <div className="container mx-auto flex h-12 items-center justify-between px-4">
           {/* Left: Arena UFC logo */}
-          <Link
-            href="/arena"
-            className="flex items-center gap-2 group"
-          >
+          <Link href="/arena" className="flex items-center gap-2 group">
             <Target className="w-5 h-5 text-ufc-red transition-transform group-hover:scale-110" />
             <span className="font-display text-lg text-white tracking-wide">
               Arena <span className="text-ufc-red">UFC</span>
             </span>
           </Link>
+
+          {/* Center: Desktop nav tabs */}
+          <div className="hidden md:block">
+            <BottomNav
+              eventoId={evento?.id ?? null}
+              isAoVivo={isAoVivo}
+              username={usuario?.username ?? null}
+            />
+          </div>
 
           {/* Right: Points badge + UserAvatar */}
           <div className="flex items-center gap-3">
@@ -44,7 +53,18 @@ export default function ArenaLayout({ children }: { children: React.ReactNode })
       </div>
 
       {/* Page Content */}
-      {children}
+      <main className="pb-16 md:pb-0">
+        {children}
+      </main>
+
+      {/* Mobile Bottom Nav */}
+      <div className="md:hidden">
+        <BottomNav
+          eventoId={evento?.id ?? null}
+          isAoVivo={isAoVivo}
+          username={usuario?.username ?? null}
+        />
+      </div>
     </>
   );
 }

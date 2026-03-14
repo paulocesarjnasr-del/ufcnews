@@ -331,10 +331,9 @@ export function TabEvento() {
         <button
           onClick={goToPrev}
           disabled={currentIndex === 0}
-          className="flex items-center gap-1 px-4 py-2 rounded-xl bg-dark-card border border-dark-border text-sm text-dark-textMuted hover:text-white transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+          className="w-10 h-10 flex items-center justify-center rounded-full bg-dark-card border border-dark-border text-dark-textMuted hover:text-white transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
         >
-          <ChevronLeft className="w-4 h-4" />
-          Anterior
+          <ChevronLeft className="w-5 h-5" />
         </button>
 
         {/* Dot indicators */}
@@ -354,10 +353,9 @@ export function TabEvento() {
 
         <button
           onClick={goToNext}
-          className="flex items-center gap-1 px-4 py-2 rounded-xl bg-dark-card border border-dark-border text-sm text-dark-textMuted hover:text-white transition-colors"
+          className="w-10 h-10 flex items-center justify-center rounded-full bg-dark-card border border-dark-border text-dark-textMuted hover:text-white transition-colors"
         >
-          {currentIndex < sortedLutas.length - 1 ? 'Proxima' : 'Concluir'}
-          <ChevronRight className="w-4 h-4" />
+          <ChevronRight className="w-5 h-5" />
         </button>
       </div>
     </div>

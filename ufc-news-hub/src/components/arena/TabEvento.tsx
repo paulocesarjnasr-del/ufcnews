@@ -242,8 +242,8 @@ export function TabEvento() {
             const f2 = luta.lutador2;
 
             return (
-              <div key={luta.id} className="min-w-full flex-shrink-0 snap-center">
-                <div className="neu-card p-4 space-y-3">
+              <div key={luta.id} className="min-w-[85%] sm:min-w-[70%] flex-shrink-0 snap-center">
+                <div className="neu-card p-3 space-y-2">
                   {/* Fight type badge */}
                   <div className="flex items-center justify-between">
                     <span
@@ -277,7 +277,7 @@ export function TabEvento() {
                           key={fighter.id}
                           onClick={() => handlePick(luta.id, fighter.id)}
                           disabled={!isAuthenticated || isSaving || luta.status !== 'agendada'}
-                          className={`relative flex flex-col items-center gap-2 p-3 rounded-xl transition-all ${
+                          className={`relative flex flex-col items-center gap-1.5 p-2 rounded-xl transition-all ${
                             isSelected
                               ? 'bg-ufc-red/10 border-2 border-ufc-red ring-1 ring-ufc-red/30'
                               : 'bg-dark-bg/50 border-2 border-transparent hover:border-dark-border'
@@ -294,13 +294,13 @@ export function TabEvento() {
                           )}
 
                           {/* Fighter image */}
-                          <div className="w-16 h-16 rounded-full overflow-hidden bg-dark-card border-2 border-dark-border">
+                          <div className="w-12 h-12 rounded-full overflow-hidden bg-dark-card border-2 border-dark-border">
                             {fighter.imagem_url ? (
                               <Image
                                 src={fighter.imagem_url}
                                 alt={fighter.nome}
-                                width={64}
-                                height={64}
+                                width={48}
+                                height={48}
                                 className="w-full h-full object-cover"
                               />
                             ) : (

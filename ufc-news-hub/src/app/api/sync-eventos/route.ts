@@ -717,16 +717,20 @@ async function checkAndUpdateEventStatus(eventoId: string): Promise<boolean> {
 
   const eventTime = new Date(eventoData.data_evento);
   const now = new Date();
+  // Give 6h buffer for timezone differences (UFC events stored as UTC midnight
+  // but actually happen evening US time = same calendar day in other timezones)
+  const eventTimeWithBuffer = new Date(eventTime.getTime() + 6 * 3600000);
+  const eventDayStarted = eventTimeWithBuffer <= now || eventTime <= now;
   let newStatus = eventoData.status;
 
   if (fightStats.finalizadas === fightStats.total) {
     // All fights done (finalizada or cancelada) → finalizado
     newStatus = 'finalizado';
-  } else if (eventTime <= now && fightStats.pendentes < fightStats.total) {
-    // Event started (date passed AND at least one fight is not 'agendada') → ao_vivo
+  } else if (eventDayStarted && fightStats.pendentes < fightStats.total) {
+    // Event started (some fights done) → ao_vivo
     newStatus = 'ao_vivo';
-  } else if (eventTime <= now && fightStats.pendentes === fightStats.total) {
-    // Event date passed but no fights have started yet → ao_vivo (event day)
+  } else if (eventDayStarted && fightStats.pendentes === fightStats.total) {
+    // Event day but no fights started yet → ao_vivo
     newStatus = 'ao_vivo';
   }
 

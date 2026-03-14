@@ -10,7 +10,6 @@ interface ResultadoProcessamento {
   previsoesProcessadas: number;
   pontosDistribuidos: number;
   conquistasDesbloqueadas: number;
-  duelosFinalizados: number;
 }
 
 /**
@@ -21,7 +20,6 @@ export async function processarPrevisoesLuta(lutaId: string): Promise<ResultadoP
     previsoesProcessadas: 0,
     pontosDistribuidos: 0,
     conquistasDesbloqueadas: 0,
-    duelosFinalizados: 0,
   };
 
   // Buscar dados da luta
@@ -38,7 +36,7 @@ export async function processarPrevisoesLuta(lutaId: string): Promise<ResultadoP
   );
 
   if (!luta || !luta.vencedor_id) {
-    console.log(`Luta ${lutaId} não tem vencedor definido`);
+    console.info(`Luta ${lutaId} não tem vencedor definido`);
     return resultado;
   }
 
@@ -71,7 +69,7 @@ export async function processarPrevisoesLuta(lutaId: string): Promise<ResultadoP
       let multiplicadorMetodo = 1.0;
       let multiplicadorRound = 1.0;
       let multiplicadorUnderdog = 1.0;
-      let multiplicadorConfianca = previsao.pontos_confianca / 100;
+      const multiplicadorConfianca = previsao.pontos_confianca / 100;
 
       if (acertouVencedor) {
         pontosBase = PONTUACAO_CONFIG.PONTOS_BASE_VENCEDOR;
@@ -172,7 +170,6 @@ export async function processarEventoFinalizado(eventoId: string): Promise<Resul
     previsoesProcessadas: 0,
     pontosDistribuidos: 0,
     conquistasDesbloqueadas: 0,
-    duelosFinalizados: 0,
   };
 
   // Buscar lutas finalizadas do evento
@@ -193,9 +190,6 @@ export async function processarEventoFinalizado(eventoId: string): Promise<Resul
 
   // Verificar cards perfeitos
   await verificarCardPerfeito(eventoId);
-
-  // Finalizar duelos do evento
-  resultadoTotal.duelosFinalizados = await finalizarDuelosEvento(eventoId);
 
   // Atualizar rankings das ligas
   await atualizarRankingsLigas(eventoId);
@@ -333,101 +327,6 @@ async function verificarCardPerfeito(eventoId: string): Promise<void> {
       [usuario_id, JSON.stringify({ evento_id: eventoId })]
     );
   }
-}
-
-/**
- * Finaliza duelos de um evento
- */
-async function finalizarDuelosEvento(eventoId: string): Promise<number> {
-  // Buscar duelos aceitos do evento
-  const duelos = await query<{
-    id: string;
-    desafiante_id: string;
-    desafiado_id: string;
-  }>(
-    `SELECT id, desafiante_id, desafiado_id FROM duelos WHERE evento_id = $1 AND status = 'aceito'`,
-    [eventoId]
-  );
-
-  let finalizados = 0;
-
-  for (const duelo of duelos) {
-    // Calcular pontos de cada um
-    const pontosDesafiante = await queryOne<{ pontos: number; acertos: number }>(
-      `SELECT COALESCE(SUM(pontos_ganhos), 0) as pontos, COUNT(CASE WHEN acertou_vencedor THEN 1 END) as acertos
-       FROM previsoes WHERE usuario_id = $1 AND evento_id = $2`,
-      [duelo.desafiante_id, eventoId]
-    );
-
-    const pontosDesafiado = await queryOne<{ pontos: number; acertos: number }>(
-      `SELECT COALESCE(SUM(pontos_ganhos), 0) as pontos, COUNT(CASE WHEN acertou_vencedor THEN 1 END) as acertos
-       FROM previsoes WHERE usuario_id = $1 AND evento_id = $2`,
-      [duelo.desafiado_id, eventoId]
-    );
-
-    // Determinar vencedor
-    let vencedorId: string | null = null;
-    if ((pontosDesafiante?.pontos || 0) > (pontosDesafiado?.pontos || 0)) {
-      vencedorId = duelo.desafiante_id;
-    } else if ((pontosDesafiado?.pontos || 0) > (pontosDesafiante?.pontos || 0)) {
-      vencedorId = duelo.desafiado_id;
-    }
-    // Se empate em pontos, quem tem mais acertos
-    else if ((pontosDesafiante?.acertos || 0) > (pontosDesafiado?.acertos || 0)) {
-      vencedorId = duelo.desafiante_id;
-    } else if ((pontosDesafiado?.acertos || 0) > (pontosDesafiante?.acertos || 0)) {
-      vencedorId = duelo.desafiado_id;
-    }
-    // Se ainda empate, deixa null (empate)
-
-    // Atualizar duelo
-    await query(
-      `UPDATE duelos SET
-        status = 'finalizado',
-        vencedor_id = $1,
-        pontos_desafiante = $2,
-        pontos_desafiado = $3,
-        acertos_desafiante = $4,
-        acertos_desafiado = $5,
-        finalizado_em = NOW()
-      WHERE id = $6`,
-      [
-        vencedorId,
-        pontosDesafiante?.pontos || 0,
-        pontosDesafiado?.pontos || 0,
-        pontosDesafiante?.acertos || 0,
-        pontosDesafiado?.acertos || 0,
-        duelo.id,
-      ]
-    );
-
-    // Dar XP ao vencedor
-    if (vencedorId) {
-      await query(
-        `UPDATE usuarios_arena SET xp_total = xp_total + $1 WHERE id = $2`,
-        [PONTUACAO_CONFIG.XP_DUELO_VENCIDO, vencedorId]
-      );
-
-      // Notificar participantes
-      const perdedorId = vencedorId === duelo.desafiante_id ? duelo.desafiado_id : duelo.desafiante_id;
-
-      await query(
-        `INSERT INTO notificacoes (usuario_id, tipo, titulo, mensagem, dados)
-         VALUES ($1, 'duelo_vencido', 'Você venceu o duelo!', 'Parabéns pela vitória!', $2)`,
-        [vencedorId, JSON.stringify({ duelo_id: duelo.id })]
-      );
-
-      await query(
-        `INSERT INTO notificacoes (usuario_id, tipo, titulo, mensagem, dados)
-         VALUES ($1, 'duelo_perdido', 'Duelo finalizado', 'Você perdeu o duelo. Na próxima!', $2)`,
-        [perdedorId, JSON.stringify({ duelo_id: duelo.id })]
-      );
-    }
-
-    finalizados++;
-  }
-
-  return finalizados;
 }
 
 /**

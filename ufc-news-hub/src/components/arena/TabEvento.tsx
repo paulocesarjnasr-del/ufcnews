@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
-import { Calendar, Clock, Swords, Check, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Calendar, Clock, Swords, Check, ChevronLeft, ChevronRight, Radio, Trophy } from 'lucide-react';
 import { useArenaAuth } from '@/hooks/useArenaAuth';
 
 interface Lutador {
@@ -22,6 +22,8 @@ interface Luta {
   rounds: number;
   is_titulo: boolean;
   status: string;
+  vencedor_id?: string | null;
+  metodo?: string | null;
   lutador1: Lutador;
   lutador2: Lutador;
 }
@@ -36,31 +38,26 @@ interface EventoComLutas {
 }
 
 const tipoOrder: Record<string, number> = {
-  main_event: 0,
-  co_main: 1,
-  card_principal: 2,
-  preliminar: 3,
-  early_prelim: 4,
+  main_event: 0, co_main: 1, card_principal: 2, preliminar: 3, early_prelim: 4,
 };
 
 export function TabEvento() {
   const { isAuthenticated } = useArenaAuth();
   const [evento, setEvento] = useState<EventoComLutas | null>(null);
-  const [picks, setPicks] = useState<Record<string, string>>({}); // luta_id -> vencedor_id
+  const [picks, setPicks] = useState<Record<string, string>>({});
   const [savingLuta, setSavingLuta] = useState<string | null>(null);
-  const [activeIndex, setActiveIndex] = useState(0);
+  const [currentIndex, setCurrentIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const [allDone, setAllDone] = useState(false);
 
   useEffect(() => {
     async function fetchData() {
       try {
-        const res = await fetch('/api/eventos/proximo');
+        const res = await fetch('/api/eventos/proximo?include_live=true');
         if (!res.ok) { setIsLoading(false); return; }
         const data = await res.json() as EventoComLutas;
         setEvento(data);
 
-        // Fetch existing picks
         if (isAuthenticated) {
           const picksRes = await fetch(`/api/arena/previsoes?evento_id=${data.id}`);
           if (picksRes.ok) {
@@ -83,33 +80,26 @@ export function TabEvento() {
     fetchData();
   }, [isAuthenticated]);
 
-  // Track scroll position for dots
-  useEffect(() => {
-    const container = scrollRef.current;
-    if (!container) return;
-    const handleScroll = () => {
-      const width = container.offsetWidth;
-      if (width === 0) return;
-      const index = Math.round(container.scrollLeft / width);
-      setActiveIndex(index);
-    };
-    container.addEventListener('scroll', handleScroll, { passive: true });
-    return () => container.removeEventListener('scroll', handleScroll);
-  }, [evento]);
+  const sortedLutas = evento
+    ? [...evento.lutas].sort((a, b) => (tipoOrder[a.tipo] ?? 5) - (tipoOrder[b.tipo] ?? 5))
+    : [];
 
-  const scrollToFight = (index: number) => {
-    const container = scrollRef.current;
-    if (!container) return;
-    container.scrollTo({
-      left: index * container.offsetWidth,
-      behavior: 'smooth',
-    });
+  const goToNext = useCallback(() => {
+    if (currentIndex < sortedLutas.length - 1) {
+      setCurrentIndex(prev => prev + 1);
+    } else {
+      setAllDone(true);
+    }
+  }, [currentIndex, sortedLutas.length]);
+
+  const goToPrev = () => {
+    if (currentIndex > 0) setCurrentIndex(prev => prev - 1);
+    setAllDone(false);
   };
 
   const handlePick = async (lutaId: string, vencedorId: string) => {
     if (!isAuthenticated || savingLuta) return;
 
-    // Optimistic update
     setPicks(prev => ({ ...prev, [lutaId]: vencedorId }));
     setSavingLuta(lutaId);
 
@@ -118,60 +108,69 @@ export function TabEvento() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          previsoes: [{
-            luta_id: lutaId,
-            vencedor_previsto_id: vencedorId,
-            pontos_confianca: 100,
-          }],
+          previsoes: [{ luta_id: lutaId, vencedor_previsto_id: vencedorId, pontos_confianca: 100 }],
         }),
       });
 
       if (!res.ok) {
-        // Revert on error
-        setPicks(prev => {
-          const next = { ...prev };
-          delete next[lutaId];
-          return next;
-        });
+        setPicks(prev => { const next = { ...prev }; delete next[lutaId]; return next; });
+      } else {
+        // Auto-advance after 800ms
+        setTimeout(goToNext, 800);
       }
     } catch {
-      setPicks(prev => {
-        const next = { ...prev };
-        delete next[lutaId];
-        return next;
-      });
+      setPicks(prev => { const next = { ...prev }; delete next[lutaId]; return next; });
     }
     setSavingLuta(null);
   };
 
+  // Loading
   if (isLoading) {
-    return (
-      <div className="space-y-4 animate-pulse">
-        <div className="h-64 rounded-xl bg-dark-card" />
-      </div>
-    );
+    return <div className="h-64 rounded-xl bg-dark-card animate-pulse" />;
   }
 
-  if (!evento || evento.lutas.length === 0) {
+  // No event
+  if (!evento || sortedLutas.length === 0) {
     return (
       <div className="neu-card p-6 text-center">
         <Swords className="w-10 h-10 text-dark-textMuted mx-auto mb-3" />
         <p className="text-dark-textMuted">Nenhum evento agendado.</p>
-        <p className="text-sm text-dark-textMuted mt-1">Fique ligado para o proximo card!</p>
       </div>
     );
   }
 
   const eventDate = new Date(evento.data_evento);
+  const isLive = evento.status === 'ao_vivo';
   const diffMs = eventDate.getTime() - Date.now();
   const diffDays = Math.max(0, Math.floor(diffMs / 86400000));
   const diffHours = Math.max(0, Math.floor((diffMs % 86400000) / 3600000));
   const picksCount = Object.keys(picks).length;
-  const totalLutas = evento.lutas.length;
+  const totalLutas = sortedLutas.length;
 
-  const sortedLutas = [...evento.lutas].sort(
-    (a, b) => (tipoOrder[a.tipo] ?? 5) - (tipoOrder[b.tipo] ?? 5)
-  );
+  // All done screen
+  if (allDone) {
+    return (
+      <div className="space-y-4">
+        <div className="neu-card p-8 text-center space-y-4">
+          <Trophy className="w-16 h-16 text-ufc-gold mx-auto" />
+          <h3 className="font-display text-2xl uppercase text-white">Previsoes Completas!</h3>
+          <p className="text-dark-textMuted">
+            Voce fez {picksCount} de {totalLutas} previsoes para {evento.nome}.
+          </p>
+          <button
+            onClick={() => { setAllDone(false); setCurrentIndex(0); }}
+            className="px-6 py-2 rounded-xl bg-dark-card border border-dark-border text-sm text-dark-textMuted hover:text-white transition-colors"
+          >
+            Revisar previsoes
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const currentLuta = sortedLutas[currentIndex];
+  const currentPick = picks[currentLuta.id];
+  const isSaving = savingLuta === currentLuta.id;
 
   return (
     <div className="space-y-3">
@@ -181,188 +180,185 @@ export function TabEvento() {
           <h3 className="font-display text-lg uppercase text-white leading-tight">{evento.nome}</h3>
           <div className="flex items-center gap-2 mt-1 text-xs text-dark-textMuted">
             <Calendar className="w-3 h-3" />
-            <span>
-              {eventDate.toLocaleDateString('pt-BR', {
-                weekday: 'short',
-                day: 'numeric',
-                month: 'short',
-              })}
-            </span>
+            <span>{eventDate.toLocaleDateString('pt-BR', { weekday: 'short', day: 'numeric', month: 'short' })}</span>
           </div>
         </div>
-        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-ufc-red/10 border border-ufc-red/20">
-          <Clock className="w-3 h-3 text-ufc-red" />
-          <span className="text-xs font-semibold text-ufc-red">
-            {diffDays > 0 ? `${diffDays}d ${diffHours}h` : `${diffHours}h`}
-          </span>
-        </div>
+        {isLive ? (
+          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-ufc-red border border-ufc-red">
+            <span className="relative flex h-2 w-2">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-white opacity-75" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-white" />
+            </span>
+            <span className="text-xs font-bold text-white uppercase">Ao Vivo</span>
+          </div>
+        ) : (
+          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-ufc-red/10 border border-ufc-red/20">
+            <Clock className="w-3 h-3 text-ufc-red" />
+            <span className="text-xs font-semibold text-ufc-red">
+              {diffDays > 0 ? `${diffDays}d ${diffHours}h` : `${diffHours}h`}
+            </span>
+          </div>
+        )}
       </div>
 
-      {/* Progress bar */}
-      <div className="flex items-center gap-3">
-        <div className="flex-1 h-1.5 rounded-full bg-dark-bg overflow-hidden">
-          <div
-            className="h-full rounded-full bg-ufc-red transition-all duration-300"
-            style={{ width: `${totalLutas > 0 ? (picksCount / totalLutas) * 100 : 0}%` }}
-          />
-        </div>
-        <span className="text-xs text-dark-textMuted font-medium">{picksCount}/{totalLutas}</span>
+      {/* Progress indicator */}
+      <div className="flex items-center justify-between">
+        <span className="text-sm font-medium text-dark-text">
+          Luta {currentIndex + 1} de {totalLutas}
+        </span>
+        <span className="text-xs text-dark-textMuted">{picksCount}/{totalLutas} picks</span>
       </div>
-
-      {/* Fight carousel */}
-      <div className="relative">
-        {/* Arrow buttons (desktop only) */}
-        {activeIndex > 0 && (
-          <button
-            onClick={() => scrollToFight(activeIndex - 1)}
-            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-8 h-8 rounded-full bg-dark-card/90 border border-dark-border items-center justify-center text-dark-textMuted hover:text-white transition-colors hidden md:flex"
-          >
-            <ChevronLeft className="w-4 h-4" />
-          </button>
-        )}
-        {activeIndex < sortedLutas.length - 1 && (
-          <button
-            onClick={() => scrollToFight(activeIndex + 1)}
-            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-8 h-8 rounded-full bg-dark-card/90 border border-dark-border items-center justify-center text-dark-textMuted hover:text-white transition-colors hidden md:flex"
-          >
-            <ChevronRight className="w-4 h-4" />
-          </button>
-        )}
-
-        <div className="w-full overflow-hidden">
+      <div className="h-1.5 rounded-full bg-dark-bg overflow-hidden">
         <div
-          ref={scrollRef}
-          className="flex overflow-x-auto snap-x snap-mandatory gap-3"
-          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch' }}
-        >
-          {sortedLutas.map((luta) => {
-            const picked = picks[luta.id];
-            const isSaving = savingLuta === luta.id;
-            const f1 = luta.lutador1;
-            const f2 = luta.lutador2;
-
-            return (
-              <div key={luta.id} className="min-w-[85%] sm:min-w-[70%] flex-shrink-0 snap-center">
-                <div className="neu-card p-3 space-y-2">
-                  {/* Fight type badge */}
-                  <div className="flex items-center justify-between">
-                    <span
-                      className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded ${
-                        luta.tipo === 'main_event'
-                          ? 'bg-ufc-red/20 text-ufc-red'
-                          : luta.tipo === 'co_main'
-                            ? 'bg-ufc-gold/20 text-ufc-gold'
-                            : 'bg-dark-bg text-dark-textMuted'
-                      }`}
-                    >
-                      {luta.tipo === 'main_event'
-                        ? 'Main Event'
-                        : luta.tipo === 'co_main'
-                          ? 'Co-Main'
-                          : luta.tipo === 'card_principal'
-                            ? 'Main Card'
-                            : luta.tipo === 'preliminar'
-                              ? 'Prelim'
-                              : 'Early Prelim'}
-                    </span>
-                    <span className="text-[10px] text-dark-textMuted">{luta.categoria_peso}</span>
-                  </div>
-
-                  {/* Fighters */}
-                  <div className="grid grid-cols-2 gap-3">
-                    {([f1, f2] as Lutador[]).map((fighter, fi) => {
-                      const isSelected = picked === fighter.id;
-                      return (
-                        <button
-                          key={fighter.id}
-                          onClick={() => handlePick(luta.id, fighter.id)}
-                          disabled={!isAuthenticated || isSaving || luta.status !== 'agendada'}
-                          className={`relative flex flex-col items-center gap-1.5 p-2 rounded-xl transition-all ${
-                            isSelected
-                              ? 'bg-ufc-red/10 border-2 border-ufc-red ring-1 ring-ufc-red/30'
-                              : 'bg-dark-bg/50 border-2 border-transparent hover:border-dark-border'
-                          } ${
-                            !isAuthenticated || luta.status !== 'agendada'
-                              ? 'opacity-60 cursor-not-allowed'
-                              : 'cursor-pointer'
-                          }`}
-                        >
-                          {isSelected && (
-                            <div className="absolute top-1.5 right-1.5">
-                              <Check className="w-4 h-4 text-ufc-red" />
-                            </div>
-                          )}
-
-                          {/* Fighter image */}
-                          <div className="w-12 h-12 rounded-full overflow-hidden bg-dark-card border-2 border-dark-border">
-                            {fighter.imagem_url ? (
-                              <Image
-                                src={fighter.imagem_url}
-                                alt={fighter.nome}
-                                width={48}
-                                height={48}
-                                className="w-full h-full object-cover"
-                              />
-                            ) : (
-                              <div className="w-full h-full flex items-center justify-center text-xl font-bold text-dark-textMuted">
-                                {fighter.nome.split(' ').map(w => w[0]).join('').slice(0, 2)}
-                              </div>
-                            )}
-                          </div>
-
-                          {/* Name */}
-                          <span className="text-sm font-semibold text-white text-center leading-tight">
-                            {fighter.nome.split(' ').pop()}
-                          </span>
-
-                          {/* Record */}
-                          <span className="text-[10px] text-dark-textMuted">
-                            {fighter.vitorias}-{fighter.derrotas}-{fighter.empates}
-                          </span>
-
-                          {/* VS label — only on first fighter card */}
-                          {fi === 0 && (
-                            <div className="absolute -right-4 top-1/2 -translate-y-1/2 z-10 text-[10px] font-bold text-dark-textMuted">
-                              VS
-                            </div>
-                          )}
-                        </button>
-                      );
-                    })}
-                  </div>
-
-                  {/* Saving indicator */}
-                  {isSaving && (
-                    <div className="text-center text-xs text-dark-textMuted animate-pulse">
-                      Salvando...
-                    </div>
-                  )}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-        </div>
+          className="h-full rounded-full bg-ufc-red transition-all duration-300"
+          style={{ width: `${(picksCount / totalLutas) * 100}%` }}
+        />
       </div>
 
-      {/* Dot indicators */}
-      <div className="flex items-center justify-center gap-1.5">
-        {sortedLutas.map((luta, i) => {
-          const hasPick = !!picks[luta.id];
-          return (
+      {/* Current fight card */}
+      <div className="neu-card p-4 space-y-4">
+        {/* Fight type + category */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-1.5">
+            <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded ${
+              currentLuta.tipo === 'main_event' ? 'bg-ufc-red/20 text-ufc-red'
+                : currentLuta.tipo === 'co_main' ? 'bg-ufc-gold/20 text-ufc-gold'
+                : 'bg-dark-bg text-dark-textMuted'
+            }`}>
+              {currentLuta.tipo === 'main_event' ? 'Main Event'
+                : currentLuta.tipo === 'co_main' ? 'Co-Main'
+                : currentLuta.tipo === 'card_principal' ? 'Main Card'
+                : currentLuta.tipo === 'preliminar' ? 'Prelim' : 'Early Prelim'}
+            </span>
+            {isLive && currentLuta.status === 'em_andamento' && (
+              <span className="flex items-center gap-1 text-[10px] font-bold text-ufc-red">
+                <Radio className="w-3 h-3 animate-pulse" /> LIVE
+              </span>
+            )}
+            {currentLuta.status === 'finalizada' && (
+              <span className="text-[10px] font-bold text-green-400 px-1.5 py-0.5 rounded bg-green-400/10">
+                RESULT
+              </span>
+            )}
+          </div>
+          <span className="text-[10px] text-dark-textMuted">{currentLuta.categoria_peso}</span>
+        </div>
+
+        {/* Fighters - two buttons side by side */}
+        <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
+          {/* Fighter 1 */}
+          <button
+            onClick={() => handlePick(currentLuta.id, currentLuta.lutador1.id)}
+            disabled={!isAuthenticated || isSaving || currentLuta.status !== 'agendada'}
+            className={`flex flex-col items-center gap-2 p-3 rounded-xl transition-all ${
+              currentPick === currentLuta.lutador1.id
+                ? 'bg-ufc-red/10 border-2 border-ufc-red'
+                : 'bg-dark-bg/50 border-2 border-transparent hover:border-dark-border'
+            } ${(!isAuthenticated || currentLuta.status !== 'agendada') ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'}`}
+          >
+            {currentPick === currentLuta.lutador1.id && (
+              <Check className="w-4 h-4 text-ufc-red absolute top-1 right-1" />
+            )}
+            <div className="w-14 h-14 rounded-full overflow-hidden bg-dark-card border-2 border-dark-border">
+              {currentLuta.lutador1.imagem_url ? (
+                <Image src={currentLuta.lutador1.imagem_url} alt={currentLuta.lutador1.nome} width={56} height={56} className="w-full h-full object-cover" />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-lg font-bold text-dark-textMuted">
+                  {currentLuta.lutador1.nome.split(' ').map(w => w[0]).join('').slice(0, 2)}
+                </div>
+              )}
+            </div>
+            <span className="text-sm font-semibold text-white text-center leading-tight">
+              {currentLuta.lutador1.nome.split(' ').pop()}
+            </span>
+            <span className="text-[10px] text-dark-textMuted">
+              {currentLuta.lutador1.vitorias}-{currentLuta.lutador1.derrotas}-{currentLuta.lutador1.empates}
+            </span>
+          </button>
+
+          {/* VS */}
+          <span className="font-display text-xl text-dark-textMuted">VS</span>
+
+          {/* Fighter 2 */}
+          <button
+            onClick={() => handlePick(currentLuta.id, currentLuta.lutador2.id)}
+            disabled={!isAuthenticated || isSaving || currentLuta.status !== 'agendada'}
+            className={`flex flex-col items-center gap-2 p-3 rounded-xl transition-all ${
+              currentPick === currentLuta.lutador2.id
+                ? 'bg-ufc-red/10 border-2 border-ufc-red'
+                : 'bg-dark-bg/50 border-2 border-transparent hover:border-dark-border'
+            } ${(!isAuthenticated || currentLuta.status !== 'agendada') ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'}`}
+          >
+            {currentPick === currentLuta.lutador2.id && (
+              <Check className="w-4 h-4 text-ufc-red absolute top-1 right-1" />
+            )}
+            <div className="w-14 h-14 rounded-full overflow-hidden bg-dark-card border-2 border-dark-border">
+              {currentLuta.lutador2.imagem_url ? (
+                <Image src={currentLuta.lutador2.imagem_url} alt={currentLuta.lutador2.nome} width={56} height={56} className="w-full h-full object-cover" />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-lg font-bold text-dark-textMuted">
+                  {currentLuta.lutador2.nome.split(' ').map(w => w[0]).join('').slice(0, 2)}
+                </div>
+              )}
+            </div>
+            <span className="text-sm font-semibold text-white text-center leading-tight">
+              {currentLuta.lutador2.nome.split(' ').pop()}
+            </span>
+            <span className="text-[10px] text-dark-textMuted">
+              {currentLuta.lutador2.vitorias}-{currentLuta.lutador2.derrotas}-{currentLuta.lutador2.empates}
+            </span>
+          </button>
+        </div>
+
+        {/* Saving indicator */}
+        {isSaving && (
+          <div className="text-center text-xs text-dark-textMuted animate-pulse">Salvando...</div>
+        )}
+
+        {/* Result display for finished fights */}
+        {currentLuta.status === 'finalizada' && currentLuta.metodo && (
+          <div className="text-center text-sm text-dark-textMuted border-t border-dark-border/30 pt-3">
+            <span className="text-green-400 font-medium">
+              {currentLuta.vencedor_id === currentLuta.lutador1.id ? currentLuta.lutador1.nome : currentLuta.lutador2.nome}
+            </span>
+            {' '}venceu por {currentLuta.metodo}
+          </div>
+        )}
+      </div>
+
+      {/* Navigation buttons */}
+      <div className="flex items-center justify-between gap-3">
+        <button
+          onClick={goToPrev}
+          disabled={currentIndex === 0}
+          className="flex items-center gap-1 px-4 py-2 rounded-xl bg-dark-card border border-dark-border text-sm text-dark-textMuted hover:text-white transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+        >
+          <ChevronLeft className="w-4 h-4" />
+          Anterior
+        </button>
+
+        {/* Dot indicators */}
+        <div className="flex items-center gap-1 flex-wrap justify-center">
+          {sortedLutas.map((luta, i) => (
             <button
               key={luta.id}
-              onClick={() => scrollToFight(i)}
+              onClick={() => { setCurrentIndex(i); setAllDone(false); }}
               className={`rounded-full transition-all ${
-                i === activeIndex
-                  ? 'w-6 h-2 bg-ufc-red'
-                  : hasPick
-                    ? 'w-2 h-2 bg-ufc-red/50'
-                    : 'w-2 h-2 bg-dark-border'
+                i === currentIndex ? 'w-5 h-2 bg-ufc-red'
+                  : picks[luta.id] ? 'w-2 h-2 bg-ufc-red/50'
+                  : 'w-2 h-2 bg-dark-border'
               }`}
             />
-          );
-        })}
+          ))}
+        </div>
+
+        <button
+          onClick={goToNext}
+          className="flex items-center gap-1 px-4 py-2 rounded-xl bg-dark-card border border-dark-border text-sm text-dark-textMuted hover:text-white transition-colors"
+        >
+          {currentIndex < sortedLutas.length - 1 ? 'Proxima' : 'Concluir'}
+          <ChevronRight className="w-4 h-4" />
+        </button>
       </div>
     </div>
   );

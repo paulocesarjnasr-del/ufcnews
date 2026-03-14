@@ -14,7 +14,7 @@
 | Previsoes | Vencedor obrigatorio + metodo/round opcionais com bonus |
 | Revelacao de picks | Escondidos ate deadline; revelados apos previsoes fecharem |
 | Scoring | Cron automatico — processa eventos finalizados com previsoes pendentes |
-| Live | Polling 15-30s no frontend + scraping agressivo 1-2min no UFC.com |
+| Live | Polling 15-30s no frontend + scraping via cron 5min no UFC.com |
 | Auth security | P1 — primeiro UX, depois hardening (bcrypt + JWT) |
 | Inspiracoes UX | FanDuel/DraftKings (gamificacao) + Verdict MMA (live) |
 | Duelos | REMOVIDO do escopo |
@@ -128,7 +128,7 @@ Para cada evento encontrado, chamar `processarEventoFinalizado(eventoId)`.
 ### Conexao Full-Stack
 
 ```
-Vercel Cron (a cada 5 min durante eventos, 1x/hora fora)
+Vercel Cron (fixo a cada 5 min — short-circuit quando nao ha eventos ao vivo/finalizados)
   -> GET /api/arena/cron/scoring
     -> SELECT eventos finalizados com previsoes nao processadas
     -> Para cada: processarEventoFinalizado(eventoId)
@@ -145,7 +145,8 @@ Vercel Cron (a cada 5 min durante eventos, 1x/hora fora)
 | Arquivo | Acao |
 |---------|------|
 | `src/app/api/arena/cron/scoring/route.ts` | CRIAR |
-| `src/lib/arena/pontuacao.ts` | MANTER (ja esta pronto) |
+| `src/lib/arena/pontuacao.ts` | MODIFICAR (remover codigo de duelos: `finalizarDuelosEvento()` e `duelosFinalizados` do `ResultadoProcessamento`) |
+| `prisma/schema.prisma` | MODIFICAR (adicionar `processada_em DateTime?` na model `previsoes`) |
 | `vercel.json` (cron config) | MODIFICAR |
 
 ### Confianca: 95%
@@ -190,19 +191,21 @@ O tab "Evento" precisa linkar para `/arena/evento/[id]` com o ID do proximo even
 ### Conexao Full-Stack
 
 ```
-layout.tsx (client component, ja e 'use client')
-  -> useArenaAuth() -> usuario, pontos, avatar (JA EXISTE)
+layout.tsx (REESCREVER — arquivo ja existe como 'use client' component com useArenaAuth)
+  -> useArenaAuth() -> usuario, pontos, avatar (hook JA EXISTE)
   -> useProximoEvento() -> id do proximo evento (HOOK NOVO)
     -> fetch /api/eventos/proximo (JA EXISTE)
+  -> Renderiza top bar (logo + pontos + avatar dropdown)
   -> Renderiza bottom nav com 4 tabs
   -> Highlight tab ativo baseado em pathname
+  -> Nota: SWR com key compartilhado pode substituir hook dedicado
 ```
 
 ### Arquivos
 
 | Arquivo | Acao |
 |---------|------|
-| `src/app/arena/layout.tsx` | MODIFICAR (adicionar bottom nav) |
+| `src/app/arena/layout.tsx` | REESCREVER (arquivo existe com header + useArenaAuth; reescrever para adicionar bottom nav, hook proximo evento, e logica de tab "AO VIVO") |
 | `src/hooks/useProximoEvento.ts` | CRIAR |
 
 ### Confianca: 90%
@@ -313,6 +316,16 @@ Botao rapido de "so vencedor" — 1 toque por luta, sem expandir card.
 - Ninguem pode mais editar — momento de "e agora?"
 - Cria comunidade e discussao antes do evento comecar
 
+#### Deadline: Single Source of Truth
+
+Existem 3 locais que calculam deadline hoje — isso precisa ser consolidado.
+
+**Source of truth unica**: `lib/arena/previsoes-horario.ts` → `verificarStatusPrevisoes()`
+- Deadline = `data_evento - 1 hora`
+- Tanto o POST de previsoes quanto o GET de comunidade devem usar ESTA funcao
+- Remover calculo hardcoded em `previsoes/route.ts` (linha ~127)
+- O deadline de revelacao comunitaria = mesmo deadline de submissao de picks (quando fecha pra editar, abre pra ver)
+
 ### Conexao Full-Stack
 
 ```
@@ -416,9 +429,11 @@ Ligas:
     -> POST /api/arena/ligas/entrar (JA EXISTE) -> entrar via codigo
 
 Amigos:
-  -> fetch /api/arena/amigos (VERIFICAR se existe)
-  -> POST /api/arena/amigos/solicitar (VERIFICAR se existe)
+  -> GET /api/arena/amigos (JA EXISTE — lista amigos do usuario logado)
+  -> POST /api/arena/amigos (JA EXISTE — enviar pedido de amizade)
+  -> PATCH /api/arena/amigos/[amizadeId] (JA EXISTE — aceitar/rejeitar pedido)
   -> DB: amizades (tabela ja existe)
+  -> Nota: refatorar N+1 query em GET /amigos (loop de queryOne → single JOIN)
 ```
 
 ### Arquivos
@@ -430,7 +445,7 @@ Amigos:
 | `src/components/arena/LigaChat.tsx` | CRIAR |
 | `src/components/arena/RankingAnimado.tsx` | CRIAR |
 | `src/app/arena/ligas/join/[codigo]/page.tsx` | CRIAR |
-| APIs de amigos | VERIFICAR e completar se necessario |
+| `src/app/api/arena/amigos/route.ts` | MODIFICAR (refatorar N+1 query → single JOIN) |
 
 ### Confianca: 80%
 
@@ -442,7 +457,7 @@ Amigos:
 
 O scraper de resultados ao vivo **ja existe** em `sync-eventos/route.ts`. Ja detecta lutas finalizadas, extrai vencedor/metodo/round, e atualiza DB. O que falta:
 
-1. **Frequencia de scraping**: 15-30min (cron atual) -> 1-2min durante eventos ao vivo
+1. **Frequencia de scraping**: 15-30min (cron atual) -> 5min fixo via Vercel Cron (`*/5 * * * *`), com short-circuit quando nao ha evento ao vivo
 2. **Pagina live**: frontend que mostra resultados + picks + leaderboard
 3. **Scoring parcial**: processar previsoes por luta (nao esperar evento inteiro)
 
@@ -451,7 +466,7 @@ O scraper de resultados ao vivo **ja existe** em `sync-eventos/route.ts`. Ja det
 ```
 UFC.com atualiza resultado
   |
-  | scrape a cada 1-2min (durante evento ao vivo)
+  | scrape a cada 5min via Vercel Cron
   v
 sync-eventos/route.ts (JA EXISTE)
   |
@@ -466,6 +481,19 @@ PostgreSQL
   v
 Usuario ve: resultado, se acertou, leaderboard atualizado
 ```
+
+### Navegacao para Live
+
+A pagina `/arena/live` NAO tem tab dedicada na bottom nav (sao 4 tabs fixas: Home, Evento, Ligas, Perfil). Em vez disso:
+
+1. **Quando um evento esta `ao_vivo`**, o tab "Evento" muda de comportamento:
+   - Em vez de linkar para `/arena/evento/[id]` (form de picks), redireciona para `/arena/live`
+   - O icone do tab ganha um indicador vermelho pulsante (dot)
+   - Label muda de "Evento" para "AO VIVO"
+2. **Banner no Dashboard** (Tab Evento do swipe): banner vermelho no topo "EVENTO AO VIVO — ACOMPANHE" linkando para `/arena/live`
+3. **Pos-evento**: tab volta ao comportamento normal (proximo evento)
+
+Isso garante que o usuario casual NAO precisa descobrir uma rota nova — o tab que ele ja conhece muda de contexto automaticamente.
 
 ### Pagina Live
 
@@ -505,10 +533,27 @@ Scraping agressivo:
 
 ### Scoring Parcial vs Total
 
-`pontuacao.ts` hoje processa o evento inteiro. Para live, precisamos:
-- Processar por luta individual quando ela finaliza
-- Acumular pontos parciais no `evento_pontuacao`
-- Finalizar com bonus de card perfeito apos ultima luta
+`pontuacao.ts` hoje processa o evento inteiro via `processarEventoFinalizado()`. Para live, precisamos de uma nova funcao `processarLutaFinalizada(lutaId)`:
+
+1. **Por luta**: Quando uma luta finaliza, processar APENAS previsoes daquela luta
+   - UPDATE previsoes SET processada=true, pontos_ganhos=X WHERE luta_id=$1
+   - Atualizar usuario: pontos_totais, xp_total
+   - UPSERT evento_pontuacao com totais parciais acumulados
+2. **Card perfeito**: `verificarCardPerfeito()` so deve rodar quando TODAS as lutas do evento estao finalizadas
+   - Condicao: `SELECT COUNT(*) FROM lutas WHERE evento_id=$1 AND status != 'finalizada'` = 0
+   - Se sim: verificar se acertou tudo e dar bonus de 500pts
+3. **Conquistas**: verificar conquistas apos cada luta (sniper, on_fire, etc.)
+   - Exceto conquistas de card completo (esperar todas as lutas)
+
+### Timing de `verificarCardPerfeito`
+
+```
+Luta 1 finaliza -> scoring parcial (previsoes da luta 1)
+Luta 2 finaliza -> scoring parcial (previsoes da luta 2)
+...
+Luta 14 finaliza -> scoring parcial (previsoes da luta 14)
+  -> TODAS finalizadas? SIM -> verificarCardPerfeito() + conquistas de card
+```
 
 ### Arquivos
 
@@ -551,8 +596,14 @@ Pagina simples com graficos basicos. Para casuais, nao precisa ser complexo.
      -> SELECT metodo_previsto, COUNT(*) FILTER (WHERE acertou_metodo=true)
         FROM previsoes WHERE usuario_id=$1 GROUP BY metodo_previsto
   -> fetch /api/arena/analytics/ranking (API NOVA)
-     -> SELECT username, pontos_totais, taxa_acerto FROM usuarios_arena
+     -> SELECT username, pontos_totais, previsoes_corretas, total_previsoes,
+        CASE WHEN total_previsoes > 0
+          THEN ROUND(previsoes_corretas::numeric / total_previsoes * 100, 1)
+          ELSE 0 END AS taxa_acerto
+        FROM usuarios_arena
         ORDER BY pontos_totais DESC LIMIT 50
+     -> Nota: taxa_acerto NAO existe como coluna — computar a partir de
+        previsoes_corretas / total_previsoes
 ```
 
 ### Arquivos
@@ -678,3 +729,43 @@ npm install bcrypt @types/bcrypt jose
 2. **Spike: Cheerio vs Playwright** — verificar se resultados live sao server-rendered
 3. **Spike: indices DB** — rodar EXPLAIN em queries de agregacao de analytics
 4. **Spike: scoring parcial** — prototipar refactor de `processarEventoFinalizado()` para processar por luta
+
+---
+
+## Edge Cases & Empty States
+
+Para fas casuais, os empty states sao a PRIMEIRA coisa que veem. Cada tela precisa de fallback:
+
+| Tela | Empty State |
+|------|-------------|
+| Dashboard Tab Evento | "Nenhum evento agendado. Fique ligado!" com data estimada do proximo |
+| Dashboard Tab Stats | "Faca sua primeira previsao para ver seus stats aqui!" com CTA |
+| Dashboard Tab Social | "Entre numa liga para competir com amigos!" com link para /arena/ligas |
+| Perfil (novo usuario) | Stats zerados com mensagem motivacional, conquistas todas locked |
+| Live (sem evento ao vivo) | "Nenhum evento ao vivo agora. Proximo: UFC 326 em 2d 14h" |
+| Analytics (sem dados) | "Participe de pelo menos 1 evento para ver suas estatisticas" |
+| Liga chat (vazio) | "Seja o primeiro a mandar mensagem!" |
+
+---
+
+## Decisoes Tecnicas Transversais
+
+### Chart Library
+Para M4 (AccuracyChart) e M7 (AccuracyLineChart, MethodDonut): usar **recharts** (lightweight, React-native, requer `'use client'`). Alternativa: CSS-only bars para graficos simples (zero dependencia).
+
+### Polling & Visibility API
+Todas as features com polling (Live 15-30s, Chat 10s) DEVEM usar `document.visibilityState`:
+- Tab visivel: polling ativo
+- Tab em background: pausar polling
+- Isso evita requests desnecessarios quando o usuario tem multiplas tabs abertas
+
+### Cron Frequency (Vercel)
+Vercel Cron usa schedule fixo em `vercel.json`. Configurar a cada **5 minutos** (`*/5 * * * *`). O handler faz short-circuit:
+```
+1. Tem evento 'ao_vivo'? -> rodar sync-eventos (scraping agressivo)
+2. Tem previsoes nao processadas? -> rodar scoring
+3. Nenhum dos dois? -> return 200 (noop)
+```
+
+### Processada Timestamp
+Adicionar campo `processada_em: DateTime?` na tabela `previsoes` para auditoria de quando cada previsao foi processada. Util para debugging de scoring parcial.

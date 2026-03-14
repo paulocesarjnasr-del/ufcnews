@@ -57,19 +57,21 @@ export function DashboardTabs({ tabs }: DashboardTabsProps) {
       </div>
 
       {/* Scrollable tab content */}
-      <div
-        ref={scrollRef}
-        className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide"
-        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-      >
-        {tabs.map((tab, i) => (
-          <div
-            key={i}
-            className="w-full flex-shrink-0 snap-center px-4"
-          >
-            {tab.content}
-          </div>
-        ))}
+      <div className="w-full overflow-hidden">
+        <div
+          ref={scrollRef}
+          className="flex overflow-x-auto snap-x snap-mandatory"
+          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch' }}
+        >
+          {tabs.map((tab, i) => (
+            <div
+              key={i}
+              className="min-w-full flex-shrink-0 snap-center px-4"
+            >
+              {tab.content}
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );

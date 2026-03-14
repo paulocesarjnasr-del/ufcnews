@@ -229,10 +229,11 @@ export function TabEvento() {
           </button>
         )}
 
+        <div className="w-full overflow-hidden">
         <div
           ref={scrollRef}
           className="flex overflow-x-auto snap-x snap-mandatory gap-3"
-          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', WebkitOverflowScrolling: 'touch' }}
         >
           {sortedLutas.map((luta) => {
             const picked = picks[luta.id];
@@ -241,7 +242,7 @@ export function TabEvento() {
             const f2 = luta.lutador2;
 
             return (
-              <div key={luta.id} className="w-full flex-shrink-0 snap-center">
+              <div key={luta.id} className="min-w-full flex-shrink-0 snap-center">
                 <div className="neu-card p-4 space-y-3">
                   {/* Fight type badge */}
                   <div className="flex items-center justify-between">
@@ -340,6 +341,7 @@ export function TabEvento() {
               </div>
             );
           })}
+        </div>
         </div>
       </div>
 

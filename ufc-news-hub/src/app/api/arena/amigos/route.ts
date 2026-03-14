@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { query, queryOne } from '@/lib/db';
 import { getUsuarioAtual } from '@/lib/arena/auth';
-import { AmigoComDetalhes } from '@/types/arena';
+import { AmigoComDetalhes, StatusAmizade, UsuarioArenaPublico } from '@/types/arena';
 
 // GET - Listar amigos
 export async function GET(request: NextRequest) {
@@ -18,14 +18,17 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const status = searchParams.get('status') || 'aceita'; // 'aceita', 'pendente', 'todas'
 
-    // Amigos aceitos (onde eu enviei ou recebi)
+    // Single JOIN query — replaces N+1 pattern of querying each friend individually
     let amigosQuery = `
       SELECT
         a.id as amizade_id,
-        CASE WHEN a.usuario_id = $1 THEN a.amigo_id ELSE a.usuario_id END as amigo_id,
         a.status,
-        COALESCE(a.accepted_at, a.created_at) as desde
+        COALESCE(a.accepted_at, a.created_at) as desde,
+        u.id, u.username, u.display_name, u.avatar_url, u.nivel, u.pontos_totais
       FROM amizades a
+      JOIN usuarios_arena u ON (
+        CASE WHEN a.usuario_id = $1 THEN a.amigo_id ELSE a.usuario_id END = u.id
+      )
       WHERE (a.usuario_id = $1 OR a.amigo_id = $1)
     `;
 
@@ -35,48 +38,33 @@ export async function GET(request: NextRequest) {
       amigosQuery += ` AND a.status = 'pendente'`;
     }
 
-    const amizades = await query<{
+    amigosQuery += ` ORDER BY u.username`;
+
+    const rows = await query<{
       amizade_id: string;
-      amigo_id: string;
       status: string;
       desde: string;
+      id: string;
+      username: string;
+      display_name: string | null;
+      avatar_url: string | null;
+      nivel: string;
+      pontos_totais: number;
     }>(amigosQuery, [usuario.id]);
 
-    // Buscar detalhes dos amigos
-    const amigosDetalhados: AmigoComDetalhes[] = [];
-
-    for (const amizade of amizades) {
-      const amigo = await queryOne<{
-        id: string;
-        username: string;
-        display_name: string | null;
-        avatar_url: string | null;
-        nivel: string;
-        pontos_totais: number;
-        streak_atual: number;
-      }>(
-        `SELECT id, username, display_name, avatar_url, nivel, pontos_totais, streak_atual
-         FROM usuarios_arena WHERE id = $1`,
-        [amizade.amigo_id]
-      );
-
-      if (amigo) {
-        amigosDetalhados.push({
-          amizade_id: amizade.amizade_id,
-          amigo: {
-            id: amigo.id,
-            username: amigo.username,
-            display_name: amigo.display_name,
-            avatar_url: amigo.avatar_url,
-            nivel: amigo.nivel as any,
-            pontos_totais: amigo.pontos_totais,
-            streak_atual: amigo.streak_atual,
-          } as any,
-          status: amizade.status as any,
-          desde: amizade.desde,
-        });
-      }
-    }
+    const amigosDetalhados: AmigoComDetalhes[] = rows.map((row) => ({
+      amizade_id: row.amizade_id,
+      amigo: {
+        id: row.id,
+        username: row.username,
+        display_name: row.display_name,
+        avatar_url: row.avatar_url,
+        nivel: row.nivel,
+        pontos_totais: row.pontos_totais,
+      } as UsuarioArenaPublico,
+      status: row.status as StatusAmizade,
+      desde: row.desde,
+    }));
 
     // Separar solicitações pendentes recebidas
     const solicitacoesPendentes = await query<{

@@ -693,9 +693,10 @@ async function updateFighterRecords(
 //     mas ainda existem lutas não finalizadas → 'ao_vivo'
 // Returns true se o evento foi marcado como finalizado nesta chamada.
 async function checkAndUpdateEventStatus(eventoId: string): Promise<boolean> {
-  const fightStats = await queryOne<{ total: number; finalizadas: number }>(
+  const fightStats = await queryOne<{ total: number; finalizadas: number; pendentes: number }>(
     `SELECT COUNT(*)::int as total,
-            COUNT(CASE WHEN status = 'finalizada' THEN 1 END)::int as finalizadas
+            COUNT(CASE WHEN status IN ('finalizada', 'cancelada') THEN 1 END)::int as finalizadas,
+            COUNT(CASE WHEN status = 'agendada' THEN 1 END)::int as pendentes
      FROM lutas WHERE evento_id = $1`,
     [eventoId]
   );
@@ -711,15 +712,21 @@ async function checkAndUpdateEventStatus(eventoId: string): Promise<boolean> {
 
   if (!eventoData) return false;
 
+  // Never regress from finalizado
+  if (eventoData.status === 'finalizado') return true;
+
   const eventTime = new Date(eventoData.data_evento);
   const now = new Date();
   let newStatus = eventoData.status;
 
   if (fightStats.finalizadas === fightStats.total) {
-    // All fights done → finalizado
+    // All fights done (finalizada or cancelada) → finalizado
     newStatus = 'finalizado';
-  } else if (eventTime <= now && fightStats.finalizadas > 0) {
-    // Event started, at least one fight done but not all → ao_vivo
+  } else if (eventTime <= now && fightStats.pendentes < fightStats.total) {
+    // Event started (date passed AND at least one fight is not 'agendada') → ao_vivo
+    newStatus = 'ao_vivo';
+  } else if (eventTime <= now && fightStats.pendentes === fightStats.total) {
+    // Event date passed but no fights have started yet → ao_vivo (event day)
     newStatus = 'ao_vivo';
   }
 

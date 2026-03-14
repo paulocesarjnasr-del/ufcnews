@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, use } from 'react';
 import Link from 'next/link';
 
 import { LutaCard } from '@/components/arena/LutaCard';
+import { ProgressBar } from '@/components/arena/ProgressBar';
 import { Countdown } from '@/components/calendario/Countdown';
 import { OndeAssistir } from '@/components/calendario/OndeAssistir';
 import { useArenaAuth } from '@/hooks/useArenaAuth';
@@ -21,6 +22,19 @@ export default function EventoArenaPage({ params }: PageProps) {
   const { usuario, isAuthenticated } = useArenaAuth();
 
   useEffect(() => {
+    async function fetchEvento() {
+      try {
+        const res = await fetch(`/api/eventos/${id}`);
+        if (res.ok) {
+          const data = await res.json();
+          setEvento(data);
+        }
+      } catch (error) {
+        console.error('Erro ao carregar evento:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
     fetchEvento();
   }, [id]);
 
@@ -53,20 +67,6 @@ export default function EventoArenaPage({ params }: PageProps) {
       fetchUserPrevisoes();
     }
   }, [isAuthenticated, evento, fetchUserPrevisoes]);
-
-  async function fetchEvento() {
-    try {
-      const res = await fetch(`/api/eventos/${id}`);
-      if (res.ok) {
-        const data = await res.json();
-        setEvento(data);
-      }
-    } catch (error) {
-      console.error('Erro ao carregar evento:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  }
 
   const handlePrevisaoSubmit = (previsao: Previsao) => {
     setUserPrevisoes((prev) => ({
@@ -233,6 +233,13 @@ export default function EventoArenaPage({ params }: PageProps) {
 
       {/* Content */}
       <div className="container mx-auto px-4 py-8">
+        {/* Progress Bar */}
+        {isAuthenticated && (
+          <div className="mb-6">
+            <ProgressBar current={previsoesFeitas} total={totalLutas} />
+          </div>
+        )}
+
         {/* Main Card */}
         {lutasPorTipo.main.length > 0 && (
           <section className="mb-8">

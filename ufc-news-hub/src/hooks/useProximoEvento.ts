@@ -16,7 +16,7 @@ const fetcher = (url: string) => fetch(url).then(res => {
 
 export function useProximoEvento() {
   const { data, error, isLoading } = useSWR<ProximoEvento | null>(
-    '/api/eventos/proximo',
+    '/api/eventos/proximo?include_live=true',
     fetcher,
     {
       revalidateOnFocus: false,
@@ -26,11 +26,6 @@ export function useProximoEvento() {
     }
   );
 
-  // TODO(M6): Add second SWR call to detect ao_vivo events.
-  // Current API /api/eventos/proximo only returns 'agendado'.
-  // When M6 is implemented, either:
-  // 1. Modify /api/eventos/proximo to include ao_vivo, OR
-  // 2. Add separate /api/arena/live/status endpoint
   const isAoVivo = data?.status === 'ao_vivo';
 
   return {

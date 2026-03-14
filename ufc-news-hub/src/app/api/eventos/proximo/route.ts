@@ -1,9 +1,19 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { query, queryOne } from '@/lib/db';
 import { Evento, LutaComLutadores, ConsensoPrevisao } from '@/types';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    const includeLive = request.nextUrl?.searchParams?.get('include_live') === 'true';
+
+    const statusFilter = includeLive
+      ? `e.status IN ('agendado', 'ao_vivo')`
+      : `e.status = 'agendado' AND e.data_evento > NOW()`;
+
+    const orderBy = includeLive
+      ? `ORDER BY CASE WHEN e.status = 'ao_vivo' THEN 0 ELSE 1 END, e.data_evento ASC`
+      : `ORDER BY e.data_evento ASC`;
+
     const evento = await queryOne<Evento & { total_lutas: number; poster_url: string | null; horario_main_card: string | null }>(
       `SELECT
         e.*,
@@ -12,9 +22,9 @@ export async function GET() {
         COUNT(l.id)::integer as total_lutas
       FROM eventos e
       LEFT JOIN lutas l ON l.evento_id = e.id
-      WHERE e.status = 'agendado' AND e.data_evento > NOW()
+      WHERE ${statusFilter}
       GROUP BY e.id
-      ORDER BY e.data_evento ASC
+      ${orderBy}
       LIMIT 1`
     );
 
@@ -72,8 +82,8 @@ export async function GET() {
 
     // Buscar consenso
     const lutaIds = lutas.map(l => l.id);
-    let consensoMap: Record<string, ConsensoPrevisao[]> = {};
-    let totalPrevisoesMap: Record<string, number> = {};
+    const consensoMap: Record<string, ConsensoPrevisao[]> = {};
+    const totalPrevisoesMap: Record<string, number> = {};
 
     if (lutaIds.length > 0) {
       try {

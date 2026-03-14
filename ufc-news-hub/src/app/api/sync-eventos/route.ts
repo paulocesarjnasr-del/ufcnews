@@ -965,7 +965,7 @@ async function syncEvents(): Promise<SyncResult> {
         if (eventoFoiFinalizado && !eraFinalizado) {
           try {
             const resultadoPontuacao = await processarEventoFinalizado(eventoId);
-            console.log(`Arena: Evento ${event.nome} processado - ${resultadoPontuacao.previsoesProcessadas} previsões, ${resultadoPontuacao.pontosDistribuidos} pontos, ${resultadoPontuacao.duelosFinalizados} duelos`);
+            console.log(`Arena: Evento ${event.nome} processado - ${resultadoPontuacao.previsoesProcessadas} previsões, ${resultadoPontuacao.pontosDistribuidos} pontos`);
 
             // Emit event for AI Company agents
             await emitEvent('event.finalized', {

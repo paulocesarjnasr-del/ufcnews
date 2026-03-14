@@ -1,15 +1,14 @@
 'use client';
 
-import { useState, useEffect, use } from 'react';
+import { useState, useEffect, useCallback, use } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { Copy, Crown, MessageCircle, Send } from 'lucide-react';
+import { Copy, Crown } from 'lucide-react';
 
 import { useArenaAuth } from '@/hooks/useArenaAuth';
-import { NIVEL_CONFIG } from '@/types/arena';
-
-import type { Liga, LigaMembro } from '@/types/arena';
+import { LigaChat } from '@/components/arena/LigaChat';
+import { NIVEL_CONFIG, type Liga, type LigaMembro } from '@/types/arena';
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -57,11 +56,7 @@ export default function LigaPage({ params }: PageProps) {
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState('');
 
-  useEffect(() => {
-    fetchLiga();
-  }, [id]);
-
-  async function fetchLiga() {
+  const fetchLiga = useCallback(async () => {
     try {
       const res = await fetch(`/api/arena/ligas/${id}`);
       if (res.ok) {
@@ -77,7 +72,11 @@ export default function LigaPage({ params }: PageProps) {
     } finally {
       setIsLoading(false);
     }
-  }
+  }, [id, router]);
+
+  useEffect(() => {
+    fetchLiga();
+  }, [fetchLiga]);
 
   async function handleEntrar() {
     if (!isAuthenticated) {
@@ -270,18 +269,8 @@ export default function LigaPage({ params }: PageProps) {
         )}
       </div>
 
-      {/* Chat placeholder */}
-      <div className="neu-card rounded-xl p-6">
-        <div className="flex items-center gap-2 mb-4">
-          <MessageCircle className="w-5 h-5 text-dark-textMuted" />
-          <h2 className="font-display text-lg uppercase text-white">Chat</h2>
-        </div>
-
-        <div className="flex flex-col items-center justify-center py-8 text-center">
-          <Send className="w-8 h-8 text-dark-border mb-3" />
-          <p className="text-dark-textMuted text-sm">Chat em breve</p>
-        </div>
-      </div>
+      {/* Chat */}
+      <LigaChat ligaId={id} />
 
       {/* Back link */}
       <div className="mt-6 text-center">

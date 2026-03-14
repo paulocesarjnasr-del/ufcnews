@@ -67,7 +67,7 @@ function parseEventsList(html: string): Array<{
   cidade: string;
   pais: string;
   tipo: 'PPV' | 'Fight Night' | 'Apex';
-  status: 'agendado' | 'finalizado';
+  status: 'agendado' | 'ao_vivo' | 'finalizado';
   event_url: string;
 }> {
   const $ = cheerio.load(html);
@@ -79,7 +79,7 @@ function parseEventsList(html: string): Array<{
     cidade: string;
     pais: string;
     tipo: 'PPV' | 'Fight Night' | 'Apex';
-    status: 'agendado' | 'finalizado';
+    status: 'agendado' | 'ao_vivo' | 'finalizado';
     event_url: string;
   }> = [];
 
@@ -132,10 +132,13 @@ function parseEventsList(html: string): Array<{
       else if (local_evento.toLowerCase().includes('apex')) tipo = 'Apex';
 
       // Status - baseado na data do evento (mais confiável que CSS classes)
-      // Evento é considerado "finalizado" se a data já passou
+      // Evento é considerado "finalizado" se a data já passou.
+      // O status ao_vivo é refinado depois, após checar as lutas do evento.
       const now = new Date();
-      let status: 'agendado' | 'finalizado' = 'agendado';
+      let status: 'agendado' | 'ao_vivo' | 'finalizado' = 'agendado';
       if (data_evento && data_evento < now) {
+        // Event date has passed — could be live or finished.
+        // Will be refined below after checking fight statuses.
         status = 'finalizado';
       }
 
@@ -684,26 +687,51 @@ async function updateFighterRecords(
   }
 }
 
-// Verificar se todas as lutas de um evento estão finalizadas
+// Verificar e atualizar status do evento com base nas lutas e na data:
+//   - Se todas as lutas estão finalizadas → 'finalizado'
+//   - Se evento já começou (data passou) e ao menos uma luta tem resultado
+//     mas ainda existem lutas não finalizadas → 'ao_vivo'
+// Returns true se o evento foi marcado como finalizado nesta chamada.
 async function checkAndUpdateEventStatus(eventoId: string): Promise<boolean> {
-  // Contar lutas agendadas (não finalizadas)
-  const result = await query<{ count: string }>(
-    `SELECT COUNT(*) as count FROM lutas WHERE evento_id = $1 AND status != 'finalizada'`,
+  const fightStats = await queryOne<{ total: number; finalizadas: number }>(
+    `SELECT COUNT(*)::int as total,
+            COUNT(CASE WHEN status = 'finalizada' THEN 1 END)::int as finalizadas
+     FROM lutas WHERE evento_id = $1`,
     [eventoId]
   );
 
-  const lutasNaoFinalizadas = parseInt(result[0]?.count || '0');
-
-  // Se todas finalizadas, atualizar evento
-  if (lutasNaoFinalizadas === 0) {
-    await query(
-      `UPDATE eventos SET status = 'finalizado' WHERE id = $1`,
-      [eventoId]
-    );
-    return true;
+  if (!fightStats || fightStats.total === 0) {
+    return false;
   }
 
-  return false;
+  const eventoData = await queryOne<{ data_evento: string; status: string }>(
+    `SELECT data_evento, status FROM eventos WHERE id = $1`,
+    [eventoId]
+  );
+
+  if (!eventoData) return false;
+
+  const eventTime = new Date(eventoData.data_evento);
+  const now = new Date();
+  let newStatus = eventoData.status;
+
+  if (fightStats.finalizadas === fightStats.total) {
+    // All fights done → finalizado
+    newStatus = 'finalizado';
+  } else if (eventTime <= now && fightStats.finalizadas > 0) {
+    // Event started, at least one fight done but not all → ao_vivo
+    newStatus = 'ao_vivo';
+  }
+
+  if (newStatus !== eventoData.status) {
+    await query(
+      `UPDATE eventos SET status = $1 WHERE id = $2`,
+      [newStatus, eventoId]
+    );
+    console.log(`[SYNC] Evento ${eventoId} status: ${eventoData.status} → ${newStatus}`);
+  }
+
+  return newStatus === 'finalizado';
 }
 
 async function syncEvents(): Promise<SyncResult> {
@@ -950,16 +978,12 @@ async function syncEvents(): Promise<SyncResult> {
 
         let eventoFoiFinalizado = false;
 
-        if (event.status === 'finalizado') {
-          await query(
-            `UPDATE eventos SET status = 'finalizado' WHERE id = $1`,
-            [eventoId]
-          );
-          eventoFoiFinalizado = true;
-        } else {
-          // Verificar se todas as lutas estão finalizadas
-          eventoFoiFinalizado = await checkAndUpdateEventStatus(eventoId);
-        }
+        // Sempre usar checkAndUpdateEventStatus para derivar o status correto
+        // com base nas lutas (suporta ao_vivo além de finalizado).
+        // Para eventos que o scraper já marcou como 'finalizado' mas cujas lutas
+        // ainda não foram todas processadas, a função irá ajustar para 'ao_vivo'
+        // se necessário, ou confirmar 'finalizado' se tudo estiver pronto.
+        eventoFoiFinalizado = await checkAndUpdateEventStatus(eventoId);
 
         // Se o evento acabou de ser finalizado, processar pontuação da Arena
         if (eventoFoiFinalizado && !eraFinalizado) {

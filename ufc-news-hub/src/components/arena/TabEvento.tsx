@@ -216,6 +216,25 @@ export function TabEvento() {
       </div>
 
       {/* Current fight card */}
+      <div className="relative">
+        {/* Left arrow */}
+        {currentIndex > 0 && (
+          <button
+            onClick={goToPrev}
+            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 z-10 w-8 h-8 flex items-center justify-center rounded-full bg-dark-card border border-dark-border text-dark-textMuted hover:text-white transition-colors"
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </button>
+        )}
+        {/* Right arrow */}
+        {currentIndex < sortedLutas.length - 1 && (
+          <button
+            onClick={goToNext}
+            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 z-10 w-8 h-8 flex items-center justify-center rounded-full bg-dark-card border border-dark-border text-dark-textMuted hover:text-white transition-colors"
+          >
+            <ChevronRight className="w-5 h-5" />
+          </button>
+        )}
       <div className="neu-card p-4 space-y-4">
         {/* Fight type + category */}
         <div className="flex items-center justify-between">
@@ -325,38 +344,21 @@ export function TabEvento() {
           </div>
         )}
       </div>
+      </div>
 
-      {/* Navigation buttons */}
-      <div className="flex items-center justify-between gap-3">
-        <button
-          onClick={goToPrev}
-          disabled={currentIndex === 0}
-          className="w-10 h-10 flex items-center justify-center rounded-full bg-dark-card border border-dark-border text-dark-textMuted hover:text-white transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-        >
-          <ChevronLeft className="w-5 h-5" />
-        </button>
-
-        {/* Dot indicators */}
-        <div className="flex items-center gap-1 flex-wrap justify-center">
-          {sortedLutas.map((luta, i) => (
-            <button
-              key={luta.id}
-              onClick={() => { setCurrentIndex(i); setAllDone(false); }}
-              className={`rounded-full transition-all ${
-                i === currentIndex ? 'w-5 h-2 bg-ufc-red'
-                  : picks[luta.id] ? 'w-2 h-2 bg-ufc-red/50'
-                  : 'w-2 h-2 bg-dark-border'
-              }`}
-            />
-          ))}
-        </div>
-
-        <button
-          onClick={goToNext}
-          className="w-10 h-10 flex items-center justify-center rounded-full bg-dark-card border border-dark-border text-dark-textMuted hover:text-white transition-colors"
-        >
-          <ChevronRight className="w-5 h-5" />
-        </button>
+      {/* Dot indicators */}
+      <div className="flex items-center gap-1 flex-wrap justify-center">
+        {sortedLutas.map((luta, i) => (
+          <button
+            key={luta.id}
+            onClick={() => { setCurrentIndex(i); setAllDone(false); }}
+            className={`rounded-full transition-all ${
+              i === currentIndex ? 'w-5 h-2 bg-ufc-red'
+                : picks[luta.id] ? 'w-2 h-2 bg-ufc-red/50'
+                : 'w-2 h-2 bg-dark-border'
+            }`}
+          />
+        ))}
       </div>
     </div>
   );

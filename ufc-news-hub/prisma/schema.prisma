@@ -443,6 +443,7 @@ model previsoes {
   round_previsto          Int?
   pontos_confianca        Int?             @default(100)
   processada              Boolean?         @default(false)
+  processada_em           DateTime?        @db.Timestamptz(6)
   acertou_vencedor        Boolean?
   acertou_metodo          Boolean?
   acertou_round           Boolean?
@@ -500,7 +501,8 @@ model usuarios_arena {
   avatar_url                                   String?
   bio                                          String?            @db.VarChar(200)
   email                                        String             @unique @db.VarChar(255)
-  senha_hash                                   String             @db.VarChar(255)
+  senha_hash                                   String?            @db.VarChar(255)
+  google_id                                    String?            @unique
   pontos_totais                                Int?               @default(0)
   xp_total                                     Int?               @default(0)
   nivel                                        nivel_usuario?     @default(iniciante)

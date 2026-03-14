@@ -55,7 +55,7 @@ export function LigaChat({ ligaId }: LigaChatProps) {
       const data = await res.json();
       const novas: ChatMessage[] = data.mensagens ?? [];
 
-      setMensagens((prev) => {
+      setMensagens((_prev) => {
         // Only scroll if there are genuinely new messages
         const lastNew = novas[novas.length - 1];
         if (lastNew && lastNew.id !== lastMessageIdRef.current) {

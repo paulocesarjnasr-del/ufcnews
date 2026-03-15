@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Octagon } from 'lucide-react';
 import { OctagonPortalLayout } from '@/components/arena/OctagonPortalLayout';
@@ -9,7 +9,9 @@ import { useArenaAuth } from '@/hooks/useArenaAuth';
 
 export default function ArenaRegistroPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { registro, isAuthenticated, isLoading: authLoading } = useArenaAuth();
+  const redirectTo = searchParams.get('redirect') || '/arena';
   const [formData, setFormData] = useState({
     username: '',
     email: '',
@@ -21,9 +23,9 @@ export default function ArenaRegistroPage() {
 
   useEffect(() => {
     if (isAuthenticated && !authLoading) {
-      router.push('/arena');
+      router.push(redirectTo);
     }
-  }, [isAuthenticated, authLoading, router]);
+  }, [isAuthenticated, authLoading, router, redirectTo]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData((prev) => ({
@@ -66,7 +68,7 @@ export default function ArenaRegistroPage() {
     );
 
     if (result.success) {
-      router.push('/arena');
+      router.push(redirectTo);
     } else {
       setError(result.error || 'Erro ao criar conta');
     }

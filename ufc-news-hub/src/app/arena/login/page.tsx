@@ -32,11 +32,13 @@ export default function ArenaLoginPage() {
     }
   }, [searchParams]);
 
+  const redirectTo = searchParams.get('redirect') || '/arena';
+
   useEffect(() => {
     if (isAuthenticated && !authLoading) {
-      router.push('/arena');
+      router.push(redirectTo);
     }
-  }, [isAuthenticated, authLoading, router]);
+  }, [isAuthenticated, authLoading, router, redirectTo]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,7 +48,7 @@ export default function ArenaLoginPage() {
     const result = await login(email, senha);
 
     if (result.success) {
-      router.push('/arena');
+      router.push(redirectTo);
     } else {
       setError(result.error || 'Erro ao fazer login');
     }
@@ -155,7 +157,7 @@ export default function ArenaLoginPage() {
 
           <div className="text-center text-sm text-dark-textMuted slide-up-fade" style={{ animationDelay: '300ms' }}>
             Não tem uma conta?{' '}
-            <Link href="/arena/registro" className="text-ufc-red hover:text-ufc-redLight font-medium">
+            <Link href={`/arena/registro${redirectTo !== '/arena' ? `?redirect=${encodeURIComponent(redirectTo)}` : ''}`} className="text-ufc-red hover:text-ufc-redLight font-medium">
               Criar conta
             </Link>
           </div>

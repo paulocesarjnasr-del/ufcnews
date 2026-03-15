@@ -267,6 +267,12 @@ model ligas {
   max_membros                                     Int?              @default(50)
   apenas_main_card                                Boolean?          @default(false)
   mostrar_picks_antes                             Boolean?          @default(false)
+  revelar_picks_ao_vivo                           Boolean?          @default(false)
+  punicao_texto                                   String?           @db.Text
+  aposta_rodada                                   String?           @db.VarChar(100)
+  ranking_tipo                                    String?           @default("pontos") @db.VarChar(20)
+  temporada_duracao                               Int?              @default(0)
+  chat_ativo                                      Boolean?          @default(true)
   total_membros                                   Int?              @default(1)
   total_eventos_disputados                        Int?              @default(0)
   campeao_id                                      String?           @db.Uuid

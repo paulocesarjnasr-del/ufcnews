@@ -450,6 +450,12 @@ export interface CriarLigaRequest {
   max_membros?: number;
   apenas_main_card?: boolean;
   mostrar_picks_antes?: boolean;
+  revelar_picks_ao_vivo?: boolean;
+  punicao_texto?: string;
+  aposta_rodada?: string;
+  ranking_tipo?: 'pontos' | 'percentual';
+  temporada_duracao?: number;
+  chat_ativo?: boolean;
 }
 
 export interface EntrarLigaRequest {

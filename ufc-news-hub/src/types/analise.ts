@@ -236,6 +236,8 @@ export interface HeroSectionData {
   };
 }
 
+export type HeroFighterData = HeroSectionData['fighter1'];
+
 export interface StakeRow {
   dimensao: string;
   fighter1: string;

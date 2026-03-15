@@ -1,5 +1,4 @@
-import { EventAnalysisView } from '@/components/analise/EventAnalysisView';
-import type { EventAnalysisData } from '@/components/analise/EventAnalysisView';
+import { EventAnalysisView, type EventAnalysisData } from '@/components/analise/EventAnalysisView';
 import { enrichEventWithPhotos } from '@/lib/enrich-event-photos';
 
 const eventData: EventAnalysisData = {

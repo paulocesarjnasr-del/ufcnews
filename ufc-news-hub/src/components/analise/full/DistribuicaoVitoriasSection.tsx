@@ -1,5 +1,7 @@
 import { SectionHeader } from './SectionHeader';
-import type { DistribuicaoVitoriasSectionData, DistribuicaoVitoriasFighter, WinMethodBreakdown } from '@/types/analise';
+import type { DistribuicaoVitoriasSectionData, WinMethodBreakdown } from '@/types/analise';
+
+type DistribuicaoVitoriasFighter = { nome: string } & WinMethodBreakdown;
 
 interface DistribuicaoVitoriasSectionProps {
   data: DistribuicaoVitoriasSectionData;
@@ -7,7 +9,7 @@ interface DistribuicaoVitoriasSectionProps {
 
 interface BarProps {
   label: string;
-  method: WinMethodBreakdown;
+  method: { count: number; percent: number };
   colorClass: string;
 }
 

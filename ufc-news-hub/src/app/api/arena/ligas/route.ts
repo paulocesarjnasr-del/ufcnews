@@ -80,9 +80,15 @@ export async function POST(request: NextRequest) {
       nome,
       descricao,
       tipo = 'privada',
-      max_membros = 0, // 0 = ilimitado
+      max_membros = 0,
       apenas_main_card = false,
       mostrar_picks_antes = false,
+      revelar_picks_ao_vivo = false,
+      punicao_texto,
+      aposta_rodada,
+      ranking_tipo = 'pontos',
+      temporada_duracao = 0,
+      chat_ativo = true,
     } = body;
 
     // Validações
@@ -100,14 +106,30 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    if (ranking_tipo && !['pontos', 'percentual'].includes(ranking_tipo)) {
+      return NextResponse.json(
+        { error: 'ranking_tipo deve ser "pontos" ou "percentual"' },
+        { status: 400 }
+      );
+    }
+
+    // Gerar codigo de convite unico (6 chars, sem caracteres ambiguos)
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    const codigoConvite = Array.from({ length: 6 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+
     // Criar liga
     const liga = await queryOne<Liga>(
       `INSERT INTO ligas (
-        nome, descricao, criador_id, tipo, max_membros,
-        apenas_main_card, mostrar_picks_antes
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+        nome, descricao, criador_id, tipo, codigo_convite, max_membros,
+        apenas_main_card, mostrar_picks_antes, revelar_picks_ao_vivo,
+        punicao_texto, aposta_rodada, ranking_tipo, temporada_duracao, chat_ativo
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
       RETURNING *`,
-      [nome, descricao || null, usuario.id, tipo, max_membros, apenas_main_card, mostrar_picks_antes]
+      [
+        nome, descricao || null, usuario.id, tipo, codigoConvite, max_membros,
+        apenas_main_card, mostrar_picks_antes, revelar_picks_ao_vivo,
+        punicao_texto || null, aposta_rodada || null, ranking_tipo, temporada_duracao, chat_ativo,
+      ]
     );
 
     if (!liga) {

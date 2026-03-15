@@ -115,10 +115,8 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      liga: {
-        id: liga.id,
-        nome: liga.nome,
-      },
+      liga_id: liga.id,
+      liga_nome: liga.nome,
     });
   } catch (error) {
     console.error('Erro ao entrar na liga:', error);

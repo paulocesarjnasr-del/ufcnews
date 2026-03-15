@@ -130,7 +130,7 @@ export function FullAnalysisView({ analise }: FullAnalysisViewProps) {
 
         {/* 15 - Radar do Apostador */}
         <section>
-          <RadarApostadorSection data={fa.radar_apostador} />
+          {fa.radar_apostador && <RadarApostadorSection data={fa.radar_apostador} />}
         </section>
       </div>
     </main>

@@ -539,6 +539,26 @@ function HomeLogado({ evento }: { evento: Evento | null }) {
             <FightTicker lutas={sortedLutas} />
           )}
 
+          {/* Two paths: Solo vs Liga */}
+          <div className="grid grid-cols-2 gap-3">
+            <Link
+              href={evento ? `/arena/evento/${evento.id}` : '/arena'}
+              className="rounded-xl border border-white/10 bg-black/40 backdrop-blur-md p-4 hover:border-ufc-red/30 transition-all group text-center"
+            >
+              <Zap className="w-6 h-6 text-ufc-red mx-auto mb-2 group-hover:scale-110 transition-transform" />
+              <div className="font-display text-sm uppercase text-white">Solo</div>
+              <div className="text-[10px] text-white/30 mt-1">Compete contra todos os usuarios</div>
+            </Link>
+            <Link
+              href="/arena/ligas/criar"
+              className="rounded-xl border border-white/10 bg-black/40 backdrop-blur-md p-4 hover:border-ufc-gold/30 transition-all group text-center"
+            >
+              <Users className="w-6 h-6 text-ufc-gold mx-auto mb-2 group-hover:scale-110 transition-transform" />
+              <div className="font-display text-sm uppercase text-white">Com Amigos</div>
+              <div className="text-[10px] text-white/30 mt-1">Crie uma liga e desafie amigos</div>
+            </Link>
+          </div>
+
           {/* Picks progress card — glass, with inline stats */}
           {evento && !picksLoading && (
             <div className="rounded-xl border border-white/10 bg-black/50 backdrop-blur-md p-5 space-y-4">

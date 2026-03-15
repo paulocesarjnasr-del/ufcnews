@@ -38,6 +38,7 @@ export function sanitizeContent(text: string): string {
     // Remove tags HTML
     .replace(/<[^>]*>/g, '')
     // Remove caracteres de controle exceto newlines
+    // eslint-disable-next-line no-control-regex
     .replace(/[\x00-\x09\x0B\x0C\x0E-\x1F\x7F]/g, '')
     // Normaliza múltiplas quebras de linha
     .replace(/\n{3,}/g, '\n\n')

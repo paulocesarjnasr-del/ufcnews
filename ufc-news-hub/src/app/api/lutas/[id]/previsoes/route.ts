@@ -77,7 +77,7 @@ export async function GET(request: NextRequest, { params }: Params) {
     const previsoesFormatadas = previsoes.map(p => ({
       ...p,
       lutador_escolhido: {
-        id: (p as any).lutador_escolhido_id || (p as any).vencedor_previsto_id,
+        id: (p as unknown as Record<string, unknown>).lutador_escolhido_id || (p as unknown as Record<string, unknown>).vencedor_previsto_id,
         nome: p.lutador_nome,
         apelido: p.lutador_apelido,
         imagem_url: p.lutador_imagem,

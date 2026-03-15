@@ -85,7 +85,7 @@ export interface FighterComparison {
 // CALCULATION HELPERS
 // ═══════════════════════════════════════════════════════════════════════════════
 
-function safeDivide(a: number, b: number): number {
+function _safeDivide(a: number, b: number): number {
   return b === 0 ? 0 : a / b;
 }
 
@@ -155,7 +155,7 @@ export function calculateDerivedMetrics(
     return pctOf(allSigStr);
   };
 
-  const calcAbsorption = (fightList: FightDetailStats[]): number => {
+  const _calcAbsorption = (_fightList: FightDetailStats[]): number => {
     // We don't have opponent's strikes directly, but we can estimate from SApM career stat
     // For now, return career SApM as baseline
     return profile.sapm ?? 0;
@@ -271,7 +271,7 @@ export function calculateDerivedMetrics(
 
   // ─── OPPONENT QUALITY ───
   // Simple heuristic based on context (event type, streak)
-  const recentOpponents = fights.slice(0, 5).map(f => f.opponent);
+  const _recentOpponents = fights.slice(0, 5).map(f => f.opponent);
   // We'll mark as "strong" by default since these fighters are in the UFC
   const recentOpponentQuality: OpponentQuality = 'strong';
 

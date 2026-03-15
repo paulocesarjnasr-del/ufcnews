@@ -21,9 +21,9 @@ function formatTime(date: Date): string {
 
 async function runNewsSync(): Promise<void> {
   const now = new Date();
-  console.log(`\n${'═'.repeat(50)}`);
-  console.log(`📰 [${formatTime(now)}] Sync de NOTÍCIAS iniciando...`);
-  console.log('═'.repeat(50));
+  console.info(`\n${'═'.repeat(50)}`);
+  console.info(`📰 [${formatTime(now)}] Sync de NOTÍCIAS iniciando...`);
+  console.info('═'.repeat(50));
 
   const port = process.env.PORT || '3010';
   const url = `http://localhost:${port}/api/sync`;
@@ -41,27 +41,27 @@ async function runNewsSync(): Promise<void> {
     const result = await response.json();
 
     if (result.success) {
-      console.log(`✅ Notícias: +${result.adicionadas} novas | ${result.duplicadas} dup | ${result.rejeitadas} rej`);
+      console.info(`✅ Notícias: +${result.adicionadas} novas | ${result.duplicadas} dup | ${result.rejeitadas} rej`);
       if (result.adicionadas > 0) {
-        console.log(`🎉 ${result.adicionadas} notícia(s) nova(s)!`);
+        console.info(`🎉 ${result.adicionadas} notícia(s) nova(s)!`);
       }
     } else {
-      console.log(`⚠️ Sync erro: ${result.error || 'Erro desconhecido'}`);
+      console.info(`⚠️ Sync erro: ${result.error || 'Erro desconhecido'}`);
     }
   } catch (error) {
     console.error('❌ Erro no sync de notícias:', error instanceof Error ? error.message : error);
   }
 
   const nextSync = new Date(Date.now() + NEWS_INTERVAL_MS);
-  console.log(`⏳ Próximo sync notícias: ${formatTime(nextSync)}`);
-  console.log('─'.repeat(50));
+  console.info(`⏳ Próximo sync notícias: ${formatTime(nextSync)}`);
+  console.info('─'.repeat(50));
 }
 
 async function runEventsSync(): Promise<void> {
   const now = new Date();
-  console.log(`\n${'═'.repeat(50)}`);
-  console.log(`🥊 [${formatTime(now)}] Sync de EVENTOS iniciando...`);
-  console.log('═'.repeat(50));
+  console.info(`\n${'═'.repeat(50)}`);
+  console.info(`🥊 [${formatTime(now)}] Sync de EVENTOS iniciando...`);
+  console.info('═'.repeat(50));
 
   const port = process.env.PORT || '3010';
   const url = `http://localhost:${port}/api/sync-eventos`;
@@ -79,38 +79,38 @@ async function runEventsSync(): Promise<void> {
     const result = await response.json();
 
     if (result.success) {
-      console.log(`✅ Eventos: ${result.eventosProcessados} processados`);
+      console.info(`✅ Eventos: ${result.eventosProcessados} processados`);
       if (result.eventosNovos > 0) {
-        console.log(`🎉 ${result.eventosNovos} evento(s) novo(s)!`);
+        console.info(`🎉 ${result.eventosNovos} evento(s) novo(s)!`);
       }
       if (result.lutasNovas > 0) {
-        console.log(`🥊 ${result.lutasNovas} luta(s) nova(s) adicionada(s)`);
+        console.info(`🥊 ${result.lutasNovas} luta(s) nova(s) adicionada(s)`);
       }
       if (result.lutasRemovidas > 0) {
-        console.log(`❌ ${result.lutasRemovidas} luta(s) removida(s) (caíram do card)`);
+        console.info(`❌ ${result.lutasRemovidas} luta(s) removida(s) (caíram do card)`);
       }
     } else {
-      console.log(`⚠️ Sync erro: ${result.erro || 'Erro desconhecido'}`);
+      console.info(`⚠️ Sync erro: ${result.erro || 'Erro desconhecido'}`);
     }
   } catch (error) {
     console.error('❌ Erro no sync de eventos:', error instanceof Error ? error.message : error);
   }
 
   const nextSync = new Date(Date.now() + EVENTS_INTERVAL_MS);
-  console.log(`⏳ Próximo sync eventos: ${formatTime(nextSync)}`);
-  console.log('─'.repeat(50));
+  console.info(`⏳ Próximo sync eventos: ${formatTime(nextSync)}`);
+  console.info('─'.repeat(50));
 }
 
 export async function register() {
   if (process.env.NEXT_RUNTIME === 'nodejs') {
     const port = process.env.PORT || '3010';
-    console.log('\n╔════════════════════════════════════════════════════════╗');
-    console.log('║           🔄 AUTO-SYNC ATIVADO (REAL-TIME)             ║');
-    console.log('╠════════════════════════════════════════════════════════╣');
-    console.log(`║  📰 Notícias: a cada ${NEWS_INTERVAL_MINUTES} minutos                          ║`);
-    console.log(`║  🥊 Eventos:  a cada ${EVENTS_INTERVAL_MINUTES} minutos                         ║`);
-    console.log(`║  🔌 Porta:    ${port}                                       ║`);
-    console.log('╚════════════════════════════════════════════════════════╝\n');
+    console.info('\n╔════════════════════════════════════════════════════════╗');
+    console.info('║           🔄 AUTO-SYNC ATIVADO (REAL-TIME)             ║');
+    console.info('╠════════════════════════════════════════════════════════╣');
+    console.info(`║  📰 Notícias: a cada ${NEWS_INTERVAL_MINUTES} minutos                          ║`);
+    console.info(`║  🥊 Eventos:  a cada ${EVENTS_INTERVAL_MINUTES} minutos                         ║`);
+    console.info(`║  🔌 Porta:    ${port}                                       ║`);
+    console.info('╚════════════════════════════════════════════════════════╝\n');
 
     // Sync de notícias após 8 segundos
     setTimeout(async () => {

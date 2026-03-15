@@ -85,22 +85,21 @@ export default function EventoCalendarioPage({ params }: PageProps) {
   const [activeTab, setActiveTab] = useState<TabType>('main');
 
   useEffect(() => {
+    async function fetchEvento() {
+      try {
+        const res = await fetch(`/api/eventos/${id}/card`);
+        if (res.ok) {
+          const responseData = await res.json();
+          setData(responseData);
+        }
+      } catch (error) {
+        console.error('Erro ao carregar evento:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
     fetchEvento();
   }, [id]);
-
-  async function fetchEvento() {
-    try {
-      const res = await fetch(`/api/eventos/${id}/card`);
-      if (res.ok) {
-        const responseData = await res.json();
-        setData(responseData);
-      }
-    } catch (error) {
-      console.error('Erro ao carregar evento:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  }
 
   if (isLoading) {
     return (

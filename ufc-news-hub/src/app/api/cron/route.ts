@@ -125,7 +125,7 @@ async function runSync(baseUrl: string) {
 }
 
 // GET — Called by Vercel Cron
-export async function GET(request: Request) {
+export async function GET(_request: Request) {
   // Vercel Cron sends user-agent "vercel-cron/1.0" — optionally verify
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || `http://localhost:${process.env.PORT || '3010'}`;
 

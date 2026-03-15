@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
     const ativo = searchParams.get('ativo');
     const sort = searchParams.get('sort');
 
-    let whereConditions: string[] = [];
+    const whereConditions: string[] = [];
     const params: unknown[] = [];
     let paramIndex = 1;
 

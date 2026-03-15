@@ -15,7 +15,7 @@ const LEVELS: Record<number, { title: string; xpRequired: number }> = {
  * - Clamps XP to level ceiling for agents at max (L4)
  * - Fixes xpToNextLevel field
  */
-export async function POST(req: NextRequest) {
+export async function POST(_req: NextRequest) {
   try {
     const agents = await prisma.agent.findMany({ where: { firedAt: null } });
     const fixes: Array<{ id: string; name: string; action: string; from: string; to: string }> = [];

@@ -104,9 +104,9 @@ export function TacticalBreakdown() {
         </h3>
         <div className="grid grid-cols-[1fr_auto_1fr] gap-4 items-center">
           <div className="text-center space-y-3">
-            <p className="font-display text-3xl text-dark-text">6'1"</p>
+            <p className="font-display text-3xl text-dark-text">6&apos;1&quot;</p>
             <p className="text-xs text-dark-textMuted">Altura</p>
-            <p className="font-display text-3xl text-dark-text">76"</p>
+            <p className="font-display text-3xl text-dark-text">76&quot;</p>
             <p className="text-xs text-dark-textMuted">Envergadura</p>
             <p className="font-display text-3xl text-dark-text">33</p>
             <p className="text-xs text-dark-textMuted">Idade</p>
@@ -125,9 +125,9 @@ export function TacticalBreakdown() {
             <div className="h-px w-16 bg-dark-border" />
           </div>
           <div className="text-center space-y-3">
-            <p className="font-display text-3xl text-dark-text">6'0"</p>
+            <p className="font-display text-3xl text-dark-text">6&apos;0&quot;</p>
             <p className="text-xs text-dark-textMuted">Altura</p>
-            <p className="font-display text-3xl text-dark-text">75"</p>
+            <p className="font-display text-3xl text-dark-text">75&quot;</p>
             <p className="text-xs text-dark-textMuted">Envergadura</p>
             <p className="font-display text-3xl text-dark-text">32</p>
             <p className="text-xs text-dark-textMuted">Idade</p>
@@ -140,11 +140,11 @@ export function TacticalBreakdown() {
           <p className="text-center text-xs text-dark-textMuted mb-2">Vantagem de Envergadura</p>
           <div className="flex items-center justify-center gap-2">
             <div className="h-3 rounded-full bg-ufc-red" style={{ width: '52%' }} />
-            <span className="text-xs text-dark-textMuted">+1"</span>
+            <span className="text-xs text-dark-textMuted">+1&quot;</span>
             <div className="h-3 rounded-full bg-blue-400" style={{ width: '48%' }} />
           </div>
           <p className="mt-2 text-center text-sm text-dark-textMuted">
-            Strickland tem vantagem marginal de 1" na envergadura — suficiente para manter distância com jabs
+            Strickland tem vantagem marginal de 1&quot; na envergadura — suficiente para manter distância com jabs
           </p>
         </div>
       </div>
@@ -170,7 +170,7 @@ export function TacticalBreakdown() {
             </li>
             <li className="flex items-start gap-2">
               <span className="mt-1 text-ufc-red">▸</span>
-              <span><strong>Distância:</strong> Usar 1" de reach vantagem para jabs e manter Hernandez na ponta.</span>
+              <span><strong>Distância:</strong> Usar 1&quot; de reach vantagem para jabs e manter Hernandez na ponta.</span>
             </li>
           </ul>
         </div>

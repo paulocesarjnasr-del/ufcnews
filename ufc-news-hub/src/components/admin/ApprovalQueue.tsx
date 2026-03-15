@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { ShieldAlert, Check, X, ChevronDown, ChevronUp, Loader2 } from 'lucide-react';
 import { AgentIcon } from './AgentIcon';
 import { useAdminAuth } from './AdminAuthContext';
@@ -29,7 +29,7 @@ interface ApprovalQueueProps {
   currentPromptId?: string;
 }
 
-export function ApprovalQueue({ processing = false, currentPromptId }: ApprovalQueueProps) {
+export function ApprovalQueue({ processing = false, currentPromptId: _currentPromptId }: ApprovalQueueProps) {
   const { authFetch } = useAdminAuth();
   const [approvals, setApprovals] = useState<ApprovalItem[]>([]);
   const [autoApproved, setAutoApproved] = useState<ApprovalItem[]>([]);
@@ -66,7 +66,7 @@ export function ApprovalQueue({ processing = false, currentPromptId }: ApprovalQ
     return () => clearInterval(interval);
   }, [processing]);
 
-  async function fetchApprovals() {
+  const fetchApprovals = useCallback(async () => {
     try {
       const shouldFetchAuto = processing || showAutoSection;
       const fetches: Promise<Response>[] = [
@@ -92,13 +92,13 @@ export function ApprovalQueue({ processing = false, currentPromptId }: ApprovalQ
     } finally {
       setLoading(false);
     }
-  }
+  }, [authFetch, processing, showAutoSection]);
 
   useEffect(() => {
     fetchApprovals();
     const interval = setInterval(fetchApprovals, 5000);
     return () => clearInterval(interval);
-  }, [authFetch, processing, showAutoSection]);
+  }, [fetchApprovals]);
 
   async function handleAction(approvalId: string, action: 'approve' | 'reject') {
     const reviewNote =

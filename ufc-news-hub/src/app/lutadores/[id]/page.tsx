@@ -17,22 +17,21 @@ export default function LutadorPage({ params }: PageProps) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    async function fetchLutador() {
+      try {
+        const res = await fetch(`/api/lutadores/${id}`);
+        if (res.ok) {
+          const data = await res.json();
+          setLutador(data);
+        }
+      } catch (error) {
+        console.error('Erro ao carregar lutador:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
     fetchLutador();
   }, [id]);
-
-  async function fetchLutador() {
-    try {
-      const res = await fetch(`/api/lutadores/${id}`);
-      if (res.ok) {
-        const data = await res.json();
-        setLutador(data);
-      }
-    } catch (error) {
-      console.error('Erro ao carregar lutador:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  }
 
   if (isLoading) {
     return (

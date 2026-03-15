@@ -24,10 +24,6 @@ export function FightPrediction() {
     { method: 'Decisão Dividida', probability: 5, description: 'Mix de striking e grappling competitivo' },
   ];
 
-  const otherOutcomes = [
-    { method: 'Draw/NC', probability: 3, description: 'Empate ou no contest' },
-  ];
-
   const totalStrickland = stricklandWin.reduce((a, b) => a + b.probability, 0);
   const totalHernandez = hernandezWin.reduce((a, b) => a + b.probability, 0);
 

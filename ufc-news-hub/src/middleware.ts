@@ -1,5 +1,4 @@
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
+import { NextResponse, type NextRequest } from 'next/server';
 
 // Auth is handled at the API route level via requireAdmin()
 // Middleware passes through all requests

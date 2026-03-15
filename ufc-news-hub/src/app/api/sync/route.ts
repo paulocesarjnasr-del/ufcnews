@@ -184,7 +184,7 @@ export async function POST(): Promise<NextResponse<SyncResult>> {
       }
 
       // 3.3 Preparar conteúdo — usa RSS content, scrape é feito em background depois
-      let articleContent = item.description || item.content || item.contentSnippet || '';
+      const articleContent = item.description || item.content || item.contentSnippet || '';
       const needsScrape = !articleContent || articleContent.length < 50;
 
       // 3.4 Verificar duplicata — se existe artigo sobre mesmos lutadores, fica com o melhor

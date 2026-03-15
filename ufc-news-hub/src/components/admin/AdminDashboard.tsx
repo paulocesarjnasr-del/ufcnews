@@ -241,7 +241,7 @@ export function AdminDashboard() {
     const agentCount = Object.keys(agents).length;
     setMissionToast(`🚀 Missão iniciada — ${agentCount} agentes mobilizados`);
     setTimeout(() => setMissionToast(null), 2500);
-  }, []);
+  }, [agents]);
 
   const handlePromptEnd = useCallback(() => {
     setProcessing(false);

@@ -1,0 +1,231 @@
+<h2>Qual direção visual para o Arena?</h2>
+<p class="subtitle">Baseado nas tendências de UI/UX de março 2026: Strategic Minimalism, Micro-interactions, Progressive Disclosure, Container Queries, View Transitions</p>
+
+<div class="cards">
+  <!-- OPTION A: Broadcast Cinematic -->
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image" style="background: linear-gradient(180deg, #0a0a0f 0%, #111118 100%); padding: 0; min-height: 340px; display: flex; flex-direction: column; overflow: hidden; position: relative;">
+
+      <!-- Top bar - countdown -->
+      <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.06);">
+        <div style="display: flex; align-items: center; gap: 6px;">
+          <div style="width: 6px; height: 6px; border-radius: 50%; background: #22c55e;"></div>
+          <span style="font-size: 10px; text-transform: uppercase; letter-spacing: 2px; color: #666;">Em 3 dias</span>
+        </div>
+        <span style="font-size: 10px; color: #444;">4/12 picks feitos</span>
+      </div>
+
+      <!-- Main fight card -->
+      <div style="flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; position: relative;">
+        <!-- Event badge -->
+        <div style="font-size: 10px; text-transform: uppercase; letter-spacing: 4px; color: #e94560; margin-bottom: 16px; font-weight: 600;">UFC 326 — Titulo Peso Pesado</div>
+
+        <!-- Fighters -->
+        <div style="display: flex; gap: 40px; align-items: center; width: 100%;">
+          <div style="flex: 1; text-align: center;">
+            <div style="width: 64px; height: 64px; border-radius: 50%; background: linear-gradient(135deg, #1a1a2e, #2a1a2e); border: 2px solid rgba(233,69,96,0.4); margin: 0 auto 8px; display: flex; align-items: center; justify-content: center;">
+              <span style="font-size: 11px; color: #e94560; font-weight: 700;">AP</span>
+            </div>
+            <div style="font-size: 16px; font-weight: 800; color: white; letter-spacing: 0.5px;">PEREIRA</div>
+            <div style="font-size: 11px; color: #555; margin-top: 2px;">12-1-0 • Campeao</div>
+          </div>
+
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 2px;">
+            <div style="width: 1px; height: 16px; background: #222;"></div>
+            <div style="font-size: 10px; color: #333; font-weight: 600;">VS</div>
+            <div style="width: 1px; height: 16px; background: #222;"></div>
+          </div>
+
+          <div style="flex: 1; text-align: center;">
+            <div style="width: 64px; height: 64px; border-radius: 50%; background: linear-gradient(135deg, #1a1a2e, #1a2040); border: 2px solid rgba(96,165,250,0.4); margin: 0 auto 8px; display: flex; align-items: center; justify-content: center;">
+              <span style="font-size: 11px; color: #60a5fa; font-weight: 700;">CG</span>
+            </div>
+            <div style="font-size: 16px; font-weight: 800; color: white; letter-spacing: 0.5px;">GANE</div>
+            <div style="font-size: 11px; color: #555; margin-top: 2px;">12-2-0 • #1</div>
+          </div>
+        </div>
+
+        <!-- Pick buttons -->
+        <div style="display: flex; gap: 8px; width: 100%; margin-top: 20px;">
+          <button style="flex: 1; padding: 10px; background: rgba(233,69,96,0.08); border: 1px solid rgba(233,69,96,0.2); border-radius: 8px; color: #e94560; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s;">Pereira vence</button>
+          <button style="flex: 1; padding: 10px; background: rgba(96,165,250,0.08); border: 1px solid rgba(96,165,250,0.2); border-radius: 8px; color: #60a5fa; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s;">Gane vence</button>
+        </div>
+      </div>
+
+      <!-- Bottom nav dots -->
+      <div style="display: flex; justify-content: center; gap: 4px; padding: 12px;">
+        <div style="width: 16px; height: 3px; border-radius: 2px; background: #e94560;"></div>
+        <div style="width: 6px; height: 3px; border-radius: 2px; background: #333;"></div>
+        <div style="width: 6px; height: 3px; border-radius: 2px; background: #333;"></div>
+        <div style="width: 6px; height: 3px; border-radius: 2px; background: #333;"></div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A) Strategic Minimalism + Broadcast</h3>
+      <p><strong>Filosofia:</strong> "Cada elemento reduz esforço mental ou sai." Zero decoracao. Tipografia bold como unica linguagem visual. Inspirado em FanDuel + ESPN broadcast.<br><br>
+      <strong>Tecnicas 2026:</strong> Container Queries para cards adaptativos, @starting-style para entrada de picks, Server Components para SEO, View Transitions entre lutas.<br><br>
+      <strong>Pro:</strong> Maximo foco na acao (prever), carrega rapido, SEO excelente.<br>
+      <strong>Contra:</strong> Pode parecer "frio" — menos vibe UFC.</p>
+    </div>
+  </div>
+
+  <!-- OPTION B: Immersive Fight Night -->
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image" style="background: radial-gradient(ellipse at 50% 30%, #1a0a0a 0%, #0d0d0d 70%); padding: 0; min-height: 340px; display: flex; flex-direction: column; overflow: hidden; position: relative;">
+
+      <!-- Ambient glow -->
+      <div style="position: absolute; top: -50px; left: 50%; transform: translateX(-50%); width: 200px; height: 200px; background: radial-gradient(circle, rgba(233,69,96,0.12) 0%, transparent 70%); pointer-events: none;"></div>
+
+      <!-- Top bar -->
+      <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; position: relative; z-index: 1;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <div style="font-size: 10px; text-transform: uppercase; letter-spacing: 3px; color: #e94560; font-weight: 700;">UFC 326</div>
+          <div style="width: 1px; height: 12px; background: #333;"></div>
+          <div style="font-size: 10px; color: #555;">Peso Pesado</div>
+        </div>
+        <div style="background: rgba(233,69,96,0.15); border: 1px solid rgba(233,69,96,0.25); border-radius: 12px; padding: 3px 10px; font-size: 9px; color: #e94560; text-transform: uppercase; letter-spacing: 1px;">3 dias</div>
+      </div>
+
+      <!-- Fight card with atmosphere -->
+      <div style="flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 16px; position: relative; z-index: 1;">
+
+        <div style="display: flex; gap: 24px; align-items: center; width: 100%;">
+          <!-- Fighter 1 -->
+          <div style="flex: 1; text-align: center;">
+            <div style="width: 72px; height: 72px; border-radius: 50%; margin: 0 auto 10px; position: relative;">
+              <div style="position: absolute; inset: -3px; border-radius: 50%; background: conic-gradient(#e94560, transparent 70%); opacity: 0.5;"></div>
+              <div style="position: absolute; inset: 0; border-radius: 50%; background: linear-gradient(135deg, #1a1014, #201018); display: flex; align-items: center; justify-content: center;">
+                <span style="font-size: 12px; color: #e94560; font-weight: 800;">AP</span>
+              </div>
+            </div>
+            <div style="font-size: 18px; font-weight: 900; color: white; text-shadow: 0 0 20px rgba(233,69,96,0.2);">PEREIRA</div>
+            <div style="font-size: 10px; color: #666; margin-top: 3px;">12-1-0</div>
+            <div style="font-size: 9px; color: #e94560; margin-top: 2px; text-transform: uppercase; letter-spacing: 1px;">Campeao</div>
+          </div>
+
+          <!-- VS divider -->
+          <div style="display: flex; flex-direction: column; align-items: center;">
+            <div style="font-size: 20px; font-weight: 900; color: #333; text-shadow: 0 0 30px rgba(233,69,96,0.15);">VS</div>
+          </div>
+
+          <!-- Fighter 2 -->
+          <div style="flex: 1; text-align: center;">
+            <div style="width: 72px; height: 72px; border-radius: 50%; margin: 0 auto 10px; position: relative;">
+              <div style="position: absolute; inset: -3px; border-radius: 50%; background: conic-gradient(#60a5fa, transparent 70%); opacity: 0.5;"></div>
+              <div style="position: absolute; inset: 0; border-radius: 50%; background: linear-gradient(135deg, #0f1420, #101828); display: flex; align-items: center; justify-content: center;">
+                <span style="font-size: 12px; color: #60a5fa; font-weight: 800;">CG</span>
+              </div>
+            </div>
+            <div style="font-size: 18px; font-weight: 900; color: white; text-shadow: 0 0 20px rgba(96,165,250,0.2);">GANE</div>
+            <div style="font-size: 10px; color: #666; margin-top: 3px;">12-2-0</div>
+            <div style="font-size: 9px; color: #60a5fa; margin-top: 2px; text-transform: uppercase; letter-spacing: 1px;">#1 Contender</div>
+          </div>
+        </div>
+
+        <!-- Pick buttons with glow -->
+        <div style="display: flex; gap: 10px; width: 100%; margin-top: 24px;">
+          <button style="flex: 1; padding: 12px; background: linear-gradient(135deg, rgba(233,69,96,0.12), rgba(233,69,96,0.06)); border: 1px solid rgba(233,69,96,0.25); border-radius: 10px; color: white; font-size: 13px; font-weight: 700; cursor: pointer; box-shadow: 0 0 15px rgba(233,69,96,0.08);">Pereira</button>
+          <button style="flex: 1; padding: 12px; background: linear-gradient(135deg, rgba(96,165,250,0.12), rgba(96,165,250,0.06)); border: 1px solid rgba(96,165,250,0.25); border-radius: 10px; color: white; font-size: 13px; font-weight: 700; cursor: pointer; box-shadow: 0 0 15px rgba(96,165,250,0.08);">Gane</button>
+        </div>
+      </div>
+
+      <!-- Progress indicator -->
+      <div style="padding: 8px 16px 14px; display: flex; align-items: center; gap: 8px;">
+        <div style="flex: 1; height: 2px; background: #1a1a1a; border-radius: 1px; overflow: hidden;">
+          <div style="width: 33%; height: 100%; background: linear-gradient(90deg, #e94560, #ff6b6b); border-radius: 1px;"></div>
+        </div>
+        <span style="font-size: 9px; color: #444;">4/12</span>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B) Atmospheric Fight Night</h3>
+      <p><strong>Filosofia:</strong> "Entrar no Arena = entrar na noite de luta." Glows ambientais sutis (nao neon gritante), gradientes que respiram, hierarquia dramatica. Energia controlada.<br><br>
+      <strong>Tecnicas 2026:</strong> CSS @starting-style para micro-animacoes de entrada, conic-gradient para auras, Container Queries, Server Components com Suspense streaming.<br><br>
+      <strong>Pro:</strong> Tem a vibe UFC sem ser over-the-top. Emocionante mas legivel.<br>
+      <strong>Contra:</strong> Mais CSS = potencial impacto em performance (mitigavel).</p>
+    </div>
+  </div>
+
+  <!-- OPTION C: Hybrid -->
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image" style="background: #0b0b0f; padding: 0; min-height: 340px; display: flex; flex-direction: column; overflow: hidden; position: relative;">
+
+      <!-- Contextual hero banner -->
+      <div style="background: linear-gradient(135deg, rgba(233,69,96,0.08) 0%, rgba(96,165,250,0.05) 100%); padding: 16px; border-bottom: 1px solid rgba(255,255,255,0.04);">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+          <div>
+            <div style="font-size: 9px; text-transform: uppercase; letter-spacing: 3px; color: #e94560; font-weight: 600; margin-bottom: 4px;">Proximo Evento</div>
+            <div style="font-size: 18px; font-weight: 900; color: white;">UFC 326</div>
+            <div style="font-size: 11px; color: #555; margin-top: 2px;">Sabado, 17 Mar — T-Mobile Arena</div>
+          </div>
+          <div style="text-align: right;">
+            <div style="font-size: 22px; font-weight: 900; color: white; font-variant-numeric: tabular-nums;">2d 14h</div>
+            <div style="font-size: 9px; color: #555; text-transform: uppercase; letter-spacing: 1px;">Para o deadline</div>
+          </div>
+        </div>
+        <!-- Progress -->
+        <div style="display: flex; align-items: center; gap: 8px; margin-top: 12px;">
+          <div style="flex: 1; height: 4px; background: #1a1a1a; border-radius: 2px; overflow: hidden;">
+            <div style="width: 33%; height: 100%; background: #e94560; border-radius: 2px;"></div>
+          </div>
+          <span style="font-size: 10px; color: #888; font-weight: 600;">4/12</span>
+        </div>
+      </div>
+
+      <!-- Fight list (scrollable) -->
+      <div style="flex: 1; padding: 8px; display: flex; flex-direction: column; gap: 6px; overflow: hidden;">
+        <!-- Fight 1 - completed -->
+        <div style="display: flex; align-items: center; padding: 10px 12px; background: rgba(34,197,94,0.04); border: 1px solid rgba(34,197,94,0.12); border-radius: 8px; gap: 12px;">
+          <div style="width: 20px; height: 20px; border-radius: 50%; background: rgba(34,197,94,0.15); display: flex; align-items: center; justify-content: center; font-size: 10px; color: #22c55e;">✓</div>
+          <div style="flex: 1; display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-size: 12px; color: white; font-weight: 600;">Pereira vs Gane</span>
+            <span style="font-size: 10px; color: #22c55e; font-weight: 600;">Pereira</span>
+          </div>
+        </div>
+
+        <!-- Fight 2 - completed -->
+        <div style="display: flex; align-items: center; padding: 10px 12px; background: rgba(34,197,94,0.04); border: 1px solid rgba(34,197,94,0.12); border-radius: 8px; gap: 12px;">
+          <div style="width: 20px; height: 20px; border-radius: 50%; background: rgba(34,197,94,0.15); display: flex; align-items: center; justify-content: center; font-size: 10px; color: #22c55e;">✓</div>
+          <div style="flex: 1; display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-size: 12px; color: white; font-weight: 600;">Lemos vs Robertson</span>
+            <span style="font-size: 10px; color: #22c55e; font-weight: 600;">Lemos</span>
+          </div>
+        </div>
+
+        <!-- Fight 3 - active -->
+        <div style="display: flex; align-items: center; padding: 10px 12px; background: rgba(233,69,96,0.06); border: 1px solid rgba(233,69,96,0.2); border-radius: 8px; gap: 12px;">
+          <div style="width: 20px; height: 20px; border-radius: 50%; background: rgba(233,69,96,0.15); display: flex; align-items: center; justify-content: center; font-size: 10px; color: #e94560;">→</div>
+          <div style="flex: 1; display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-size: 12px; color: white; font-weight: 700;">Tavares vs Anders</span>
+            <span style="font-size: 10px; color: #e94560; font-weight: 600;">Escolher →</span>
+          </div>
+        </div>
+
+        <!-- Fight 4 - pending -->
+        <div style="display: flex; align-items: center; padding: 10px 12px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; gap: 12px;">
+          <div style="width: 20px; height: 20px; border-radius: 50%; background: rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center; font-size: 10px; color: #444;">5</div>
+          <div style="flex: 1; display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-size: 12px; color: #666;">Smith vs You</span>
+            <span style="font-size: 10px; color: #333;">Pendente</span>
+          </div>
+        </div>
+
+        <!-- Fight 5 - pending -->
+        <div style="display: flex; align-items: center; padding: 10px 12px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; gap: 12px;">
+          <div style="width: 20px; height: 20px; border-radius: 50%; background: rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center; font-size: 10px; color: #444;">6</div>
+          <div style="flex: 1; display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-size: 12px; color: #666;">Curtis vs Orolbai</span>
+            <span style="font-size: 10px; color: #333;">Pendente</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C) Checklist-Driven (Hibrido)</h3>
+      <p><strong>Filosofia:</strong> "Seu card eh uma lista de tarefas." Mostra TODAS as lutas como checklist, progresso visivel, proximo passo claro. Clicou na luta → expande card de pick. Storytelling = completar o card.<br><br>
+      <strong>Tecnicas 2026:</strong> Server Component renderiza lista, Client Component so para interacao. ISR para dados de evento. View Transitions ao expandir luta. Progressive Disclosure total.<br><br>
+      <strong>Pro:</strong> Maximo storytelling — usuario SABE onde esta e o que falta. Zero confusao.<br>
+      <strong>Contra:</strong> Menos "wow factor" visual. Mais funcional que emocional.</p>
+    </div>
+  </div>
+</div>

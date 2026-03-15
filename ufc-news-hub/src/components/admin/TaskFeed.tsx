@@ -15,7 +15,6 @@ import {
   RefreshCw,
   Rocket,
 } from 'lucide-react';
-import { AgentIcon } from './AgentIcon';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useAdminAuth } from './AdminAuthContext';
 import { MarkdownReport } from './MarkdownReport';

@@ -122,6 +122,7 @@ export interface ContadorCategorias {
   lutadores: number;
   lutas: number;
   backstage: number;
+  reels_disponiveis: number;
 }
 
 // Tipos para Sistema de Comentários

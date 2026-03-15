@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { query, queryOne } from '@/lib/db';
+import { queryOne } from '@/lib/db';
 
 interface VotarBody {
   opcao: string;

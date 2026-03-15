@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useMemo } from 'react';
 import { formatTimeAgo, isNewNews } from '@/lib/utils';
 
 interface TimeAgoProps {

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { ChevronDown, ChevronUp, Trophy, Swords } from 'lucide-react';
+import { ChevronDown, ChevronUp, Trophy } from 'lucide-react';
 import { FightAnalysisItem } from '@/types/analise';
 import { TacticalBreakdownDynamic } from './TacticalBreakdownDynamic';
 import { FightPredictionDynamic } from './FightPredictionDynamic';

@@ -52,7 +52,7 @@ export default function HoustonPage() {
                 SS
               </div>
               <div>
-                <p className="text-xs uppercase tracking-wider text-ufc-red">"Tarzan"</p>
+                <p className="text-xs uppercase tracking-wider text-ufc-red">&quot;Tarzan&quot;</p>
                 <h2 className="font-display text-2xl uppercase text-dark-text">Sean Strickland</h2>
                 <p className="text-sm text-dark-textMuted">🇺🇸 Anaheim, California</p>
               </div>
@@ -67,7 +67,7 @@ export default function HoustonPage() {
                 <p className="text-xs text-dark-textMuted">MW Ranking</p>
               </div>
               <div>
-                <p className="font-display text-2xl text-dark-text">6'1"</p>
+                <p className="font-display text-2xl text-dark-text">6&apos;1&quot;</p>
                 <p className="text-xs text-dark-textMuted">Altura</p>
               </div>
             </div>
@@ -103,7 +103,7 @@ export default function HoustonPage() {
                 AH
               </div>
               <div>
-                <p className="text-xs uppercase tracking-wider text-blue-400">"Fluffy"</p>
+                <p className="text-xs uppercase tracking-wider text-blue-400">&quot;Fluffy&quot;</p>
                 <h2 className="font-display text-2xl uppercase text-dark-text">Anthony Hernandez</h2>
                 <p className="text-sm text-dark-textMuted">🇺🇸 Oakland, California</p>
               </div>
@@ -118,7 +118,7 @@ export default function HoustonPage() {
                 <p className="text-xs text-dark-textMuted">MW Ranking</p>
               </div>
               <div>
-                <p className="font-display text-2xl text-dark-text">6'0"</p>
+                <p className="font-display text-2xl text-dark-text">6&apos;0&quot;</p>
                 <p className="text-xs text-dark-textMuted">Altura</p>
               </div>
             </div>
@@ -165,7 +165,7 @@ export default function HoustonPage() {
             <p>
               O UFC retorna a Houston no dia 21 de fevereiro com um main event que coloca frente a frente dois momentos 
               completamente distintos na divisão dos médios: <strong>Sean Strickland</strong>, o ex-campeão buscando 
-              recuperar seu lugar entre a elite, contra <strong>Anthony "Fluffy" Hernandez</strong>, o homem mais quente 
+              recuperar seu lugar entre a elite, contra <strong>Anthony &quot;Fluffy&quot; Hernandez</strong>, o homem mais quente 
               do middleweight com uma sequência de 8 vitórias consecutivas.
             </p>
             <p>
@@ -177,7 +177,7 @@ export default function HoustonPage() {
             <p>
               Do outro lado, Hernandez (15-2 no UFC) está vivendo o melhor momento de sua carreira. Com 8 vitórias 
               consecutivas, incluindo finalizações sobre Roman Dolidze e Roman Kopylov, e um impressionante TKO sobre 
-              Michel Pereira no quinto round, "Fluffy" provou que pertence ao topo da divisão. Sua vitória por decisão 
+              Michel Pereira no quinto round, &quot;Fluffy&quot; provou que pertence ao topo da divisão. Sua vitória por decisão 
               unânime sobre Brendan Allen em fevereiro de 2025 foi particularmente significativa, mostrando que pode 
               vencer lutadores de elite mesmo quando a luta vai para os juízes.
             </p>

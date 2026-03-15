@@ -29,12 +29,12 @@ export function IntangiveisSection({ data }: { data: IntangiveisSectionData }) {
       <SectionHeader number="09" title="Fatores Invisiveis &" accent="Red Flags" />
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {data.items.map((item, i) => {
+        {data.items.map((item, _i) => {
           const Icon = resolveIcon(item.icon);
 
           return (
             <div
-              key={i}
+              key={`${item.title}-${item.fighter}`}
               className={`neu-card p-5 border-l-2 ${borderColorMap[item.risk_color]}`}
             >
               <div className="flex items-center">

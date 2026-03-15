@@ -32,7 +32,7 @@ export async function scrapeArticleContent(url: string): Promise<string> {
     clearTimeout(timeout);
 
     if (!response.ok) {
-      console.log(`  [scraper] HTTP ${response.status} for ${url}`);
+      console.info(`  [scraper] HTTP ${response.status} for ${url}`);
       return '';
     }
 
@@ -40,25 +40,25 @@ export async function scrapeArticleContent(url: string): Promise<string> {
     const content = extractContent(html, url);
 
     if (content && content.length > 50) {
-      console.log(`  [scraper] Extracted ${content.length} chars from ${getDomain(url)}`);
+      console.info(`  [scraper] Extracted ${content.length} chars from ${getDomain(url)}`);
       return content;
     }
 
     // Fallback: generic extraction
     const fallback = genericExtract(html);
     if (fallback && fallback.length > 50) {
-      console.log(`  [scraper] Generic fallback: ${fallback.length} chars from ${getDomain(url)}`);
+      console.info(`  [scraper] Generic fallback: ${fallback.length} chars from ${getDomain(url)}`);
       return fallback;
     }
 
-    console.log(`  [scraper] No content extracted from ${url}`);
+    console.info(`  [scraper] No content extracted from ${url}`);
     return '';
   } catch (error) {
     const msg = error instanceof Error ? error.message : String(error);
     if (msg.includes('abort')) {
-      console.log(`  [scraper] Timeout for ${url}`);
+      console.info(`  [scraper] Timeout for ${url}`);
     } else {
-      console.log(`  [scraper] Error: ${msg.slice(0, 100)}`);
+      console.info(`  [scraper] Error: ${msg.slice(0, 100)}`);
     }
     return '';
   }

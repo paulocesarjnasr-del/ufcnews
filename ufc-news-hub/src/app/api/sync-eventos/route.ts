@@ -927,10 +927,14 @@ async function syncEvents(): Promise<SyncResult> {
                 metodo = COALESCE($7, metodo),
                 round_final = COALESCE($8, round_final),
                 tempo_final = COALESCE($9, tempo_final),
-                status = $10
-              WHERE evento_id = $11 AND (
-                (lutador1_id = $12 AND lutador2_id = $13) OR
-                (lutador1_id = $13 AND lutador2_id = $12)
+                status = CASE
+                  WHEN $6 IS NOT NULL THEN 'finalizada'
+                  WHEN lutas.status = 'finalizada' THEN 'finalizada'
+                  ELSE 'agendada'
+                END
+              WHERE evento_id = $10 AND (
+                (lutador1_id = $11 AND lutador2_id = $12) OR
+                (lutador1_id = $12 AND lutador2_id = $11)
               )`,
               [
                 ordem, fight.tipo, fight.categoria_peso, fight.rounds, fight.is_titulo,
@@ -938,7 +942,6 @@ async function syncEvents(): Promise<SyncResult> {
                 fight.metodo || null,
                 fight.round_final || null,
                 fight.tempo_final || null,
-                vencedorId ? 'finalizada' : 'agendada',
                 eventoId, lutador1Id, lutador2Id
               ]
             );

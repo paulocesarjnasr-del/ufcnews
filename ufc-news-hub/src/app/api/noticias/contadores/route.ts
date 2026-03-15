@@ -23,12 +23,19 @@ export async function GET() {
       lutadores: string;
       lutas: string;
       backstage: string;
+      reels_disponiveis: string;
     }>(`
       SELECT
         COUNT(*) FILTER (WHERE eh_sobre_ufc = true) as todas,
         COUNT(*) FILTER (WHERE categoria = 'lutadores' AND eh_sobre_ufc = true) as lutadores,
         COUNT(*) FILTER (WHERE categoria = 'lutas' AND eh_sobre_ufc = true) as lutas,
-        COUNT(*) FILTER (WHERE categoria = 'backstage' AND eh_sobre_ufc = true) as backstage
+        COUNT(*) FILTER (WHERE categoria = 'backstage' AND eh_sobre_ufc = true) as backstage,
+        COUNT(*) FILTER (
+          WHERE eh_sobre_ufc = true
+          AND imagem_url IS NOT NULL
+          AND imagem_url NOT LIKE '%youtube.com%'
+          AND publicado_em >= NOW() - INTERVAL '7 days'
+        ) as reels_disponiveis
       FROM noticias
     `);
 
@@ -37,6 +44,7 @@ export async function GET() {
       lutadores: parseInt(result[0]?.lutadores || '0', 10),
       lutas: parseInt(result[0]?.lutas || '0', 10),
       backstage: parseInt(result[0]?.backstage || '0', 10),
+      reels_disponiveis: parseInt(result[0]?.reels_disponiveis || '0', 10),
     };
 
     cachedContadores = contadores;

@@ -10,9 +10,6 @@ function FighterTimeline({ fighter }: { fighter: MomentoAtualFighter }) {
   const isRed = fighter.color === 'red';
   const accentClass = isRed ? 'text-ufc-red' : 'text-blue-400';
   const bgAccent = isRed ? 'bg-ufc-red' : 'bg-blue-400';
-  const gradientClass = isRed
-    ? 'bg-gradient-to-r from-ufc-red to-ufc-gold'
-    : 'bg-gradient-to-r from-blue-400 to-blue-300';
   const TrendIcon = fighter.momentum_trend === 'resilient' ? Activity : TrendingUp;
   const trendColor = fighter.momentum_trend === 'descending' ? 'text-red-400' : isRed ? 'text-green-400' : 'text-blue-400';
 

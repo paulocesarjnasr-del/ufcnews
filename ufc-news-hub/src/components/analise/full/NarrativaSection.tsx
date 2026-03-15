@@ -1,3 +1,4 @@
+import { Fragment } from 'react';
 import { SectionHeader } from './SectionHeader';
 import type { NarrativaSectionData } from '@/types/analise';
 
@@ -38,26 +39,17 @@ export function NarrativaSection({ data, fighter1Name, fighter2Name }: Narrativa
 
               {/* Data Rows */}
               {stakes.map((stake) => (
-                <>
-                  <div
-                    key={`dim-${stake.dimensao}`}
-                    className="text-dark-textMuted uppercase text-xs tracking-wider py-2 border-b border-dark-border/30"
-                  >
+                <Fragment key={stake.dimensao}>
+                  <div className="text-dark-textMuted uppercase text-xs tracking-wider py-2 border-b border-dark-border/30">
                     {stake.dimensao}
                   </div>
-                  <div
-                    key={`f1-${stake.dimensao}`}
-                    className="text-ufc-red text-sm py-2 border-b border-dark-border/30"
-                  >
+                  <div className="text-ufc-red text-sm py-2 border-b border-dark-border/30">
                     {stake.fighter1}
                   </div>
-                  <div
-                    key={`f2-${stake.dimensao}`}
-                    className="text-blue-400 text-sm py-2 border-b border-dark-border/30"
-                  >
+                  <div className="text-blue-400 text-sm py-2 border-b border-dark-border/30">
                     {stake.fighter2}
                   </div>
-                </>
+                </Fragment>
               ))}
             </div>
           </div>

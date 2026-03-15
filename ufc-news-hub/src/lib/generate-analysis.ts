@@ -232,12 +232,12 @@ export async function generateFightAnalysis(
   const f2 = fight.lutador2;
 
   // Scrape real stats from ufcstats.com
-  console.log(`[ANALYSIS] Scraping stats for ${f1.nome} and ${f2.nome}...`);
+  console.info(`[ANALYSIS] Scraping stats for ${f1.nome} and ${f2.nome}...`);
   const [f1Stats, f2Stats] = await Promise.all([
     getFighterStatsByName(f1.nome),
     getFighterStatsByName(f2.nome),
   ]);
-  console.log(`[ANALYSIS] Stats scraped — F1: ${f1Stats ? 'OK' : 'NOT FOUND'}, F2: ${f2Stats ? 'OK' : 'NOT FOUND'}`);
+  console.info(`[ANALYSIS] Stats scraped — F1: ${f1Stats ? 'OK' : 'NOT FOUND'}, F2: ${f2Stats ? 'OK' : 'NOT FOUND'}`);
 
   const realStatsBlock = [
     formatRealStats(f1.nome, 'FIGHTER 1 REAL STATS', f1Stats),
@@ -722,12 +722,12 @@ export async function generateFightWithBetting(
 
   // Scrape ENHANCED profiles with fight-by-fight history
   const maxFights = isMainEvent ? 8 : 5;
-  console.log(`[CARD-ANALYSIS] Scraping enhanced profiles for ${f1.nome} and ${f2.nome} (last ${maxFights} fights)...`);
+  console.info(`[CARD-ANALYSIS] Scraping enhanced profiles for ${f1.nome} and ${f2.nome} (last ${maxFights} fights)...`);
   const [f1Profile, f2Profile] = await Promise.all([
     getEnhancedFighterProfile(f1.nome, maxFights),
     getEnhancedFighterProfile(f2.nome, maxFights),
   ]);
-  console.log(`[CARD-ANALYSIS] Profiles scraped — F1: ${f1Profile ? `OK (${f1Profile.fightHistory.length} fights)` : 'NOT FOUND'}, F2: ${f2Profile ? `OK (${f2Profile.fightHistory.length} fights)` : 'NOT FOUND'}`);
+  console.info(`[CARD-ANALYSIS] Profiles scraped — F1: ${f1Profile ? `OK (${f1Profile.fightHistory.length} fights)` : 'NOT FOUND'}, F2: ${f2Profile ? `OK (${f2Profile.fightHistory.length} fights)` : 'NOT FOUND'}`);
 
   // Build the data block for the prompt
   let realStatsBlock: string;
@@ -946,7 +946,7 @@ export async function generateFullCardAnalysis(
     return (b.ordem ?? 0) - (a.ordem ?? 0);
   });
 
-  console.log(`[FULL-CARD] Gerando análise para ${sortedFights.length} lutas do ${event.nome}...`);
+  console.info(`[FULL-CARD] Gerando análise para ${sortedFights.length} lutas do ${event.nome}...`);
 
   // Build tasks: main_event fight gets the full prompt, others get compact
   const tasks = sortedFights.map((fight) => {
@@ -1012,7 +1012,7 @@ export async function generateFullCardAnalysis(
     });
   }
 
-  console.log(`[FULL-CARD] ${fightsAnalysis.length} lutas analisadas. Gerando visão geral do card...`);
+  console.info(`[FULL-CARD] ${fightsAnalysis.length} lutas analisadas. Gerando visão geral do card...`);
 
   // Generate card overview
   const cardOverview = await generateCardOverview(event, fightResultsForOverview);
@@ -1024,7 +1024,7 @@ export async function generateFullCardAnalysis(
     (mainEventResult?.subtitulo as string) ||
     `Prévia completa com análise de apostas para todas as lutas do card`;
 
-  console.log(`[FULL-CARD] Análise completa do card finalizada.`);
+  console.info(`[FULL-CARD] Análise completa do card finalizada.`);
 
   return {
     fights_analysis: fightsAnalysis,
@@ -1336,10 +1336,10 @@ export async function generateFullAnalysis(
   const f1 = fight.lutador1;
   const f2 = fight.lutador2;
 
-  console.log(`[FULL-ANALYSIS] Starting premium analysis: ${f1.nome} vs ${f2.nome}`);
+  console.info(`[FULL-ANALYSIS] Starting premium analysis: ${f1.nome} vs ${f2.nome}`);
 
   // 1. Scrape enhanced profiles + web research (parallel)
-  console.log(`[FULL-ANALYSIS] Scraping enhanced profiles + web research...`);
+  console.info(`[FULL-ANALYSIS] Scraping enhanced profiles + web research...`);
   const [f1Profile, f2Profile, f1Images, f2Images, researchBriefing] = await Promise.all([
     getEnhancedFighterProfile(f1.nome, 10),
     getEnhancedFighterProfile(f2.nome, 10),
@@ -1349,7 +1349,7 @@ export async function generateFullAnalysis(
   ]);
 
   if (researchBriefing) {
-    console.log(`[FULL-ANALYSIS] Web research: ${researchBriefing.sources_count} sources, ${researchBriefing.key_facts?.length || 0} key facts`);
+    console.info(`[FULL-ANALYSIS] Web research: ${researchBriefing.sources_count} sources, ${researchBriefing.key_facts?.length || 0} key facts`);
   } else {
     console.warn(`[FULL-ANALYSIS] Web research unavailable, proceeding with UFCStats only`);
   }
@@ -1358,7 +1358,7 @@ export async function generateFullAnalysis(
     throw new Error(`Could not scrape enhanced profiles for ${!f1Profile ? f1.nome : f2.nome}`);
   }
 
-  console.log(`[FULL-ANALYSIS] Profiles: F1 ${f1Profile.fightHistory.length} fights, F2 ${f2Profile.fightHistory.length} fights`);
+  console.info(`[FULL-ANALYSIS] Profiles: F1 ${f1Profile.fightHistory.length} fights, F2 ${f2Profile.fightHistory.length} fights`);
 
   // 2. Compute derived metrics
   const metrics1 = calculateDerivedMetrics(f1Profile, { academia: f1.academia, stance: null });
@@ -1402,7 +1402,7 @@ export async function generateFullAnalysis(
     .replace('{titulo_luta}', tituloText)
     .replace('{research_block}', researchBlock);
 
-  console.log(`[FULL-ANALYSIS] Calling Claude (Sonnet 4.6 + Fight Analyst persona) for 14-section analysis...`);
+  console.info(`[FULL-ANALYSIS] Calling Claude (Sonnet 4.6 + Fight Analyst persona) for 14-section analysis...`);
 
   const response = await anthropic.messages.create({
     model: 'claude-sonnet-4-6',
@@ -1418,7 +1418,7 @@ export async function generateFullAnalysis(
   }
 
   const aiResult = parseClaudeJsonResponse(content.text) as Record<string, unknown>;
-  console.log(`[FULL-ANALYSIS] Claude response parsed. Merging pre-computed data...`);
+  console.info(`[FULL-ANALYSIS] Claude response parsed. Merging pre-computed data...`);
 
   // 6. Merge pre-computed data + AI output into FullAnalysisData
   const f1Sobrenome = f1.nome.split(' ').pop() || f1.nome;
@@ -1492,6 +1492,6 @@ export async function generateFullAnalysis(
     betting_value: bettingAI ? (bettingAI as unknown as FullAnalysisData['betting_value']) : null,
   };
 
-  console.log(`[FULL-ANALYSIS] Premium analysis complete: ${f1.nome} vs ${f2.nome}`);
+  console.info(`[FULL-ANALYSIS] Premium analysis complete: ${f1.nome} vs ${f2.nome}`);
   return fullAnalysis;
 }

@@ -106,7 +106,24 @@
       "Bash(npx eslint:*)",
       "Bash(git merge:*)",
       "Bash(git fetch:*)",
-      "Bash(DATABASE_URL=postgresql://ufcnews:ufcnews123@localhost:5432/ufc_news_hub npx tsx:*)"
+      "Bash(DATABASE_URL=postgresql://ufcnews:ufcnews123@localhost:5432/ufc_news_hub npx tsx:*)",
+      "Bash(npx create-video@latest:*)",
+      "Bash(mkdir:*)",
+      "Bash(npx remotion:*)",
+      "Bash(open:*)",
+      "Bash(GOOGLE_AI_KEY=\"AIzaSyCgggh_HMTNidgelOAfE9bZxzmAf6iq5UI\" node:*)",
+      "Bash(GOOGLE_AI_KEY='AIzaSyCgggh_HMTNidgelOAfE9bZxzmAf6iq5UI' node:*)",
+      "WebFetch(domain:www.youtube.com)",
+      "WebFetch(domain:youtubetranscript.com)",
+      "WebFetch(domain:www.youtube-transcript.io)",
+      "WebFetch(domain:noembed.com)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:www.datawithbaraa.com)",
+      "Bash(gh api:*)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:www.blog.datawithbaraa.com)",
+      "Bash(do echo:*)",
+      "Bash(rm:*)"
     ]
   },
   "enabledMcpjsonServers": [

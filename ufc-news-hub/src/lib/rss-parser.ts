@@ -138,7 +138,7 @@ function cleanDescription(description: string | undefined): string {
   return cleaned;
 }
 
-function isWithinMaxAge(pubDate: string): boolean {
+function _isWithinMaxAge(pubDate: string): boolean {
   const publishedDate = new Date(pubDate);
   const maxAgeMs = NEWS_MAX_AGE_HOURS * 60 * 60 * 1000;
   const cutoffDate = new Date(Date.now() - maxAgeMs);
@@ -148,16 +148,16 @@ function isWithinMaxAge(pubDate: string): boolean {
 
 export async function fetchRSSFeed(): Promise<RSSItem[]> {
   try {
-    console.log(`Buscando RSS feed: ${RSS_FEED_URL}`);
+    console.info(`Buscando RSS feed: ${RSS_FEED_URL}`);
 
     const feed = await parser.parseURL(RSS_FEED_URL);
 
     if (!feed.items || feed.items.length === 0) {
-      console.log('Feed RSS vazio');
+      console.info('Feed RSS vazio');
       return [];
     }
 
-    console.log(`${feed.items.length} itens encontrados no feed`);
+    console.info(`${feed.items.length} itens encontrados no feed`);
 
     const items: RSSItem[] = [];
 
@@ -191,7 +191,7 @@ export async function fetchRSSFeed(): Promise<RSSItem[]> {
       });
     }
 
-    console.log(`${items.length} itens válidos após filtragem`);
+    console.info(`${items.length} itens válidos após filtragem`);
 
     return items;
   } catch (error) {
@@ -208,18 +208,18 @@ export async function fetchMultipleRSSFeeds(): Promise<RSSItem[]> {
   const allItems: RSSItem[] = [];
   const seenUrls = new Set<string>();
 
-  console.log(`Buscando de ${RSS_FEED_URLS.length} fontes RSS...`);
+  console.info(`Buscando de ${RSS_FEED_URLS.length} fontes RSS...`);
 
   for (const feedUrl of RSS_FEED_URLS) {
     try {
-      console.log(`  -> Buscando: ${feedUrl}`);
+      console.info(`  -> Buscando: ${feedUrl}`);
 
       // Try direct parsing first, fall back to sanitized XML on failure
       let feed;
       try {
         feed = await parser.parseURL(feedUrl);
       } catch {
-        console.log(`     Tentando com sanitizacao XML: ${feedUrl}`);
+        console.info(`     Tentando com sanitizacao XML: ${feedUrl}`);
         const res = await fetch(feedUrl, {
           headers: {
             'User-Agent': 'UFC-News-Hub/1.0 (RSS Aggregator)',
@@ -232,7 +232,7 @@ export async function fetchMultipleRSSFeeds(): Promise<RSSItem[]> {
       }
 
       if (!feed.items || feed.items.length === 0) {
-        console.log(`     Feed vazio: ${feedUrl}`);
+        console.info(`     Feed vazio: ${feedUrl}`);
         continue;
       }
 
@@ -270,7 +270,7 @@ export async function fetchMultipleRSSFeeds(): Promise<RSSItem[]> {
         addedFromFeed++;
       }
 
-      console.log(`     ${addedFromFeed} itens adicionados de ${feedUrl}`);
+      console.info(`     ${addedFromFeed} itens adicionados de ${feedUrl}`);
     } catch (error) {
       console.error(`     Erro ao buscar ${feedUrl}:`, error);
       // Continua com os outros feeds mesmo se um falhar
@@ -280,7 +280,7 @@ export async function fetchMultipleRSSFeeds(): Promise<RSSItem[]> {
   // Ordenar por data (mais recentes primeiro)
   allItems.sort((a, b) => new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime());
 
-  console.log(`Total: ${allItems.length} itens de todas as fontes`);
+  console.info(`Total: ${allItems.length} itens de todas as fontes`);
 
   return allItems;
 }
@@ -288,16 +288,16 @@ export async function fetchMultipleRSSFeeds(): Promise<RSSItem[]> {
 export async function testRSSFeed(): Promise<void> {
   try {
     const items = await fetchRSSFeed();
-    console.log('\n=== TEST RSS FEED ===\n');
-    console.log(`Total de itens: ${items.length}\n`);
+    console.info('\n=== TEST RSS FEED ===\n');
+    console.info(`Total de itens: ${items.length}\n`);
 
     for (const item of items.slice(0, 5)) {
-      console.log('---');
-      console.log(`Título: ${item.title}`);
-      console.log(`Link: ${item.link}`);
-      console.log(`Data: ${item.pubDate}`);
-      console.log(`Imagem: ${item.enclosure?.url || 'N/A'}`);
-      console.log(`Descrição: ${item.description.slice(0, 100)}...`);
+      console.info('---');
+      console.info(`Título: ${item.title}`);
+      console.info(`Link: ${item.link}`);
+      console.info(`Data: ${item.pubDate}`);
+      console.info(`Imagem: ${item.enclosure?.url || 'N/A'}`);
+      console.info(`Descrição: ${item.description.slice(0, 100)}...`);
     }
   } catch (error) {
     console.error('Erro no teste:', error);

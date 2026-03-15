@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { query, queryOne } from '@/lib/db';
-import { LutadorExpandido, LutaComLutadores } from '@/types';
+import { LutadorExpandido } from '@/types';
 
 export async function GET(request: NextRequest) {
   try {

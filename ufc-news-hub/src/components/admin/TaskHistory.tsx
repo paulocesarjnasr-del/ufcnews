@@ -121,6 +121,7 @@ function TaskCard({ task, compact }: { task: Task; compact?: boolean }) {
         {!compact && (
           <>
             {task.agent.avatarUrl ? (
+              /* eslint-disable-next-line @next/next/no-img-element */
               <img src={task.agent.avatarUrl} alt="" className="w-6 h-6 rounded-lg object-cover shrink-0" />
             ) : (
               <span style={{ color: task.agent.color }} className="shrink-0">
@@ -265,7 +266,7 @@ export function TaskHistory({ agentId, compact }: TaskHistoryProps) {
     } finally {
       setLoading(false);
     }
-  }, [agentId, statusFilter, offset, limit]);
+  }, [agentId, statusFilter, offset, limit, authFetch]);
 
   useEffect(() => {
     fetchTasks();

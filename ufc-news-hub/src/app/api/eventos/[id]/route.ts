@@ -72,8 +72,8 @@ export async function GET(request: NextRequest, { params }: Params) {
 
     // Buscar consenso de previsões para cada luta
     const lutaIds = lutas.map(l => l.id);
-    let consensoMap: Record<string, ConsensoPrevisao[]> = {};
-    let totalPrevisoesMap: Record<string, number> = {};
+    const consensoMap: Record<string, ConsensoPrevisao[]> = {};
+    const totalPrevisoesMap: Record<string, number> = {};
 
     if (lutaIds.length > 0) {
       try {

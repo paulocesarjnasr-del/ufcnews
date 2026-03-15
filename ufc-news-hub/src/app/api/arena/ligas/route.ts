@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { query, queryOne } from '@/lib/db';
 import { getUsuarioAtual } from '@/lib/arena/auth';
-import { CriarLigaRequest, Liga, LigaComDetalhes } from '@/types/arena';
+import { CriarLigaRequest, Liga } from '@/types/arena';
 
 // GET - Listar ligas (públicas ou do usuário)
 export async function GET(request: NextRequest) {

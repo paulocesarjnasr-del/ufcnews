@@ -135,7 +135,7 @@ export async function checkDuplicate(
   for (const row of recentTitles.rows) {
     const similarity = calculateSimilarity(titulo, row.titulo);
     if (similarity > 0.70) {
-      console.log(`Notícia similar encontrada (${(similarity * 100).toFixed(0)}%): "${row.titulo.substring(0, 60)}..."`);
+      console.info(`Notícia similar encontrada (${(similarity * 100).toFixed(0)}%): "${row.titulo.substring(0, 60)}..."`);
 
       if (newArticle) {
         // Fetch content length only when needed for replacement check
@@ -172,12 +172,12 @@ export async function checkDuplicate(
 
       // Only duplicate if SAME angle (result vs result, preview vs preview, etc.)
       if (newAngle !== existingAngle) {
-        console.log(`  Mesmos lutadores mas ângulo diferente (${newAngle} vs ${existingAngle}) — NÃO é duplicata`);
+        console.info(`  Mesmos lutadores mas ângulo diferente (${newAngle} vs ${existingAngle}) — NÃO é duplicata`);
         continue;
       }
 
       // Same fighters + same angle = duplicate. Check if new one is better.
-      console.log(`Duplicata: mesmos lutadores + mesmo ângulo (${newAngle}): "${row.titulo.substring(0, 60)}..."`);
+      console.info(`Duplicata: mesmos lutadores + mesmo ângulo (${newAngle}): "${row.titulo.substring(0, 60)}..."`);
 
       if (newArticle) {
         const contentCheck = await pool.query<{ conteudo_completo: string | null }>(
@@ -209,13 +209,13 @@ function shouldReplace(
 
   // New article is significantly longer (50%+ more content)
   if (newLen > existingLen * 1.5) {
-    console.log(`  -> Nova versão é mais completa (${newLen} vs ${existingLen} chars)`);
+    console.info(`  -> Nova versão é mais completa (${newLen} vs ${existingLen} chars)`);
     return true;
   }
 
   // New article is from a better source AND at least as long
   if (newScore > existingScore && newLen >= existingLen * 0.8) {
-    console.log(`  -> Nova versão é de fonte melhor (${newArticle.fonteName} vs ${existing.fonte_nome})`);
+    console.info(`  -> Nova versão é de fonte melhor (${newArticle.fonteName} vs ${existing.fonte_nome})`);
     return true;
   }
 

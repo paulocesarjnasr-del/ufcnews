@@ -50,7 +50,6 @@ export default function ScraperLive() {
   const [totals, setTotals] = useState<Totals | null>(null);
   const [recent, setRecent] = useState<RecentFighter[]>([]);
   const [rate, setRate] = useState<Rate | null>(null);
-  const [prevValues, setPrevValues] = useState<Record<string, number>>({});
   const [deltas, setDeltas] = useState<Record<string, number>>({});
   const [isDone, setIsDone] = useState(false);
   const zeroCount = useRef(0);
@@ -70,9 +69,6 @@ export default function ScraperLive() {
               newDeltas[f.key] = newVal - oldVal;
             }
             setDeltas(newDeltas);
-            setPrevValues(
-              FIELDS.reduce((acc, f) => ({ ...acc, [f.key]: parseInt(prev[f.key]) || 0 }), {})
-            );
           }
           return data.totals;
         });

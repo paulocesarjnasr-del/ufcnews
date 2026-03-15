@@ -143,7 +143,7 @@ function TikTokTab({
   return (
     <div className="space-y-4">
       {scripts.map((script, i) => (
-        <div key={i} className="neu-card p-5">
+        <div key={`tiktok-${script.hook.slice(0, 30)}`} className="neu-card p-5">
           <div className="flex items-center justify-between mb-3">
             <span className="text-xs text-dark-textMuted font-medium">
               Script {i + 1}
@@ -182,8 +182,8 @@ function TikTokTab({
 function HeadlinesTab({ headlines }: { headlines: string[] }) {
   return (
     <div className="space-y-2">
-      {headlines.map((headline, i) => (
-        <div key={i} className="neu-card p-4 flex items-center justify-between">
+      {headlines.map((headline) => (
+        <div key={headline} className="neu-card p-4 flex items-center justify-between">
           <span className="text-sm text-dark-text font-medium">{headline}</span>
           <CopyButton text={headline} />
         </div>

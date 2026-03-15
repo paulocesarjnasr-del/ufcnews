@@ -47,8 +47,19 @@ interface EventInfo {
   local_evento: string | null;
 }
 
+interface EventoRecente {
+  id: string;
+  nome: string;
+  data_evento: string;
+  local_evento: string | null;
+  total_lutas: number;
+  lutas_finalizadas: number;
+}
+
 // ═══════════════════════════════════════════════════════════════
 // GET /api/arena/live?evento_id=X
+// Without evento_id: returns recent finalized events
+// With evento_id: returns full event data (live or finalized)
 // ═══════════════════════════════════════════════════════════════
 
 export async function GET(request: NextRequest) {
@@ -56,13 +67,27 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const eventoId = searchParams.get('evento_id');
 
+    // No evento_id → return recent finalized events list
     if (!eventoId) {
+      const recentes = await query<EventoRecente>(
+        `SELECT
+           e.id, e.nome, e.data_evento, e.local_evento,
+           COUNT(l.id)::int AS total_lutas,
+           COUNT(l.id) FILTER (WHERE l.status = 'finalizada')::int AS lutas_finalizadas
+         FROM eventos e
+         LEFT JOIN lutas l ON l.evento_id = e.id
+         WHERE e.status IN ('finalizado', 'ao_vivo')
+           AND e.nome NOT ILIKE '%TBD%'
+           AND e.data_evento > NOW() - INTERVAL '60 days'
+         GROUP BY e.id
+         HAVING COUNT(l.id) > 0
+         ORDER BY e.data_evento DESC
+         LIMIT 5`
+      );
+
       return NextResponse.json(
-        { error: 'evento_id is required' },
-        {
-          status: 400,
-          headers: { 'Cache-Control': 'no-store' },
-        }
+        { eventos_recentes: recentes },
+        { headers: { 'Cache-Control': 'public, s-maxage=120, stale-while-revalidate=30' } }
       );
     }
 
@@ -159,6 +184,12 @@ export async function GET(request: NextRequest) {
       userPick: picksMap.get(luta.luta_id) ?? null,
     }));
 
+    // Finalized events → cache aggressively (data won't change)
+    // Live events → no cache (polling)
+    const cacheHeader = evento.status === 'finalizado'
+      ? 'public, s-maxage=3600, stale-while-revalidate=60'
+      : 'no-store';
+
     return NextResponse.json(
       {
         evento,
@@ -168,7 +199,7 @@ export async function GET(request: NextRequest) {
         usuario_id: usuario?.id ?? null,
       },
       {
-        headers: { 'Cache-Control': 'no-store' },
+        headers: { 'Cache-Control': cacheHeader },
       }
     );
   } catch (error) {

@@ -8,7 +8,7 @@ interface LutadorHistoricoProps {
   lutadorId: string;
 }
 
-export function LutadorHistorico({ lutas, lutadorId }: LutadorHistoricoProps) {
+export function LutadorHistorico({ lutas, lutadorId: _lutadorId }: LutadorHistoricoProps) {
   if (lutas.length === 0) {
     return (
       <div className="rounded-lg border border-dark-border bg-dark-card p-6 text-center text-dark-textMuted">

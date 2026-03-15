@@ -511,7 +511,7 @@ export async function scrapeFightDetailPage(
     const perRoundTotalsTable = $('table.b-fight-details__table.js-fight-table').first();
     if (perRoundTotalsTable.length) {
       const roundDataRows = perRoundTotalsTable.find('tbody tr.b-fight-details__table-row');
-      const roundHeaders = perRoundTotalsTable.find('thead.b-fight-details__table-row_type_head th');
+      const _roundHeaders = perRoundTotalsTable.find('thead.b-fight-details__table-row_type_head th');
 
       // Per-round sig strikes table (typically the last js-fight-table)
       const allJsFightTables = $('table.b-fight-details__table.js-fight-table');
@@ -578,7 +578,7 @@ export async function getEnhancedFighterProfile(
   }
 
   // 2. Fetch fighter page (career stats + fight history links)
-  console.log(`[ENHANCED] Fetching profile for ${name}...`);
+  console.info(`[ENHANCED] Fetching profile for ${name}...`);
   const res = await fetch(fighterUrl, {
     headers: { 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36' },
     signal: AbortSignal.timeout(15000),
@@ -639,7 +639,7 @@ export async function getEnhancedFighterProfile(
 
   // 4. Parse fight history table
   const historyRows = parseFightHistoryFromFighterPage($, name);
-  console.log(`[ENHANCED] Found ${historyRows.length} fights in history, scraping last ${Math.min(maxFights, historyRows.length)} detail pages...`);
+  console.info(`[ENHANCED] Found ${historyRows.length} fights in history, scraping last ${Math.min(maxFights, historyRows.length)} detail pages...`);
 
   // 5. Scrape fight detail pages for the most recent N fights
   const recentFights = historyRows.slice(0, maxFights);
@@ -664,7 +664,7 @@ export async function getEnhancedFighterProfile(
           totals: detail.totals,
           rounds: detail.rounds,
         });
-        console.log(`[ENHANCED]   ✓ ${fight.result} vs ${fight.opponent} (${fight.method} R${fight.roundFinished})`);
+        console.info(`[ENHANCED]   ✓ ${fight.result} vs ${fight.opponent} (${fight.method} R${fight.roundFinished})`);
       } else {
         // Fallback: create a minimal entry from the fight history row
         fightHistory.push({
@@ -703,7 +703,7 @@ export async function getEnhancedFighterProfile(
     }
   }
 
-  console.log(`[ENHANCED] Profile complete for ${name}: ${fightHistory.length} fights with detail data`);
+  console.info(`[ENHANCED] Profile complete for ${name}: ${fightHistory.length} fights with detail data`);
 
   return {
     name: careerName || name,

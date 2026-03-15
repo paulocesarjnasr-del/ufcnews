@@ -113,7 +113,7 @@ export function RadarApostadorSection({ data }: { data: RadarApostadorSectionDat
             const isExpanded = expandedEdges.has(i);
 
             return (
-              <div key={i} className="neu-card overflow-hidden">
+              <div key={edge.titulo} className="neu-card overflow-hidden">
                 <button
                   type="button"
                   onClick={() => toggleEdge(i)}
@@ -157,8 +157,8 @@ export function RadarApostadorSection({ data }: { data: RadarApostadorSectionDat
       <div className="mt-6">
         <h3 className="font-display text-lg uppercase text-dark-text mb-4">Value Picks</h3>
         <div className="grid gap-4 md:grid-cols-2">
-          {data.value_picks.map((pick, i) => (
-            <div key={i} className="neu-card p-5">
+          {data.value_picks.map((pick) => (
+            <div key={`${pick.tipo}-${pick.pick}`} className="neu-card p-5">
               <span className="text-[10px] uppercase tracking-wider text-dark-textMuted">
                 {pick.tipo}
               </span>

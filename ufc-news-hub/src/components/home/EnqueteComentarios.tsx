@@ -1,8 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { cn } from '@/lib/utils';
-import { formatTimeAgo, getInitials } from '@/lib/utils';
+import { cn, formatTimeAgo, getInitials } from '@/lib/utils';
 import type { ComentarioEnquete } from '@/types/enquete';
 
 // ═══════════════════════════════════════════════════════

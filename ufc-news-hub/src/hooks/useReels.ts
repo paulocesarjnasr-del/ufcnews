@@ -21,7 +21,8 @@ export function useReels() {
       }).then((res) => res.json()),
     {
       refreshInterval: AUTO_REFRESH_INTERVAL,
-      revalidateOnFocus: false,
+      revalidateOnFocus: true,
+      revalidateOnReconnect: true,
     }
   );
 

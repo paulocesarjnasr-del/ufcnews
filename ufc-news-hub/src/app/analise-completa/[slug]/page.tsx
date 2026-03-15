@@ -2,6 +2,21 @@ import { Header } from '@/components/ui/Header';
 import { FullAnalysisView } from '@/components/analise/full/FullAnalysisView';
 import type { FullSingleAnalise } from '@/types/analise';
 import { notFound } from 'next/navigation';
+import { pereiraGaneAnalise } from './pereira-gane-data';
+import { lemosRobertsonAnalise } from './lemos-robertson-data';
+import { cutelabaSyAnalise } from './cutelaba-sy-data';
+import { emmettVallejosAnalise } from './emmett-vallejos-data';
+import { filiDelgadoAnalise } from './fili-delgado-data';
+import { rahikiHardwickAnalise } from './rahiki-hardwick-data';
+import { petrinoAsplundAnalise } from './petrino-asplund-data';
+import { johnsonSilvaAnalise } from './johnson-silva-data';
+import { tavaresAndersAnalise } from './tavares-anders-data';
+import { curtisOrolbaiAnalise } from './curtis-orolbai-data';
+import { lacerdaSosaAnalise } from './lacerda-sosa-data';
+import { mesquitaRendonAnalise } from './mesquita-rendon-data';
+import { smithYouAnalise } from './smith-you-data';
+import { okiSousaAnalise } from './oki-sousa-data';
+import { hughesRodriguezAnalise } from './hughes-rodriguez-data';
 
 // ═══════════════════════════════════════════════════════════════
 // Demo Analysis Data (will be replaced by fight-analyst agent)
@@ -372,6 +387,22 @@ const demoAnalise: FullSingleAnalise = {
 
 const analyses: Record<string, FullSingleAnalise> = {
   'holloway-oliveira-demo': demoAnalise,
+  'pereira-gane-ufc-freedom-250': pereiraGaneAnalise,
+  // UFC Fight Night: Emmett vs Vallejos — March 14, 2026
+  'emmett-vallejos-ufn-mar-14': emmettVallejosAnalise,
+  'lemos-robertson-ufn-mar-14': lemosRobertsonAnalise,
+  'cutelaba-sy-ufn-mar-14': cutelabaSyAnalise,
+  'fili-delgado-ufn-mar-14': filiDelgadoAnalise,
+  'rahiki-hardwick-ufn-mar-14': rahikiHardwickAnalise,
+  'petrino-asplund-ufn-mar-14': petrinoAsplundAnalise,
+  'johnson-silva-ufn-mar-14': johnsonSilvaAnalise,
+  'tavares-anders-ufn-mar-14': tavaresAndersAnalise,
+  'curtis-orolbai-ufn-mar-14': curtisOrolbaiAnalise,
+  'lacerda-sosa-ufn-mar-14': lacerdaSosaAnalise,
+  'mesquita-rendon-ufn-mar-14': mesquitaRendonAnalise,
+  'smith-you-ufn-mar-14': smithYouAnalise,
+  'oki-sousa-ufn-mar-14': okiSousaAnalise,
+  'hughes-rodriguez-ufn-mar-14': hughesRodriguezAnalise,
 };
 
 // ═══════════════════════════════════════════════════════════════

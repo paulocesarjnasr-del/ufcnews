@@ -1,11 +1,9 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
-import { MODELS } from '@/lib/admin/agents';
+import { useState, useEffect } from 'react';
 import { ModelBadge } from './ModelBadge';
 import { useAdminAuth } from './AdminAuthContext';
 import { Plus, LogOut, DollarSign, ClipboardList, CheckCircle2, X, Loader2 } from 'lucide-react';
-import { AgentIcon } from './AgentIcon';
 import type { Agent, AgentModel } from '@/lib/admin/types';
 
 interface TopBarProps {

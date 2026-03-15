@@ -5,6 +5,7 @@ import {
   processarEventoFinalizado,
   atualizarPontuacaoEvento,
 } from '@/lib/arena/pontuacao';
+import { scrapeUFCResults, mapMethodToDB, matchFighterName } from '@/lib/scrape-results';
 
 export async function GET(request: NextRequest) {
   const authHeader = request.headers.get('authorization');
@@ -55,6 +56,112 @@ export async function GET(request: NextRequest) {
     for (const ev of oldAgendado) {
       await query(`UPDATE eventos SET status = 'finalizado' WHERE id = $1`, [ev.id]);
       console.log(`[SCORING CRON] Status fix: ${ev.nome} agendado (old) → finalizado`);
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // PHASE 0.5: Auto-scrape results for live events
+    // ═══════════════════════════════════════════════════════════════
+    // Scrape for ao_vivo events AND finalizado events that still have
+    // unfinished fights (can happen if sync-eventos reset luta status)
+    const eventosAoVivo = await query<{ id: string; nome: string; ufc_slug: string | null }>(
+      `SELECT e.id, e.nome, e.ufc_slug FROM eventos e
+       WHERE e.status IN ('ao_vivo', 'finalizado')
+         AND e.data_evento > NOW() - INTERVAL '2 days'
+         AND EXISTS (
+           SELECT 1 FROM lutas l
+           WHERE l.evento_id = e.id AND l.status != 'finalizada'
+         )`
+    );
+
+    let totalLutasScraped = 0;
+
+    for (const ev of eventosAoVivo) {
+      console.log(`[SCORING CRON] Scraping results for: ${ev.nome} (slug: ${ev.ufc_slug})`);
+      try {
+        const scraped = await scrapeUFCResults(ev.nome, {
+          eventSlug: ev.ufc_slug || undefined,
+        });
+        if (scraped.length === 0) {
+          console.log(`[SCORING CRON] No results found yet for ${ev.nome}`);
+          continue;
+        }
+
+        const lutas = await query<{
+          id: string;
+          lutador1_id: string;
+          lutador2_id: string;
+          lutador1_nome: string;
+          lutador2_nome: string;
+          status: string;
+        }>(
+          `SELECT l.id, l.lutador1_id, l.lutador2_id,
+                  l1.nome as lutador1_nome, l2.nome as lutador2_nome,
+                  l.status
+           FROM lutas l
+           JOIN lutadores l1 ON l1.id = l.lutador1_id
+           JOIN lutadores l2 ON l2.id = l.lutador2_id
+           WHERE l.evento_id = $1 AND l.status != 'finalizada'
+           ORDER BY l.ordem DESC`,
+          [ev.id]
+        );
+
+        for (const result of scraped) {
+          const matchedLuta = lutas.find(luta => {
+            const match1 = matchFighterName(result.lutador1_nome, luta.lutador1_nome) ||
+                            matchFighterName(result.lutador1_nome, luta.lutador2_nome);
+            const match2 = matchFighterName(result.lutador2_nome, luta.lutador1_nome) ||
+                            matchFighterName(result.lutador2_nome, luta.lutador2_nome);
+            return match1 && match2;
+          });
+
+          if (!matchedLuta) continue;
+
+          let vencedorId: string | null = null;
+          if (matchFighterName(result.vencedor_nome, matchedLuta.lutador1_nome)) {
+            vencedorId = matchedLuta.lutador1_id;
+          } else if (matchFighterName(result.vencedor_nome, matchedLuta.lutador2_nome)) {
+            vencedorId = matchedLuta.lutador2_id;
+          }
+
+          const metodo = mapMethodToDB(result.metodo);
+
+          await query(
+            `UPDATE lutas
+             SET vencedor_id = $1, metodo = $2, round_final = $3,
+                 tempo_final = $4, status = 'finalizada'
+             WHERE id = $5`,
+            [vencedorId, metodo, result.round, result.tempo, matchedLuta.id]
+          );
+
+          totalLutasScraped++;
+          console.log(
+            `[SCORING CRON] Result scraped: ${matchedLuta.lutador1_nome} vs ${matchedLuta.lutador2_nome} → ${result.vencedor_nome} (${metodo})`
+          );
+        }
+      } catch (err) {
+        console.error(`[SCORING CRON] Scrape error for ${ev.nome}:`, err);
+      }
+    }
+
+    if (totalLutasScraped > 0) {
+      console.log(`[SCORING CRON] Total fights scraped: ${totalLutasScraped}`);
+    }
+
+    // Fix event status: if a "finalizado" event still has pending fights,
+    // revert to ao_vivo (can happen if sync-eventos reset luta status)
+    for (const ev of eventosAoVivo) {
+      const pending = await queryOne<{ count: number }>(
+        `SELECT COUNT(*)::int as count FROM lutas
+         WHERE evento_id = $1 AND status != 'finalizada'`,
+        [ev.id]
+      );
+      const currentStatus = await queryOne<{ status: string }>(
+        `SELECT status FROM eventos WHERE id = $1`, [ev.id]
+      );
+      if (pending && pending.count > 0 && currentStatus?.status === 'finalizado') {
+        await query(`UPDATE eventos SET status = 'ao_vivo' WHERE id = $1`, [ev.id]);
+        console.log(`[SCORING CRON] Status fix: ${ev.nome} finalizado → ao_vivo (${pending.count} lutas pendentes)`);
+      }
     }
 
     // ═══════════════════════════════════════════════════════════════

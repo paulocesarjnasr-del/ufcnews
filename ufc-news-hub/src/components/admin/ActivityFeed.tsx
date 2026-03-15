@@ -3,9 +3,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import {
   Radio,
-  AlertCircle,
-  ShieldAlert,
-  Info,
   ChevronDown,
   ChevronUp,
   Search,
@@ -136,7 +133,7 @@ function MissionCard({ mission, authFetch }: { mission: MissionPrompt; authFetch
       const createdDate = safeDate(mission.createdAt);
       if (!createdDate) { setLoadingLogs(false); return; }
       const since = new Date(createdDate.getTime() - 5000).toISOString();
-      let url = `/api/company/logs?limit=100&since=${since}`;
+      const url = `/api/company/logs?limit=100&since=${since}`;
       const res = await authFetch(url);
       if (res.ok) {
         let data: LogEntry[] = await res.json();

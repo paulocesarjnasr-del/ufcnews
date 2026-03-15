@@ -1,42 +1,63 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { query } from '@/lib/db';
-import { ReelNoticia } from '@/types';
+
+interface ReelRow {
+  id: string;
+  titulo: string;
+  reel_caption: string | null;
+  imagem_url: string;
+  fonte_url: string;
+  fonte_nome: string;
+  categoria: string;
+  publicado_em: string;
+  likes_count: number;
+  user_liked: boolean;
+  comments_count: number;
+}
+
+const MAX_REELS = 30;
 
 export async function GET(request: NextRequest) {
   try {
     const fingerprint = request.headers.get('x-user-fingerprint') || '';
 
-    const noticias = await query<ReelNoticia>(
-      `SELECT
-        n.id,
-        n.titulo,
-        n.reel_caption,
-        n.imagem_url,
-        n.fonte_url,
-        n.fonte_nome,
-        n.categoria,
-        n.publicado_em,
-        COALESCE(l.likes_count, 0)::int AS likes_count,
-        CASE WHEN ul.id IS NOT NULL THEN true ELSE false END AS user_liked,
-        COALESCE(c.comments_count, 0)::int AS comments_count
-      FROM noticias n
-      LEFT JOIN (
-        SELECT noticia_id, COUNT(*) AS likes_count
-        FROM news_likes
-        GROUP BY noticia_id
-      ) l ON l.noticia_id = n.id
-      LEFT JOIN news_likes ul ON ul.noticia_id = n.id AND ul.user_fingerprint = $1
-      LEFT JOIN (
-        SELECT noticia_id, COUNT(*) AS comments_count
-        FROM comentarios
-        WHERE status = 'aprovado'
-        GROUP BY noticia_id
-      ) c ON c.noticia_id = n.id
-      WHERE n.eh_sobre_ufc = true
-        AND n.imagem_url IS NOT NULL
-        AND n.publicado_em >= NOW() - INTERVAL '72 hours'
-      ORDER BY n.publicado_em DESC`,
-      [fingerprint]
+    // Flexible time window: start with 72h, expand if not enough content
+    const noticias = await query<ReelRow>(
+      `WITH reels_recentes AS (
+        SELECT
+          n.id,
+          n.titulo,
+          n.reel_caption,
+          n.imagem_url,
+          n.fonte_url,
+          n.fonte_nome,
+          n.categoria,
+          n.publicado_em,
+          COALESCE(l.likes_count, 0)::int AS likes_count,
+          CASE WHEN ul.id IS NOT NULL THEN true ELSE false END AS user_liked,
+          COALESCE(c.comments_count, 0)::int AS comments_count
+        FROM noticias n
+        LEFT JOIN (
+          SELECT noticia_id, COUNT(*) AS likes_count
+          FROM news_likes
+          GROUP BY noticia_id
+        ) l ON l.noticia_id = n.id
+        LEFT JOIN news_likes ul ON ul.noticia_id = n.id AND ul.user_fingerprint = $1
+        LEFT JOIN (
+          SELECT noticia_id, COUNT(*) AS comments_count
+          FROM comentarios
+          WHERE status = 'aprovado'
+          GROUP BY noticia_id
+        ) c ON c.noticia_id = n.id
+        WHERE n.eh_sobre_ufc = true
+          AND n.imagem_url IS NOT NULL
+          AND n.imagem_url NOT LIKE '%youtube.com%'
+        ORDER BY n.publicado_em DESC
+        LIMIT $2
+      )
+      SELECT * FROM reels_recentes
+      ORDER BY publicado_em DESC`,
+      [fingerprint, MAX_REELS]
     );
 
     return NextResponse.json({ noticias }, {

@@ -11,7 +11,6 @@ import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { useNoticia } from '@/hooks/useNoticias';
 import { formatDate } from '@/lib/utils';
 import { PLACEHOLDER_IMAGE } from '@/lib/constants';
-import { Noticia } from '@/types';
 import { CommentSection } from '@/components/comments/CommentSection';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -81,7 +80,7 @@ function PollWidget({ poll }: { poll: { question: string; options: string[]; rel
 // Strip emojis from headings for clean professional look
 function stripEmojis(node: React.ReactNode): React.ReactNode {
   if (typeof node === 'string') {
-    return node.replace(/[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{FE00}-\u{FE0F}\u{1F000}-\u{1FAFF}]/gu, '').trim();
+    return node.replace(/\p{Emoji_Presentation}|\p{Extended_Pictographic}/gu, '').trim();
   }
   return node;
 }

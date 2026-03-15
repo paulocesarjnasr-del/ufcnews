@@ -280,6 +280,7 @@ export function DetailPanel({ agent, agents, onClose, activeTab, setActiveTab, o
         <div className="flex items-center gap-3">
           {agent.avatarUrl ? (
             <div className={`w-12 h-12 rounded-xl neu-inset overflow-hidden flex-shrink-0 ${isFired ? 'opacity-40 grayscale' : ''}`}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={agent.avatarUrl}
                 alt={agent.humanName}

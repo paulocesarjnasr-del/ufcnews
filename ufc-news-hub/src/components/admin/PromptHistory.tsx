@@ -21,7 +21,6 @@ import {
   Filter,
 } from 'lucide-react';
 import { MarkdownReport } from './MarkdownReport';
-import { AgentIcon } from './AgentIcon';
 import { useAdminAuth } from './AdminAuthContext';
 
 // ---------------------------------------------------------------------------

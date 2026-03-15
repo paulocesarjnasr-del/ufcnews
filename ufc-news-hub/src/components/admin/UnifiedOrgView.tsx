@@ -3,7 +3,7 @@
 import { useMemo, useRef, useEffect, useState, useCallback } from 'react';
 import Image from 'next/image';
 import type { Agent } from '@/lib/admin/types';
-import { CONNECTIONS, DATABASES, CONNECTION_STYLES } from '@/lib/admin/connections';
+import { CONNECTIONS, DATABASES } from '@/lib/admin/connections';
 import { StatusBadge } from './StatusBadge';
 import { ModelBadge } from './ModelBadge';
 import { AgentIcon } from './AgentIcon';
@@ -19,14 +19,6 @@ interface UnifiedOrgViewProps {
   onSelect: (id: string) => void;
   activeAgentIds?: string[];
   processing?: boolean;
-}
-
-interface CardPosition {
-  id: string;
-  x: number;
-  y: number;
-  width: number;
-  height: number;
 }
 
 interface HierarchyLine {

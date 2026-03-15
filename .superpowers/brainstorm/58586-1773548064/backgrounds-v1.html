@@ -1,0 +1,139 @@
+<h2>Qual fundo dá identidade ao Arena?</h2>
+<p class="subtitle">O fundo define a vibe inteira. Nenhum desses é "preto genérico".</p>
+
+<div class="cards">
+
+  <!-- OPTION A: Octagon Canvas Texture -->
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image" style="min-height: 280px; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center;
+      background:
+        repeating-linear-gradient(
+          0deg,
+          transparent,
+          transparent 40px,
+          rgba(233,69,96,0.03) 40px,
+          rgba(233,69,96,0.03) 41px
+        ),
+        repeating-linear-gradient(
+          90deg,
+          transparent,
+          transparent 40px,
+          rgba(233,69,96,0.03) 40px,
+          rgba(233,69,96,0.03) 41px
+        ),
+        linear-gradient(160deg, #12101a 0%, #18141e 50%, #14101c 100%);">
+
+      <!-- Subtle octagon watermark -->
+      <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 300px; height: 300px; opacity: 0.04;">
+        <svg viewBox="0 0 200 200" style="width: 100%; height: 100%;">
+          <polygon points="60,10 140,10 190,60 190,140 140,190 60,190 10,140 10,60" fill="none" stroke="#e94560" stroke-width="1"/>
+        </svg>
+      </div>
+
+      <!-- Content -->
+      <div style="position: relative; z-index: 1; text-align: center; padding: 20px;">
+        <div style="font-size: 10px; letter-spacing: 4px; color: #e94560; text-transform: uppercase; margin-bottom: 12px;">UFC 326</div>
+        <div style="font-size: 24px; font-weight: 900; color: #f0e6f0;">PEREIRA vs GANE</div>
+        <div style="font-size: 11px; color: #6b5c7a; margin-top: 6px;">Peso Pesado — Titulo em Jogo</div>
+
+        <div style="display: flex; gap: 10px; margin-top: 24px;">
+          <button style="flex: 1; padding: 12px; background: rgba(233,69,96,0.1); border: 1px solid rgba(233,69,96,0.2); border-radius: 10px; color: #f0e6f0; font-weight: 700; font-size: 13px; cursor: pointer; backdrop-filter: blur(4px);">Pereira</button>
+          <button style="flex: 1; padding: 12px; background: rgba(96,165,250,0.1); border: 1px solid rgba(96,165,250,0.15); border-radius: 10px; color: #f0e6f0; font-weight: 700; font-size: 13px; cursor: pointer; backdrop-filter: blur(4px);">Gane</button>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A) Octagon Grid — Roxo escuro com textura</h3>
+      <p>Fundo roxo-escuro (#12101a) com grid sutil vermelho + octagono watermark. Nao eh preto, tem "temperatura". O grid lembra o canvas do octagon. Cards com backdrop-filter blur.</p>
+    </div>
+  </div>
+
+  <!-- OPTION B: Concrete/Industrial -->
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image" style="min-height: 280px; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center;
+      background:
+        url('data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%224%22 height=%224%22><rect width=%224%22 height=%224%22 fill=%22%23161619%22/><rect width=%221%22 height=%221%22 fill=%22%231a1a1d%22/></svg>') repeat,
+        linear-gradient(175deg, #19191d 0%, #131316 50%, #16161a 100%);">
+
+      <!-- Accent stripe -->
+      <div style="position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent 20%, #e94560 50%, transparent 80%);"></div>
+
+      <!-- Corner accents -->
+      <div style="position: absolute; top: 12px; left: 12px; width: 20px; height: 20px; border-left: 2px solid rgba(233,69,96,0.3); border-top: 2px solid rgba(233,69,96,0.3);"></div>
+      <div style="position: absolute; top: 12px; right: 12px; width: 20px; height: 20px; border-right: 2px solid rgba(233,69,96,0.3); border-top: 2px solid rgba(233,69,96,0.3);"></div>
+
+      <div style="position: relative; z-index: 1; text-align: center; padding: 20px;">
+        <div style="font-size: 10px; letter-spacing: 4px; color: #e94560; text-transform: uppercase; margin-bottom: 12px; font-weight: 700;">UFC 326</div>
+        <div style="font-size: 24px; font-weight: 900; color: #e8e4e8; letter-spacing: 1px;">PEREIRA vs GANE</div>
+        <div style="font-size: 11px; color: #5c5a60; margin-top: 6px;">Peso Pesado — Titulo em Jogo</div>
+
+        <div style="display: flex; gap: 10px; margin-top: 24px;">
+          <button style="flex: 1; padding: 12px; background: #1e1e22; border: 1px solid #2a2a2e; border-radius: 6px; color: #e8e4e8; font-weight: 700; font-size: 13px; cursor: pointer; box-shadow: inset 0 1px 0 rgba(255,255,255,0.04), 0 2px 4px rgba(0,0,0,0.3);">Pereira</button>
+          <button style="flex: 1; padding: 12px; background: #1e1e22; border: 1px solid #2a2a2e; border-radius: 6px; color: #e8e4e8; font-weight: 700; font-size: 13px; cursor: pointer; box-shadow: inset 0 1px 0 rgba(255,255,255,0.04), 0 2px 4px rgba(0,0,0,0.3);">Gane</button>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B) Industrial / Concreto</h3>
+      <p>Textura granulada estilo concreto/metal, cinza-escuro com ruido. Corner brackets vermelhos como HUD militar. Botoes com inset shadow (táteis). Vibe de bastidor/backstage de arena real.</p>
+    </div>
+  </div>
+
+  <!-- OPTION C: Deep Gradient with Noise -->
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image" style="min-height: 280px; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center;
+      background: linear-gradient(145deg, #0f1923 0%, #0d1117 40%, #161b22 100%);">
+
+      <!-- Noise overlay -->
+      <div style="position: absolute; inset: 0; opacity: 0.4; background: url('data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22><filter id=%22n%22><feTurbulence baseFrequency=%220.9%22 numOctaves=%224%22 stitchTiles=%22stitch%22/><feColorMatrix type=%22saturate%22 values=%220%22/></filter><rect width=%22100%22 height=%22100%22 filter=%22url(%23n)%22 opacity=%220.08%22/></svg>');"></div>
+
+      <!-- Gradient orb -->
+      <div style="position: absolute; bottom: -60px; right: -40px; width: 200px; height: 200px; background: radial-gradient(circle, rgba(233,69,96,0.08) 0%, transparent 70%); pointer-events: none;"></div>
+      <div style="position: absolute; top: -40px; left: -30px; width: 160px; height: 160px; background: radial-gradient(circle, rgba(96,165,250,0.06) 0%, transparent 70%); pointer-events: none;"></div>
+
+      <div style="position: relative; z-index: 1; text-align: center; padding: 20px;">
+        <div style="display: inline-block; font-size: 10px; letter-spacing: 4px; color: #e94560; text-transform: uppercase; margin-bottom: 12px; border-bottom: 1px solid rgba(233,69,96,0.3); padding-bottom: 4px;">UFC 326</div>
+        <div style="font-size: 24px; font-weight: 900; color: #e6edf3;">PEREIRA vs GANE</div>
+        <div style="font-size: 11px; color: #586775; margin-top: 6px;">Peso Pesado — Titulo em Jogo</div>
+
+        <div style="display: flex; gap: 10px; margin-top: 24px;">
+          <button style="flex: 1; padding: 12px; background: rgba(233,69,96,0.08); border: 1px solid rgba(233,69,96,0.18); border-radius: 8px; color: #e6edf3; font-weight: 700; font-size: 13px; cursor: pointer;">Pereira</button>
+          <button style="flex: 1; padding: 12px; background: rgba(96,165,250,0.08); border: 1px solid rgba(96,165,250,0.12); border-radius: 8px; color: #e6edf3; font-weight: 700; font-size: 13px; cursor: pointer;">Gane</button>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C) GitHub Dark — Gradiente profundo com noise</h3>
+      <p>Inspirado no dark theme do GitHub/Linear. Azul-escuro (#0f1923) com noise grain sutil que dá textura sem parecer flat. Orbs de cor nos cantos dão vida sem ser agressivo. Leitura excelente.</p>
+    </div>
+  </div>
+
+  <!-- OPTION D: Warm Dark -->
+  <div class="card" data-choice="d" onclick="toggleSelect(this)">
+    <div class="card-image" style="min-height: 280px; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center;
+      background: linear-gradient(170deg, #1c1412 0%, #171210 50%, #1a1513 100%);">
+
+      <!-- Leather texture feel -->
+      <div style="position: absolute; inset: 0; opacity: 0.15; background: url('data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%226%22 height=%226%22><rect width=%226%22 height=%226%22 fill=%22%231c1412%22/><circle cx=%221%22 cy=%221%22 r=%220.6%22 fill=%22%23201815%22/></svg>') repeat;"></div>
+
+      <!-- Warm ambient -->
+      <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: radial-gradient(ellipse at 50% 0%, rgba(233,69,96,0.06) 0%, transparent 60%);"></div>
+
+      <div style="position: relative; z-index: 1; text-align: center; padding: 20px;">
+        <div style="font-size: 10px; letter-spacing: 4px; color: #d4836a; text-transform: uppercase; margin-bottom: 12px;">UFC 326</div>
+        <div style="font-size: 24px; font-weight: 900; color: #f2e8e0;">PEREIRA vs GANE</div>
+        <div style="font-size: 11px; color: #6b5b50; margin-top: 6px;">Peso Pesado — Titulo em Jogo</div>
+
+        <div style="display: flex; gap: 10px; margin-top: 24px;">
+          <button style="flex: 1; padding: 12px; background: rgba(212,131,106,0.1); border: 1px solid rgba(212,131,106,0.2); border-radius: 8px; color: #f2e8e0; font-weight: 700; font-size: 13px; cursor: pointer;">Pereira</button>
+          <button style="flex: 1; padding: 12px; background: rgba(160,180,200,0.08); border: 1px solid rgba(160,180,200,0.12); border-radius: 8px; color: #f2e8e0; font-weight: 700; font-size: 13px; cursor: pointer;">Gane</button>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>D) Warm Dark — Marrom-escuro com textura couro</h3>
+      <p>Tons quentes (#1c1412), textura sutil que lembra couro/luva de boxe. Accent cor cobre/terracota ao inves de vermelho puro. Texto cream ao inves de branco frio. Vibe premium, unica, ninguem tem isso. Lembra whisky bar numa fight night.</p>
+    </div>
+  </div>
+
+</div>

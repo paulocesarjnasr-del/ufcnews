@@ -107,54 +107,52 @@ function ComparadorContent() {
   const [lutador1Id, setLutador1Id] = useState(initialIds[0] || '');
   const [lutador2Id, setLutador2Id] = useState(initialIds[1] || '');
   const [comparison, setComparison] = useState<{
-    lutador1: LutadorExpandido & { stats: any };
-    lutador2: LutadorExpandido & { stats: any };
-    confrontos_diretos: any[];
+    lutador1: LutadorExpandido & { stats: { record: string; taxa_vitoria: number; taxa_finalizacao: number; ko_ratio: number; sub_ratio: number; dec_ratio: number } };
+    lutador2: LutadorExpandido & { stats: { record: string; taxa_vitoria: number; taxa_finalizacao: number; ko_ratio: number; sub_ratio: number; dec_ratio: number } };
+    confrontos_diretos: { id: string; evento_nome: string; evento_data: string; vencedor_id: string | null; metodo: string | null }[];
   } | null>(null);
   const [allLutadores, setAllLutadores] = useState<LutadorExpandido[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingFighters, setIsLoadingFighters] = useState(true);
 
   useEffect(() => {
+    async function fetchAllLutadores() {
+      setIsLoadingFighters(true);
+      try {
+        // Load ALL fighters — they're lightweight (id, nome, imagem_url, categoria_peso, record)
+        const res = await fetch('/api/lutadores?limit=5000&sort=photo_first&fields=minimal');
+        if (res.ok) {
+          const data = await res.json();
+          setAllLutadores(data.lutadores || data || []);
+        }
+      } catch (error) {
+        console.error('Erro ao carregar lutadores:', error);
+      } finally {
+        setIsLoadingFighters(false);
+      }
+    }
     fetchAllLutadores();
   }, []);
 
   useEffect(() => {
     if (lutador1Id && lutador2Id) {
+      async function fetchComparison() {
+        setIsLoading(true);
+        try {
+          const res = await fetch(`/api/lutadores/comparar?ids=${lutador1Id},${lutador2Id}`);
+          if (res.ok) {
+            const data = await res.json();
+            setComparison(data);
+          }
+        } catch (error) {
+          console.error('Erro ao comparar:', error);
+        } finally {
+          setIsLoading(false);
+        }
+      }
       fetchComparison();
     }
   }, [lutador1Id, lutador2Id]);
-
-  async function fetchAllLutadores() {
-    setIsLoadingFighters(true);
-    try {
-      // Load ALL fighters — they're lightweight (id, nome, imagem_url, categoria_peso, record)
-      const res = await fetch('/api/lutadores?limit=5000&sort=photo_first&fields=minimal');
-      if (res.ok) {
-        const data = await res.json();
-        setAllLutadores(data.lutadores || data || []);
-      }
-    } catch (error) {
-      console.error('Erro ao carregar lutadores:', error);
-    } finally {
-      setIsLoadingFighters(false);
-    }
-  }
-
-  async function fetchComparison() {
-    setIsLoading(true);
-    try {
-      const res = await fetch(`/api/lutadores/comparar?ids=${lutador1Id},${lutador2Id}`);
-      if (res.ok) {
-        const data = await res.json();
-        setComparison(data);
-      }
-    } catch (error) {
-      console.error('Erro ao comparar:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  }
 
   return (
     <div className="min-h-screen bg-dark-bg">

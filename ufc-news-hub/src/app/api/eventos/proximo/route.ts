@@ -2,9 +2,40 @@ import { NextRequest, NextResponse } from 'next/server';
 import { query, queryOne } from '@/lib/db';
 import { Evento, LutaComLutadores, ConsensoPrevisao } from '@/types';
 
+// ═══════════════════════════════════════════════════════════════
+// Auto-detect event status transitions (self-healing)
+// Runs inline so the system doesn't depend solely on cron
+// ═══════════════════════════════════════════════════════════════
+async function autoDetectEventStatus() {
+  // agendado → ao_vivo: data_evento stores main card time, but prelims
+  // start ~3h earlier. Use 3h buffer so the event goes live when prelims begin.
+  await query(
+    `UPDATE eventos SET status = 'ao_vivo'
+     WHERE status = 'agendado'
+       AND data_evento <= NOW() + INTERVAL '3 hours'
+       AND EXISTS (SELECT 1 FROM lutas l WHERE l.evento_id = eventos.id)`
+  );
+
+  // ao_vivo → finalizado: all fights are done
+  await query(
+    `UPDATE eventos SET status = 'finalizado'
+     WHERE status = 'ao_vivo'
+       AND NOT EXISTS (
+         SELECT 1 FROM lutas l
+         WHERE l.evento_id = eventos.id AND l.status != 'finalizada'
+       )
+       AND EXISTS (SELECT 1 FROM lutas l WHERE l.evento_id = eventos.id)`
+  );
+}
+
 export async function GET(request: NextRequest) {
   try {
     const includeLive = request.nextUrl?.searchParams?.get('include_live') === 'true';
+
+    // Auto-detect status transitions before querying
+    if (includeLive) {
+      await autoDetectEventStatus();
+    }
 
     const statusFilter = includeLive
       ? `e.status IN ('agendado', 'ao_vivo')`

@@ -2,8 +2,7 @@
 
 import Link from 'next/link';
 import useSWR from 'swr';
-import { Newspaper, Target, BarChart3, Users, Calendar } from 'lucide-react';
-import type { LucideIcon } from 'lucide-react';
+import { Newspaper, Target, BarChart3, Users, Calendar, type LucideIcon } from 'lucide-react';
 import type { ContadorCategorias } from '@/types';
 
 // ═══════════════════════════════════════════════════════
@@ -25,8 +24,8 @@ interface CardItem {
 const fetcher = (url: string) => fetch(url).then(res => res.json());
 
 function buildCards(contadores?: ContadorCategorias): CardItem[] {
-  const noticiasSubtitle = contadores
-    ? `${contadores.todas} artigos`
+  const noticiasSubtitle = contadores?.reels_disponiveis
+    ? `${contadores.reels_disponiveis} reels esta semana`
     : 'Ultimas noticias';
 
   return [

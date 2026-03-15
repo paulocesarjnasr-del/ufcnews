@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect, useMemo } from 'react';
+import { useState, useRef, useMemo } from 'react';
 import { Send, Crown, Loader2, Brain, ClipboardList, Zap, CheckCircle2 } from 'lucide-react';
 import { useAdminAuth } from './AdminAuthContext';
 
@@ -52,7 +52,7 @@ function MissionStepper({ steps, currentStep }: { steps: StepInfo[]; currentStep
 
       {/* Steps row */}
       <div className="flex items-center justify-between">
-        {steps.map((step, i) => {
+        {steps.map((step, _i) => {
           const Icon = step.icon;
           const isActive = step.active && !step.done;
           const isDone = step.done;

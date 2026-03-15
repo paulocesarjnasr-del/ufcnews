@@ -45,7 +45,7 @@ export const PLACEHOLDER_IMAGE = '/placeholder-ufc.svg';
 
 export const ITEMS_PER_PAGE = 12;
 
-export const AUTO_REFRESH_INTERVAL = 30 * 60 * 1000; // 30 minutos em ms
+export const AUTO_REFRESH_INTERVAL = 10 * 1000; // 10 segundos — real-time feed
 
 // Constantes do Sistema de Comentários
 export const COMMENT_MAX_LENGTH = 2000;
@@ -55,5 +55,5 @@ export const AUTHOR_NAME_MIN = 2;
 export const RATE_LIMIT_WINDOW = 5 * 60 * 1000; // 5 minutos em ms
 export const RATE_LIMIT_MAX = 3; // máximo de comentários por janela
 export const REPORT_THRESHOLD = 3; // número de reports para auto-hide
-export const COMMENTS_REFRESH_INTERVAL = 60 * 1000; // 1 minuto em ms
+export const COMMENTS_REFRESH_INTERVAL = 5 * 1000; // 5 segundos — real-time comments
 export const MAX_COMMENT_DEPTH = 4; // profundidade máxima de respostas

@@ -30,6 +30,7 @@ export function FighterCard({ fighter, accentColor = 'ufc-red', initials }: Prop
     <div className="rounded-lg border border-dark-border bg-dark-card p-6">
       <div className="mb-4 flex items-center gap-4">
         {fighter.imagem_url ? (
+          /* eslint-disable-next-line @next/next/no-img-element */
           <img 
             src={fighter.imagem_url} 
             alt={fighter.nome}

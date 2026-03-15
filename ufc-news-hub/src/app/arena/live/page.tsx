@@ -1,6 +1,9 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
+import useSWR from 'swr';
+import useSWRImmutable from 'swr/immutable';
+import { Calendar, MapPin, ChevronRight, ArrowLeft } from 'lucide-react';
 import { LiveResultCard } from '@/components/arena/LiveResultCard';
 import { LiveLeaderboard } from '@/components/arena/LiveLeaderboard';
 import { useProximoEvento } from '@/hooks/useProximoEvento';
@@ -55,6 +58,20 @@ interface LiveData {
   usuario_id: string | null;
 }
 
+interface EventoRecente {
+  id: string;
+  nome: string;
+  data_evento: string;
+  local_evento: string | null;
+  total_lutas: number;
+  lutas_finalizadas: number;
+}
+
+const fetcher = (url: string) => fetch(url).then(r => {
+  if (!r.ok) throw new Error(`HTTP ${r.status}`);
+  return r.json();
+});
+
 // ═══════════════════════════════════════════════════════════════
 // Countdown helper
 // ═══════════════════════════════════════════════════════════════
@@ -62,139 +79,63 @@ interface LiveData {
 function useCountdown(targetDate: string | undefined) {
   const [timeLeft, setTimeLeft] = useState<string>('');
 
-  useEffect(() => {
+  useState(() => {
     if (!targetDate) return;
-
     function calc() {
       const diff = new Date(targetDate!).getTime() - Date.now();
-      if (diff <= 0) {
-        setTimeLeft('Em breve');
-        return;
-      }
+      if (diff <= 0) { setTimeLeft('Em breve'); return; }
       const d = Math.floor(diff / (1000 * 60 * 60 * 24));
       const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
       const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
       setTimeLeft(`${d}d ${h}h ${m}m`);
     }
-
     calc();
     const id = setInterval(calc, 60000);
     return () => clearInterval(id);
-  }, [targetDate]);
+  });
 
   return timeLeft;
 }
 
 // ═══════════════════════════════════════════════════════════════
-// Not-live state
+// Event result view (works for BOTH live and finalized)
 // ═══════════════════════════════════════════════════════════════
 
-function NoEventView() {
-  const { evento, isLoading } = useProximoEvento();
-  const countdown = useCountdown(evento?.data_evento);
-
-  if (isLoading) {
-    return (
-      <div className="flex min-h-[60vh] items-center justify-center">
-        <p className="text-dark-textMuted">Carregando...</p>
-      </div>
-    );
-  }
-
-  return (
-    <div className="flex min-h-[60vh] flex-col items-center justify-center gap-6 px-4 text-center">
-      <div className="neu-card max-w-sm rounded-xl p-8">
-        <div className="mb-4 text-5xl">🥊</div>
-        <h2 className="mb-2 font-display text-2xl uppercase text-dark-text">
-          Nenhum evento ao vivo agora
-        </h2>
-        {evento ? (
-          <>
-            <p className="mb-1 text-sm text-dark-textMuted">Proximo evento:</p>
-            <p className="font-semibold text-ufc-gold">{evento.nome}</p>
-            <p className="mt-3 font-display text-3xl tabular-nums text-ufc-red">
-              {countdown}
-            </p>
-          </>
-        ) : (
-          <p className="text-sm text-dark-textMuted">
-            Nenhum evento agendado em breve.
-          </p>
-        )}
-      </div>
-    </div>
+function EventResultView({
+  eventoId,
+  onBack,
+}: {
+  eventoId: string;
+  onBack?: () => void;
+}) {
+  // Smart fetching: SWR polls while ao_vivo, caches forever when finalizado
+  const { data, error } = useSWR<LiveData>(
+    `/api/arena/live?evento_id=${eventoId}`,
+    fetcher,
+    {
+      refreshInterval: (latestData: LiveData | undefined) => {
+        // Stop polling when event is finalized — data is immutable
+        if (latestData?.evento?.status === 'finalizado') return 0;
+        return 15000; // 15s polling while live
+      },
+      revalidateOnFocus: false,
+      dedupingInterval: 5000,
+    }
   );
-}
-
-// ═══════════════════════════════════════════════════════════════
-// Live event view
-// ═══════════════════════════════════════════════════════════════
-
-function LiveEventView({ eventoId }: { eventoId: string }) {
-  const [data, setData] = useState<LiveData | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const isPausedRef = useRef(false);
-
-  async function fetchLive() {
-    if (isPausedRef.current) return;
-    try {
-      const res = await fetch(`/api/arena/live?evento_id=${eventoId}`, {
-        cache: 'no-store',
-      });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const json = (await res.json()) as LiveData;
-      setData(json);
-      setLastUpdated(new Date());
-      setError(null);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao carregar dados');
-    }
-  }
-
-  useEffect(() => {
-    fetchLive();
-
-    intervalRef.current = setInterval(fetchLive, 15000);
-
-    function handleVisibility() {
-      if (document.hidden) {
-        isPausedRef.current = true;
-      } else {
-        isPausedRef.current = false;
-        fetchLive();
-      }
-    }
-
-    document.addEventListener('visibilitychange', handleVisibility);
-
-    return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
-      document.removeEventListener('visibilitychange', handleVisibility);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [eventoId]);
 
   if (!data && !error) {
     return (
-      <div className="flex min-h-[60vh] items-center justify-center">
-        <p className="text-dark-textMuted">Carregando dados ao vivo...</p>
+      <div className="flex min-h-[40vh] items-center justify-center">
+        <p className="text-dark-textMuted">Carregando...</p>
       </div>
     );
   }
 
   if (error && !data) {
     return (
-      <div className="flex min-h-[60vh] items-center justify-center">
+      <div className="flex min-h-[40vh] items-center justify-center">
         <div className="neu-card rounded-lg p-6 text-center">
-          <p className="text-red-400">{error}</p>
-          <button
-            onClick={fetchLive}
-            className="neu-button mt-4 rounded-lg px-4 py-2 text-sm text-dark-text"
-          >
-            Tentar novamente
-          </button>
+          <p className="text-red-400">{error.message}</p>
         </div>
       </div>
     );
@@ -204,8 +145,9 @@ function LiveEventView({ eventoId }: { eventoId: string }) {
 
   const { lutas, leaderboard, lutas_finalizadas, usuario_id } = data;
   const totalLutas = lutas.length;
+  const isLive = data.evento.status === 'ao_vivo';
+  const isFinished = data.evento.status === 'finalizado';
 
-  // Sort: finalized first (by ordem desc), then pending
   const sortedLutas = [...lutas].sort((a, b) => {
     const aFinished = a.status === 'finalizada' ? 0 : 1;
     const bFinished = b.status === 'finalizada' ? 0 : 1;
@@ -215,6 +157,17 @@ function LiveEventView({ eventoId }: { eventoId: string }) {
 
   return (
     <div className="mx-auto max-w-2xl space-y-6 px-4 py-6">
+      {/* Back button (when viewing a past event) */}
+      {onBack && (
+        <button
+          onClick={onBack}
+          className="flex items-center gap-1.5 text-sm text-dark-textMuted hover:text-dark-text transition-colors"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Voltar
+        </button>
+      )}
+
       {/* Event header */}
       <div className="neu-card rounded-xl p-5">
         <div className="flex items-start justify-between gap-3">
@@ -228,16 +181,24 @@ function LiveEventView({ eventoId }: { eventoId: string }) {
               </p>
             )}
           </div>
-          {/* AO VIVO badge with red pulse */}
-          <div className="flex shrink-0 items-center gap-2 rounded-full bg-ufc-red/10 px-3 py-1.5">
-            <span className="relative flex h-2.5 w-2.5">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-ufc-red opacity-75" />
-              <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-ufc-red" />
-            </span>
-            <span className="font-display text-sm font-bold uppercase tracking-widest text-ufc-red">
-              Ao Vivo
-            </span>
-          </div>
+          {/* Status badge */}
+          {isLive ? (
+            <div className="flex shrink-0 items-center gap-2 rounded-full bg-ufc-red/10 px-3 py-1.5">
+              <span className="relative flex h-2.5 w-2.5">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-ufc-red opacity-75" />
+                <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-ufc-red" />
+              </span>
+              <span className="font-display text-sm font-bold uppercase tracking-widest text-ufc-red">
+                Ao Vivo
+              </span>
+            </div>
+          ) : isFinished ? (
+            <div className="flex shrink-0 items-center gap-2 rounded-full bg-green-500/10 px-3 py-1.5">
+              <span className="font-display text-sm font-bold uppercase tracking-widest text-green-400">
+                Finalizado
+              </span>
+            </div>
+          ) : null}
         </div>
 
         {/* Progress bar */}
@@ -246,16 +207,6 @@ function LiveEventView({ eventoId }: { eventoId: string }) {
             <span>
               {lutas_finalizadas}/{totalLutas} lutas finalizadas
             </span>
-            {lastUpdated && (
-              <span>
-                Atualizado:{' '}
-                {lastUpdated.toLocaleTimeString('pt-BR', {
-                  hour: '2-digit',
-                  minute: '2-digit',
-                  second: '2-digit',
-                })}
-              </span>
-            )}
           </div>
           <div className="neu-inset h-2 rounded-full overflow-hidden">
             <div
@@ -296,11 +247,105 @@ function LiveEventView({ eventoId }: { eventoId: string }) {
 }
 
 // ═══════════════════════════════════════════════════════════════
+// No live event → show countdown + recent events
+// ═══════════════════════════════════════════════════════════════
+
+function NoEventView({ onSelectEvento }: { onSelectEvento: (id: string) => void }) {
+  const { evento, isLoading: proximoLoading } = useProximoEvento();
+  const countdown = useCountdown(evento?.data_evento);
+
+  // Fetch recent finalized events (immutable — won't re-fetch)
+  const { data: recentData } = useSWRImmutable<{ eventos_recentes: EventoRecente[] }>(
+    '/api/arena/live',
+    fetcher
+  );
+
+  const recentes = recentData?.eventos_recentes ?? [];
+
+  return (
+    <div className="mx-auto max-w-2xl px-4 py-6 space-y-8">
+      {/* Countdown card */}
+      <div className="neu-card rounded-xl p-8 text-center">
+        <div className="mb-4 text-5xl">🥊</div>
+        <h2 className="mb-2 font-display text-2xl uppercase text-dark-text">
+          Nenhum evento ao vivo agora
+        </h2>
+        {proximoLoading ? (
+          <div className="h-8 w-48 mx-auto bg-dark-card animate-pulse rounded" />
+        ) : evento ? (
+          <>
+            <p className="mb-1 text-sm text-dark-textMuted">Proximo evento:</p>
+            <p className="font-semibold text-ufc-gold">{evento.nome}</p>
+            <p className="mt-3 font-display text-3xl tabular-nums text-ufc-red">
+              {countdown}
+            </p>
+          </>
+        ) : (
+          <p className="text-sm text-dark-textMuted">
+            Nenhum evento agendado em breve.
+          </p>
+        )}
+      </div>
+
+      {/* Recent finalized events */}
+      {recentes.length > 0 && (
+        <section>
+          <h3 className="mb-3 font-display text-sm uppercase tracking-wide text-dark-textMuted">
+            Eventos Recentes
+          </h3>
+          <div className="space-y-3">
+            {recentes.map((ev) => {
+              const date = new Date(ev.data_evento);
+              return (
+                <button
+                  key={ev.id}
+                  onClick={() => onSelectEvento(ev.id)}
+                  className="neu-card w-full rounded-lg p-4 text-left transition-all hover:border-ufc-red/30 hover:bg-ufc-red/5 group"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="min-w-0 flex-1">
+                      <h4 className="font-display text-base uppercase text-dark-text leading-tight group-hover:text-ufc-red transition-colors">
+                        {ev.nome}
+                      </h4>
+                      <div className="mt-1.5 flex items-center gap-3 text-xs text-dark-textMuted">
+                        <span className="flex items-center gap-1">
+                          <Calendar className="w-3 h-3" />
+                          {date.toLocaleDateString('pt-BR', {
+                            day: 'numeric',
+                            month: 'short',
+                            year: 'numeric',
+                          })}
+                        </span>
+                        {ev.local_evento && (
+                          <span className="flex items-center gap-1">
+                            <MapPin className="w-3 h-3" />
+                            {ev.local_evento}
+                          </span>
+                        )}
+                      </div>
+                      <div className="mt-1 text-xs text-dark-textMuted">
+                        {ev.lutas_finalizadas}/{ev.total_lutas} lutas finalizadas
+                      </div>
+                    </div>
+                    <ChevronRight className="w-5 h-5 text-dark-textMuted group-hover:text-ufc-red transition-colors shrink-0" />
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </section>
+      )}
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════
 // Page
 // ═══════════════════════════════════════════════════════════════
 
 export default function ArenaLivePage() {
   const { evento, isAoVivo, isLoading } = useProximoEvento();
+  const [selectedEventoId, setSelectedEventoId] = useState<string | null>(null);
 
   if (isLoading) {
     return (
@@ -310,9 +355,21 @@ export default function ArenaLivePage() {
     );
   }
 
-  if (!isAoVivo || !evento) {
-    return <NoEventView />;
+  // Viewing a specific past event's results
+  if (selectedEventoId) {
+    return (
+      <EventResultView
+        eventoId={selectedEventoId}
+        onBack={() => setSelectedEventoId(null)}
+      />
+    );
   }
 
-  return <LiveEventView eventoId={evento.id} />;
+  // Live event happening now
+  if (isAoVivo && evento) {
+    return <EventResultView eventoId={evento.id} />;
+  }
+
+  // No live event → show countdown + recent events
+  return <NoEventView onSelectEvento={setSelectedEventoId} />;
 }

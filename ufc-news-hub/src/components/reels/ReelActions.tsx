@@ -12,13 +12,15 @@ interface ReelActionsProps {
 
 export function ReelActions({ noticia, onToggleLike, onOpenComments }: ReelActionsProps) {
   return (
-    <div className="absolute right-4 top-1/2 z-10 flex -translate-y-1/4 flex-col items-center gap-6 md:right-6">
+    <div className="absolute bottom-6 right-4 z-10 flex flex-col items-center gap-5 md:bottom-10 md:right-6">
+      {/* Like */}
       <ReelLikeButton
         liked={noticia.user_liked}
         count={noticia.likes_count}
         onToggle={onToggleLike}
       />
 
+      {/* Comments */}
       <button
         onClick={onOpenComments}
         className="flex flex-col items-center gap-1 transition-transform active:scale-90"
@@ -28,6 +30,7 @@ export function ReelActions({ noticia, onToggleLike, onOpenComments }: ReelActio
         <span className="text-xs font-semibold text-white">{noticia.comments_count}</span>
       </button>
 
+      {/* Source link */}
       <a
         href={noticia.fonte_url}
         target="_blank"

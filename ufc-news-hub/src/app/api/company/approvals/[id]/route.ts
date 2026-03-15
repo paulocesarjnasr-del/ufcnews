@@ -42,7 +42,7 @@ async function fetchArticleImage(title: string): Promise<string | null> {
 function buildImageSearchQueries(title: string): string[] {
   const stopWords = ['vs', 'e', 'de', 'do', 'da', 'no', 'na', 'em', 'the', 'a', 'an', 'for', 'ufc', 'fight', 'night', 'preview', 'odds', 'analise'];
   const keywords = title
-    .replace(/[—\-:|\[\]()]/g, ' ')
+    .replace(/[—\-:|[\]()]/g, ' ')
     .split(/\s+/)
     .filter(w => w.length > 2 && !stopWords.includes(w.toLowerCase()))
     .slice(0, 3)

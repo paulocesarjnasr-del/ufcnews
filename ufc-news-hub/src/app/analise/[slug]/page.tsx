@@ -11,7 +11,6 @@ import { Analise, isCardAnalise, isFullSingleAnalise, CardAnalise, FullSingleAna
 import { CardOverviewHero } from '@/components/analise/CardOverviewHero';
 import { BestBetsSection } from '@/components/analise/BestBetsSection';
 import { FightBreakdownCard } from '@/components/analise/FightBreakdownCard';
-import { BettingValueSection } from '@/components/analise/BettingValueSection';
 import { FullAnalysisView } from '@/components/analise/FullAnalysisView';
 import { AlertCircle } from 'lucide-react';
 

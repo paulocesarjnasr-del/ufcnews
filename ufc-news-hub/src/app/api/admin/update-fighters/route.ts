@@ -33,7 +33,7 @@ async function fetchWithRetry(url: string, retries = 2, timeoutMs = 8000): Promi
       }
 
       return await response.text();
-    } catch (error) {
+    } catch (_error) {
       clearTimeout(timeoutId);
       if (i === retries - 1) return null;
       await new Promise(r => setTimeout(r, 500));

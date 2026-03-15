@@ -3,8 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { X, Send } from 'lucide-react';
 import { useComentarios } from '@/hooks/useComentarios';
-import { cn } from '@/lib/utils';
-import { formatTimeAgo, getInitials } from '@/lib/utils';
+import { cn, formatTimeAgo, getInitials } from '@/lib/utils';
 
 interface ReelCommentsProps {
   noticiaId: string;
@@ -21,7 +20,7 @@ function getStoredName(): string {
   }
 }
 
-function storeName(nome: string): void {
+function _storeName(nome: string): void {
   if (typeof window === 'undefined') return;
   try {
     localStorage.setItem('reel_guest_nome', nome);

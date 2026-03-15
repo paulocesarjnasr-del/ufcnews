@@ -19,7 +19,7 @@ export async function getFighterImageUrls(ufcSlug: string): Promise<FighterImage
     });
 
     if (!res.ok) {
-      console.log(`[UFC-IMAGES] Failed to fetch ${url}: ${res.status}`);
+      console.info(`[UFC-IMAGES] Failed to fetch ${url}: ${res.status}`);
       return { fullBodyUrl: null, headshotUrl: null };
     }
 

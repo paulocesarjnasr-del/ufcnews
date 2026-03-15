@@ -96,6 +96,7 @@ export default function FightersPage() {
   useEffect(() => {
     setOffset(0);
     fetchFighters(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search, categoria]);
 
   const hasMore = fighters.length < total;

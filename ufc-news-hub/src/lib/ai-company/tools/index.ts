@@ -1851,7 +1851,7 @@ export const securityHeadersAudit = tool({
           missingCount,
           grade: gradeHeaders(presentCount, SECURITY_HEADERS.length),
         });
-      } catch (error) {
+      } catch (_error) {
         results.push({
           route,
           statusCode: 0,
@@ -2184,7 +2184,7 @@ export const injectionAudit = tool({
     let rawSqlLocations: string[] = [];
     try {
       const rawSqlCheck = execSync(
-        'grep -rn "\\$queryRaw\\|\\$executeRaw\\|query(\\`\\|query(\"\\|query(\'\\|.query(" src/ --include="*.ts" --include="*.tsx" 2>/dev/null || true',
+        'grep -rn "\\$queryRaw\\|\\$executeRaw\\|query(\\`\\|query("\\|query(\'\\|.query(" src/ --include="*.ts" --include="*.tsx" 2>/dev/null || true',
         { cwd: projectDir, encoding: 'utf-8', timeout: 10000 }
       ).trim();
       if (rawSqlCheck) {
@@ -2303,7 +2303,7 @@ export const exposedDataAudit = tool({
           exposedFields,
           severity: hasSensitiveFields ? 'CRITICAL' : leaksData ? 'HIGH' : 'INFO',
         });
-      } catch (error) {
+      } catch (_error) {
         dataLeaks.push({
           route: sr.route,
           dataType: sr.dataType,
@@ -2430,7 +2430,7 @@ export const rateLimitAudit = tool({
           const latencyMs = Date.now() - reqStart;
           const rateLimited = res.status === 429 || res.status === 503;
           results.push({ index: i, status: res.status, latencyMs, rateLimited });
-        } catch (error) {
+        } catch (_error) {
           const latencyMs = Date.now() - reqStart;
           results.push({ index: i, status: 0, latencyMs, rateLimited: false });
         }
@@ -2810,7 +2810,7 @@ export const corsAndCsrfAudit = tool({
           hasCsrfHeader: csrfHeaderRequired,
           severity: res.status !== 403 && res.status !== 401 ? 'HIGH' : 'INFO',
         });
-      } catch (error) {
+      } catch (_error) {
         csrfResults.push({
           method: ep.method,
           route: ep.route,

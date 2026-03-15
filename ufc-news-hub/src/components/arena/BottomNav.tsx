@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Swords, Trophy, User } from 'lucide-react';
+import { Home, Swords, Radio, Trophy, User } from 'lucide-react';
 
 interface BottomNavProps {
   eventoId: string | null;
@@ -12,10 +12,10 @@ interface BottomNavProps {
 
 interface NavTab {
   label: string;
-  liveLabel?: string;
   href: string;
   icon: React.ReactNode;
   matchPaths: string[];
+  isLive?: boolean;
 }
 
 export function BottomNav({ eventoId, isAoVivo, username }: BottomNavProps) {
@@ -30,14 +30,16 @@ export function BottomNav({ eventoId, isAoVivo, username }: BottomNavProps) {
     },
     {
       label: 'Evento',
-      liveLabel: 'AO VIVO',
-      href: isAoVivo
-        ? '/arena/live'
-        : eventoId
-          ? `/arena/evento/${eventoId}`
-          : '/arena',
+      href: eventoId ? `/arena/evento/${eventoId}` : '/arena',
       icon: <Swords className="w-5 h-5" />,
-      matchPaths: ['/arena/evento', '/arena/live'],
+      matchPaths: ['/arena/evento'],
+    },
+    {
+      label: isAoVivo ? 'AO VIVO' : 'Ao Vivo',
+      href: '/arena/live',
+      icon: <Radio className="w-5 h-5" />,
+      matchPaths: ['/arena/live'],
+      isLive: isAoVivo,
     },
     {
       label: 'Ligas',
@@ -65,7 +67,6 @@ export function BottomNav({ eventoId, isAoVivo, username }: BottomNavProps) {
         <div className="flex items-center justify-around h-16 px-2">
           {tabs.map((tab) => {
             const active = isActive(tab);
-            const showLive = tab.liveLabel && isAoVivo;
 
             return (
               <Link
@@ -74,17 +75,19 @@ export function BottomNav({ eventoId, isAoVivo, username }: BottomNavProps) {
                 className={`flex flex-col items-center justify-center gap-1 flex-1 h-full transition-colors ${
                   active
                     ? 'text-ufc-red'
-                    : 'text-dark-textMuted hover:text-dark-text'
+                    : tab.isLive
+                      ? 'text-red-400'
+                      : 'text-dark-textMuted hover:text-dark-text'
                 }`}
               >
                 <div className="relative">
                   {tab.icon}
-                  {showLive && (
+                  {tab.isLive && (
                     <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full animate-pulse" />
                   )}
                 </div>
-                <span className={`text-[10px] font-medium ${showLive ? 'text-red-400' : ''}`}>
-                  {showLive ? tab.liveLabel : tab.label}
+                <span className={`text-[10px] font-medium ${tab.isLive ? 'text-red-400' : ''}`}>
+                  {tab.label}
                 </span>
               </Link>
             );
@@ -96,7 +99,6 @@ export function BottomNav({ eventoId, isAoVivo, username }: BottomNavProps) {
       <nav className="hidden md:flex items-center gap-1">
         {tabs.map((tab) => {
           const active = isActive(tab);
-          const showLive = tab.liveLabel && isAoVivo;
 
           return (
             <Link
@@ -105,16 +107,18 @@ export function BottomNav({ eventoId, isAoVivo, username }: BottomNavProps) {
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
                 active
                   ? 'bg-ufc-red/10 text-ufc-red'
-                  : 'text-dark-textMuted hover:text-dark-text hover:bg-white/5'
+                  : tab.isLive
+                    ? 'text-red-400 hover:bg-red-500/10'
+                    : 'text-dark-textMuted hover:text-dark-text hover:bg-white/5'
               }`}
             >
               <div className="relative">
                 {tab.icon}
-                {showLive && (
+                {tab.isLive && (
                   <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-red-500 rounded-full animate-pulse" />
                 )}
               </div>
-              <span>{showLive ? tab.liveLabel : tab.label}</span>
+              <span>{tab.label}</span>
             </Link>
           );
         })}

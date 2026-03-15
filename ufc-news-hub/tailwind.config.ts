@@ -32,6 +32,13 @@ const config: Config = {
           backstage: '#8B5CF6',
         },
       },
+      backgroundImage: {
+        'octagon-grid': `
+          repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(255,255,255,0.02) 39px, rgba(255,255,255,0.02) 40px),
+          repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(255,255,255,0.02) 39px, rgba(255,255,255,0.02) 40px),
+          linear-gradient(160deg, #12101a 0%, #16121e 50%, #12101a 100%)
+        `,
+      },
       fontFamily: {
         display: ['var(--font-bebas)', 'Impact', 'sans-serif'],
         body: ['var(--font-inter)', 'system-ui', 'sans-serif'],
@@ -59,6 +66,7 @@ const config: Config = {
         // Arena Octagon Portal animations
         'float': 'float 6s ease-in-out infinite',
         'glow-pulse-border': 'glow-pulse-border 3s ease-in-out infinite',
+        'ticker': 'ticker linear infinite',
       },
       keyframes: {
         'pulse-red': {
@@ -139,6 +147,10 @@ const config: Config = {
         'glow-pulse-border': {
           '0%, 100%': { boxShadow: '0 0 10px rgba(210, 10, 10, 0.1), 8px 8px 16px rgba(0,0,0,0.4), -8px -8px 16px rgba(45,45,45,0.1)' },
           '50%': { boxShadow: '0 0 25px rgba(210, 10, 10, 0.25), 8px 8px 16px rgba(0,0,0,0.4), -8px -8px 16px rgba(45,45,45,0.1)' },
+        },
+        'ticker': {
+          '0%': { transform: 'translateX(0)' },
+          '100%': { transform: 'translateX(-50%)' },
         },
       },
     },

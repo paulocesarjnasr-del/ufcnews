@@ -1,5 +1,4 @@
-import { BaseAgent } from './base-agent';
-import type { AgentModelKey } from './base-agent';
+import { BaseAgent, type AgentModelKey } from './base-agent';
 import * as tools from '../tools';
 
 // Mapping: which agent has access to which tools

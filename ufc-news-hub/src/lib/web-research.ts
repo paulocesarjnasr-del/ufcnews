@@ -178,7 +178,7 @@ Apos todas as pesquisas, compile os resultados em JSON com esta estrutura EXATA:
 IMPORTANTE: Retorne APENAS o JSON ao final. Conte quantas fontes distintas voce consultou em sources_count.`;
 
   try {
-    console.log(`[WEB-RESEARCH] Starting web research for ${fighter1Name} vs ${fighter2Name}...`);
+    console.info(`[WEB-RESEARCH] Starting web research for ${fighter1Name} vs ${fighter2Name}...`);
     const startTime = Date.now();
 
     // Use web_search server-side tool - Claude executes searches on Anthropic's infra
@@ -202,7 +202,7 @@ IMPORTANTE: Retorne APENAS o JSON ao final. Conte quantas fontes distintas voce 
 
     // Handle pause_turn: server-side tool loop may need continuation
     while (response.stop_reason === 'pause_turn') {
-      console.log(`[WEB-RESEARCH] Server paused, continuing...`);
+      console.info(`[WEB-RESEARCH] Server paused, continuing...`);
       messages.push({ role: 'assistant', content: response.content });
       messages.push({ role: 'user', content: 'Continue pesquisando e compile o resultado final em JSON.' });
 
@@ -222,7 +222,7 @@ IMPORTANTE: Retorne APENAS o JSON ao final. Conte quantas fontes distintas voce 
     }
 
     const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
-    console.log(`[WEB-RESEARCH] Completed in ${elapsed}s (stop_reason: ${response.stop_reason})`);
+    console.info(`[WEB-RESEARCH] Completed in ${elapsed}s (stop_reason: ${response.stop_reason})`);
 
     // Extract text from response content blocks (may have multiple text blocks)
     const textBlocks = response.content.filter(
@@ -243,7 +243,7 @@ IMPORTANTE: Retorne APENAS o JSON ao final. Conte quantas fontes distintas voce 
       console.warn('[WEB-RESEARCH] Response preview:', fullText.slice(0, 200));
       return null;
     }
-    console.log(`[WEB-RESEARCH] Parsed briefing: ${briefing.key_facts?.length || 0} key facts, ${briefing.sources_count} sources`);
+    console.info(`[WEB-RESEARCH] Parsed briefing: ${briefing.key_facts?.length || 0} key facts, ${briefing.sources_count} sources`);
 
     return briefing;
   } catch (error) {
@@ -346,7 +346,7 @@ export function extractEventCorrections(briefing: ResearchBriefing | null): Even
   }
 
   if (num_rounds || titulo_em_jogo) {
-    console.log(`[WEB-RESEARCH] Event corrections from research: rounds=${num_rounds}, titulo=${titulo_em_jogo}`);
+    console.info(`[WEB-RESEARCH] Event corrections from research: rounds=${num_rounds}, titulo=${titulo_em_jogo}`);
   }
 
   return { num_rounds, titulo_em_jogo };

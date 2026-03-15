@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { query, queryOne } from '@/lib/db';
+import { queryOne } from '@/lib/db';
 import { generateFullAnalysis, generateSlug } from '@/lib/generate-analysis';
 
 export const maxDuration = 300; // 5 minutes for premium analysis

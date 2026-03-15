@@ -112,8 +112,8 @@ function FighterColumn({
 
       {/* Recent fights */}
       <div className="neu-inset p-4">
-        {fighter.recent_fights.map((fight, i) => (
-          <FightRow key={i} fight={fight} />
+        {fighter.recent_fights.map((fight) => (
+          <FightRow key={`${fight.opponent}-${fight.date}`} fight={fight} />
         ))}
       </div>
 
@@ -183,7 +183,7 @@ function HistoryModal({
             <tbody>
               {fights.map((fight, i) => (
                 <tr
-                  key={i}
+                  key={`${fight.opponent}-${fight.date}`}
                   className={`border-b border-dark-border/30 ${
                     i % 2 === 0 ? 'bg-dark-bg/30' : ''
                   }`}

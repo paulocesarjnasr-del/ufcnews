@@ -3,7 +3,8 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import FighterImage from '@/components/ui/FighterImage';
-import { EventAnalysisCard, type EventFightCard } from './EventAnalysisCard';
+import { EventAnalysisCard } from './EventAnalysisCard';
+import type { EventFightCard } from './EventAnalysisCard';
 
 export interface EventAnalysisData {
   evento_nome: string;

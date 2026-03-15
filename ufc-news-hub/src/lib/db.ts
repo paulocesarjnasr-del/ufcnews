@@ -20,6 +20,7 @@ if (process.env.NODE_ENV !== 'production') {
 export async function query<T>(text: string, params?: unknown[]): Promise<T[]> {
   const client = await pool.connect();
   try {
+    await client.query('SET search_path TO public');
     const result = await client.query(text, params);
     return result.rows as T[];
   } finally {

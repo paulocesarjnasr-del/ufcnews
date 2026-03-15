@@ -6,6 +6,7 @@ import {
   TrendingUp,
   Target,
   Shield,
+  Swords,
   AlertTriangle,
   Eye,
   Zap,
@@ -18,6 +19,7 @@ import {
   Video,
   Instagram,
   Twitter,
+  ArrowRight,
 } from 'lucide-react';
 
 /* ====================================================================
@@ -28,8 +30,8 @@ function StatBar({
   valueA,
   valueB,
   maxVal,
-  nameA: _nameA,
-  nameB: _nameB,
+  nameA,
+  nameB,
   note,
   format,
   reverseWinner,

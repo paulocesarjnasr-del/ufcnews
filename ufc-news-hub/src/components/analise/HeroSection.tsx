@@ -38,7 +38,6 @@ export function HeroSection({ data }: { data: HeroSectionData }) {
           <div className="flex items-center justify-end gap-3 md:gap-6">
             {f1.imagem_fullbody_url && (
               <div className="relative h-[260px] w-[160px] flex-shrink-0 md:h-[400px] md:w-[240px] lg:h-[460px] lg:w-[280px]">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={f1.imagem_fullbody_url}
                   alt={f1.nome_completo}
@@ -73,7 +72,6 @@ export function HeroSection({ data }: { data: HeroSectionData }) {
             </div>
             {f2.imagem_fullbody_url && (
               <div className="relative h-[260px] w-[160px] flex-shrink-0 md:h-[400px] md:w-[240px] lg:h-[460px] lg:w-[280px]">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={f2.imagem_fullbody_url}
                   alt={f2.nome_completo}

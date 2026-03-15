@@ -3,7 +3,7 @@
  * These sections use exact numbers from UFCStats — no AI hallucination possible.
  */
 import type { EnhancedFighterProfile } from './ufcstats-scraper';
-import type { FighterComparison } from './derived-metrics';
+import type { DerivedMetrics, FighterComparison } from './derived-metrics';
 import type {
   ComparacaoEstatisticaSectionData,
   DistribuicaoVitoriasSectionData,
@@ -128,8 +128,8 @@ export function computeWinDistribution(
 
 export function computeCommonOpponent(
   comparison: FighterComparison,
-  _f1Name: string,
-  _f2Name: string,
+  f1Name: string,
+  f2Name: string,
 ): OponenteComumSectionData | null {
   if (!comparison.commonOpponents || comparison.commonOpponents.length === 0) {
     return null;

@@ -21,13 +21,14 @@ interface BannerUploadProps {
   onUpload: (url: string | null) => void;
   isOpen: boolean;
   onClose: () => void;
+  embedded?: boolean;
 }
 
 // ═══════════════════════════════════════════════════════════════
 // Component
 // ═══════════════════════════════════════════════════════════════
 
-export function BannerUpload({ ligaId, currentBanner, onUpload, isOpen, onClose }: BannerUploadProps) {
+export function BannerUpload({ ligaId, currentBanner, onUpload, isOpen, onClose, embedded }: BannerUploadProps) {
   const [originalImage, setOriginalImage] = useState<HTMLImageElement | null>(null);
   const [zoom, setZoom] = useState(1);
   const [offsetX, setOffsetX] = useState(0);
@@ -252,30 +253,11 @@ export function BannerUpload({ ligaId, currentBanner, onUpload, isOpen, onClose 
 
   if (!isOpen) return null;
 
-  // ── Render ──
+  // ── Inner content ──
 
-  return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4"
-      onClick={onClose}
-    >
-      <div
-        className="neu-card rounded-2xl w-full max-w-lg p-6 space-y-5 relative"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <h2 className="font-display text-xl uppercase text-white">Banner da Liga</h2>
-          <button
-            onClick={onClose}
-            className="text-dark-textMuted hover:text-white transition-colors"
-            aria-label="Fechar"
-          >
-            <X size={20} />
-          </button>
-        </div>
-
-        {originalImage ? (
+  const innerContent = (
+    <div className="space-y-5">
+      {originalImage ? (
           <>
             {/* Canvas preview with drag */}
             <div
@@ -417,6 +399,36 @@ export function BannerUpload({ ligaId, currentBanner, onUpload, isOpen, onClose 
             </button>
           )}
         </div>
+    </div>
+  );
+
+  // ── Render ──
+
+  if (embedded) {
+    return innerContent;
+  }
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4"
+      onClick={onClose}
+    >
+      <div
+        className="neu-card rounded-2xl w-full max-w-lg p-6 relative"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between mb-5">
+          <h2 className="font-display text-xl uppercase text-white">Banner da Liga</h2>
+          <button
+            onClick={onClose}
+            className="text-dark-textMuted hover:text-white transition-colors"
+            aria-label="Fechar"
+          >
+            <X size={20} />
+          </button>
+        </div>
+        {innerContent}
       </div>
     </div>
   );

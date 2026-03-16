@@ -199,10 +199,20 @@ export async function getUsuarioAtual(): Promise<UsuarioArena | null> {
             underdogs_acertados, kos_acertados, subs_acertados, decisoes_acertadas,
             total_amigos, total_ligas, titulos_ganhos,
             picks_publicos, notificacoes_ativas,
-            created_at, last_login_at
+            created_at, last_login_at, ultimo_acesso
      FROM usuarios_arena WHERE id = $1`,
     [payload.id]
   );
+
+  // Throttle: update ultimo_acesso if > 5 min old (fire-and-forget)
+  if (usuario) {
+    const cincoMin = 5 * 60 * 1000;
+    const ultimoAcesso = usuario.ultimo_acesso ? new Date(usuario.ultimo_acesso).getTime() : 0;
+    if (Date.now() - ultimoAcesso > cincoMin) {
+      query('UPDATE usuarios_arena SET ultimo_acesso = NOW() WHERE id = $1', [usuario.id])
+        .catch(() => {});
+    }
+  }
 
   return usuario;
 }

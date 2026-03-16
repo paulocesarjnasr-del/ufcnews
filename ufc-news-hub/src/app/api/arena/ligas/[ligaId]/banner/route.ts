@@ -104,8 +104,9 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
 
     return NextResponse.json({ success: true, banner_url: blob.url });
   } catch (error) {
-    console.error('[banner POST] Erro ao fazer upload:', error);
-    return NextResponse.json({ error: 'Erro ao fazer upload' }, { status: 500 });
+    const msg = error instanceof Error ? error.message : 'Erro desconhecido';
+    console.error('[banner POST] Erro ao fazer upload:', msg, error);
+    return NextResponse.json({ error: `Erro ao fazer upload: ${msg}` }, { status: 500 });
   }
 }
 

@@ -5,8 +5,18 @@ import { ReelsContainer } from '@/components/reels/ReelsContainer';
 
 export default function NoticiasPage() {
   return (
-    <MainLayout>
-      <ReelsContainer />
-    </MainLayout>
+    <>
+      {/* Mobile: full-screen reels, no header/padding */}
+      <div className="md:hidden">
+        <ReelsContainer />
+      </div>
+
+      {/* Desktop: normal layout with header */}
+      <div className="hidden md:block">
+        <MainLayout>
+          <ReelsContainer />
+        </MainLayout>
+      </div>
+    </>
   );
 }

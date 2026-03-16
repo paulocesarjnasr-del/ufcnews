@@ -52,6 +52,7 @@ export async function GET(request: NextRequest) {
         WHERE n.eh_sobre_ufc = true
           AND n.imagem_url IS NOT NULL
           AND n.imagem_url NOT LIKE '%youtube.com%'
+          AND n.publicado_em > NOW() - INTERVAL '24 hours'
         ORDER BY n.publicado_em DESC
         LIMIT $2
       )

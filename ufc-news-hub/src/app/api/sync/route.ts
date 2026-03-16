@@ -5,7 +5,7 @@ import { classifyNews } from '@/lib/keyword-classifier';
 import { checkDuplicate, checkDuplicateByUrl } from '@/lib/deduplication';
 import { scrapeArticleContent } from '@/lib/article-scraper';
 import { SyncResult, Lutador } from '@/types';
-import { generateReelCaption } from '@/lib/reel-caption';
+import { generateNewsCaptions } from '@/lib/news-caption';
 import { emitEvent } from '@/lib/ai-company/event-bus';
 
 const pool = new Pool({
@@ -61,6 +61,7 @@ async function getAllLutadores(): Promise<Lutador[]> {
 async function saveNoticia(data: {
   titulo: string;
   subtitulo: string;
+  reel_caption: string;
   conteudo_completo: string;
   imagem_url: string | null;
   fonte_url: string;
@@ -69,34 +70,25 @@ async function saveNoticia(data: {
   hash_deduplicacao: string;
   publicado_em: Date;
 }): Promise<{ id: string }> {
-  const result = await pool.query(
-    `
-    INSERT INTO noticias (
-      titulo,
-      subtitulo,
-      conteudo_completo,
-      imagem_url,
-      fonte_url,
-      fonte_nome,
-      categoria,
-      hash_deduplicacao,
-      publicado_em
-    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-    RETURNING id
-  `,
-    [
-      data.titulo,
-      data.subtitulo,
-      data.conteudo_completo,
-      data.imagem_url,
-      data.fonte_url,
-      data.fonte_nome,
-      data.categoria,
-      data.hash_deduplicacao,
-      data.publicado_em,
-    ]
-  );
-  return result.rows[0];
+  const client = await pool.connect();
+  try {
+    await client.query('SET search_path TO public');
+    const result = await client.query(
+      `INSERT INTO noticias (
+        titulo, subtitulo, reel_caption, conteudo_completo, imagem_url,
+        fonte_url, fonte_nome, categoria, hash_deduplicacao, publicado_em
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+      RETURNING id`,
+      [
+        data.titulo, data.subtitulo, data.reel_caption, data.conteudo_completo,
+        data.imagem_url, data.fonte_url, data.fonte_nome, data.categoria,
+        data.hash_deduplicacao, data.publicado_em,
+      ]
+    );
+    return result.rows[0];
+  } finally {
+    client.release();
+  }
 }
 
 async function saveNoticiaEntidade(
@@ -176,9 +168,15 @@ export async function POST(): Promise<NextResponse<SyncResult>> {
         lutadoresParaClassificacao
       );
 
-      // 3.2 Verificar se é UFC
+      // 3.2 Verificar se é UFC + gate de confiança
       if (!classification.eh_ufc) {
         console.log('  -> REJEITADA (não é UFC)');
+        rejeitadas++;
+        continue;
+      }
+
+      if (classification.confidence < 0.4) {
+        console.log(`  -> REJEITADA (confiança baixa: ${classification.confidence.toFixed(2)})`);
         rejeitadas++;
         continue;
       }
@@ -199,16 +197,31 @@ export async function POST(): Promise<NextResponse<SyncResult>> {
         if (dedup.replaceId) {
           // Nova versão é melhor — substitui a existente
           try {
+            // Generate fresh captions for the replacement (fixes caption-image mismatch)
+            const replacementImageUrl = item.enclosure?.url || null;
+            let replacementSubtitulo = classification.subtitulo;
+            let replacementReelCaption = '';
+            try {
+              const replacementCaptions = await generateNewsCaptions(
+                item.title, articleContent || item.description, replacementImageUrl
+              );
+              replacementSubtitulo = replacementCaptions.subtitulo;
+              replacementReelCaption = replacementCaptions.reel_caption;
+            } catch {
+              // fallback to classifier subtitle, empty reel_caption
+            }
+
             await pool.query(
-              `UPDATE noticias SET titulo = $1, subtitulo = $2, conteudo_completo = $3,
-               imagem_url = COALESCE($4, imagem_url), fonte_url = $5, fonte_nome = $6,
-               hash_deduplicacao = $7
-               WHERE id = $8`,
+              `UPDATE noticias SET titulo = $1, subtitulo = $2, reel_caption = $3,
+               conteudo_completo = $4, imagem_url = COALESCE($5, imagem_url),
+               fonte_url = $6, fonte_nome = $7, hash_deduplicacao = $8
+               WHERE id = $9`,
               [
                 item.title,
-                classification.subtitulo,
+                replacementSubtitulo,
+                replacementReelCaption,
                 articleContent,
-                item.enclosure?.url || null,
+                replacementImageUrl,
                 item.link,
                 item.sourceName || 'Unknown',
                 dedup.hash,
@@ -233,11 +246,27 @@ export async function POST(): Promise<NextResponse<SyncResult>> {
       );
 
       try {
+        const imagemUrl = item.enclosure?.url || null;
+
+        // Generate AI captions BEFORE saving, so they go directly into the INSERT
+        let subtitulo = classification.subtitulo;
+        let reelCaption = '';
+        try {
+          const captions = await generateNewsCaptions(item.title, articleContent || item.description, imagemUrl);
+          subtitulo = captions.subtitulo;
+          reelCaption = captions.reel_caption;
+          console.log(`  -> Subtitulo: ${subtitulo}`);
+          console.log(`  -> Reel: ${reelCaption}`);
+        } catch (captionError) {
+          console.error('  -> Erro ao gerar captions:', captionError);
+        }
+
         const noticia = await saveNoticia({
           titulo: item.title,
-          subtitulo: classification.subtitulo,
+          subtitulo,
+          reel_caption: reelCaption,
           conteudo_completo: articleContent,
-          imagem_url: item.enclosure?.url || null,
+          imagem_url: imagemUrl,
           fonte_url: item.link,
           fonte_nome: item.sourceName || 'Unknown',
           categoria: classification.categoria,
@@ -245,17 +274,7 @@ export async function POST(): Promise<NextResponse<SyncResult>> {
           publicado_em: new Date(item.pubDate),
         });
 
-        // Generate reel caption
-        try {
-          const caption = await generateReelCaption(item.title, classification.subtitulo);
-          await pool.query(
-            'UPDATE noticias SET reel_caption = $1 WHERE id = $2',
-            [caption, noticia.id]
-          );
-          console.log(`  -> Caption: ${caption}`);
-        } catch (captionError) {
-          console.error('  -> Erro ao gerar caption:', captionError);
-        }
+        const noticiaId = noticia.id;
 
         // 3.5 Salvar relações com lutadores
         for (const nomeLutador of classification.lutadores_mencionados) {
@@ -263,7 +282,7 @@ export async function POST(): Promise<NextResponse<SyncResult>> {
             (l) => l.nome.toLowerCase() === nomeLutador.toLowerCase()
           );
           if (lutador) {
-            await saveNoticiaEntidade(noticia.id, lutador.id);
+            await saveNoticiaEntidade(noticiaId, lutador.id);
           }
         }
 
@@ -271,14 +290,17 @@ export async function POST(): Promise<NextResponse<SyncResult>> {
         adicionadas++;
 
         // Background scrape: enrich content if RSS had no body
-        if (needsScrape && noticia.id) {
+        // Use captured noticiaId to avoid closure issues in fire-and-forget callback
+        if (needsScrape && noticiaId) {
+          const capturedId = noticiaId;
+          const capturedTitle = item.title;
           scrapeArticleContent(item.link).then(async (scraped) => {
             if (scraped && scraped.length > (articleContent?.length || 0)) {
               await pool.query(
                 'UPDATE noticias SET conteudo_completo = $1 WHERE id = $2',
-                [scraped, noticia.id]
+                [scraped, capturedId]
               ).catch(() => {});
-              console.log(`  -> [BG] Conteúdo enriquecido para ${item.title.substring(0, 40)}...`);
+              console.log(`  -> [BG] Conteúdo enriquecido para ${capturedTitle.substring(0, 40)}...`);
             }
           }).catch(() => {});
         }
@@ -317,6 +339,17 @@ export async function POST(): Promise<NextResponse<SyncResult>> {
       // Emit event for AI Company agents
       emitEvent('news.synced', { adicionadas, processadas, duplicadas, rejeitadas }).catch(() => {});
     }
+
+    // Cleanup: delete news older than 30 days
+    try {
+      await pool.query('SET search_path TO public');
+      const deleted = await pool.query(
+        "DELETE FROM noticias WHERE created_at < NOW() - INTERVAL '30 days' RETURNING id"
+      );
+      if (deleted.rowCount && deleted.rowCount > 0) {
+        console.log(`🧹 Limpeza: ${deleted.rowCount} notícia(s) com +30 dias removida(s)`);
+      }
+    } catch { /* cleanup is non-critical */ }
 
     return NextResponse.json({
       success: true,

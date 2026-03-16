@@ -88,6 +88,7 @@ export interface RSSItem {
 
 export interface ClassificationResult {
   eh_ufc: boolean;
+  confidence: number;
   lutadores_mencionados: string[];
   categoria: CategoriaNoticia;
   subtitulo: string;

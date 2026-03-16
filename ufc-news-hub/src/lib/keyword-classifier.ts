@@ -20,9 +20,46 @@ const UFC_KEYWORDS = [
   'ufc belt',
   'cinturão ufc',
   'campeão ufc',
-  // Removed 'zuffa' - too generic, catches Zuffa Boxing
   'performance of the night',
   'fight of the night',
+  // Shows UFC
+  'the ultimate fighter',
+  'tuf ',
+  ' tuf',
+  'dwcs',
+  'contender series',
+  'ufc embedded',
+  'ufc countdown',
+  'ufc 24/7',
+  'ufc fight pass',
+  // Negocio UFC
+  'ufc contract',
+  'ufc roster',
+  'ufc debut',
+  'ufc release',
+  'ufc cut',
+  'ufc event',
+  'ufc card',
+  'ufc ppv',
+  'ufc main event',
+  // Termos PT-BR
+  'octogono',
+  'lutador do ufc',
+  'lutadora do ufc',
+  'evento do ufc',
+  'card do ufc',
+  'nocaute no ufc',
+  'finalizacao no ufc',
+  'peso galo',
+  'peso mosca',
+  'peso palha',
+  'peso medio',
+  'peso pesado',
+];
+
+// Regex patterns that indicate UFC content (e.g. "UFC 300", "UFC 312")
+const UFC_REGEX_PATTERNS = [
+  /\bufc\s?\d{3,4}\b/i,
 ];
 
 // Keywords that indicate NOT UFC (other organizations)
@@ -45,6 +82,29 @@ const NON_UFC_KEYWORDS = [
   'brave cf',
   'eagle fc',
   'senshi',
+  'cffc',
+  'combate global',
+  'pancrase',
+  'shooto',
+  'deep mma',
+  'road fc',
+  'aca mma',
+  'oktagon mma',
+
+  // Pro wrestling
+  'aew',
+  'all elite wrestling',
+  'aew revolution',
+  'pro wrestling',
+  'wwe',
+  'wrestlemania',
+  'smackdown',
+  'nxt ',
+  ' nxt',
+  'royal rumble',
+  'raw ',
+  'dynamite ',
+  'collision ',
 
   // Boxing (including Zuffa Boxing)
   'boxing',
@@ -64,6 +124,42 @@ const NON_UFC_KEYWORDS = [
   'shakur stevenson',
   'canelo',
   'tyson fury',
+  'usyk',
+  // Additional boxers
+  'terence crawford',
+  'errol spence',
+  'gervonta davis',
+  'tank davis',
+  'anthony joshua',
+  'devin haney',
+  'ryan garcia',
+  'naoya inoue',
+  'saul alvarez',
+  'teofimo lopez',
+  'jermell charlo',
+  'david benavidez',
+  'caleb plant',
+  'vergil ortiz',
+  // Boxing orgs/promotions
+  'dazn',
+  'matchroom',
+  'top rank',
+  'golden boy',
+  'showtime boxing',
+  'premier boxing',
+  'queensberry',
+  'triller',
+
+  // Celebrity / crossover fighting
+  'jake paul',
+  'logan paul',
+  'misfits boxing',
+  'power slap',
+  'slap fighting',
+  'celebrity boxing',
+  'influencer fight',
+  'crossover fight',
+  'youtuber fight',
 
   // BJJ / Grappling competitions
   'ibjjf',
@@ -84,6 +180,7 @@ const NON_UFC_KEYWORDS = [
   'mundial de jiu jitsu',
   'campeonato de jiu jitsu',
   'flograppling',
+  'submission grappling',
 
   // Kickboxing / Muay Thai
   'glory kickboxing',
@@ -99,6 +196,23 @@ const NON_UFC_KEYWORDS = [
   'wrestling championship',
   'olympic wrestling',
   'collegiate wrestling',
+
+  // Non-combat sports that leak in
+  'nfl ',
+  ' nfl',
+  'nba ',
+  ' nba',
+  'mlb ',
+  ' mlb',
+  'premier league',
+  'champions league',
+  'super bowl',
+  'world cup',
+
+  // Off-topic / generic threads
+  'off-topic',
+  'open thread',
+  'daily mania: off',
 
   // UFC non-fight content (marketing, merchandise, etc.)
   'fragrance',
@@ -431,6 +545,10 @@ function textContainsKeyword(text: string, keywords: string[]): boolean {
   );
 }
 
+function textMatchesUFCRegex(text: string): boolean {
+  return UFC_REGEX_PATTERNS.some((pattern) => pattern.test(text));
+}
+
 function textContainsAnyKeyword(text: string, keywords: string[]): string | null {
   const normalizedText = normalizeText(text);
   for (const keyword of keywords) {
@@ -673,6 +791,49 @@ function generateSubtitle(descricao: string): string {
 }
 
 // =============================================================================
+// SUSPICIOUS TITLE PATTERNS
+// If the title contains these words WITHOUT "ufc" also in the title, reject.
+// =============================================================================
+const SUSPICIOUS_TITLE_WORDS = [
+  'boxing', 'boxe', 'boxer', 'pugilista',
+  'wrestler', 'wrestling',
+  'olympic', 'olimpico', 'olimpiada',
+  'nfl', 'nba', 'mlb', 'nhl',
+  'soccer', 'football', 'futebol',
+  'tennis', 'golf', 'cricket',
+  'f1', 'formula 1', 'nascar',
+  'power slap', 'slap fighting',
+];
+
+// =============================================================================
+// CONFIDENCE SCORING
+// =============================================================================
+function calculateConfidence(
+  hasUFCKeyword: boolean,
+  hasUFCInTitle: boolean,
+  hasUFCRegex: boolean,
+  hasFighters: boolean,
+  isNonUFC: boolean,
+  isNonUFCInTitle: boolean,
+  hasSuspiciousTitle: boolean,
+): number {
+  let score = 0.0;
+
+  // Positive signals
+  if (hasUFCKeyword) score += 0.4;
+  if (hasUFCInTitle) score += 0.3;
+  if (hasUFCRegex) score += 0.3;
+  if (hasFighters) score += 0.2;
+
+  // Negative signals
+  if (isNonUFC) score -= 0.3;
+  if (isNonUFCInTitle) score -= 0.4;
+  if (hasSuspiciousTitle) score -= 0.3;
+
+  return Math.max(0.0, Math.min(1.0, score));
+}
+
+// =============================================================================
 // EXPORTED FUNCTIONS
 // =============================================================================
 
@@ -683,52 +844,104 @@ export function classifyNews(
 ): ClassificationResult {
   const fullText = `${titulo} ${descricao}`;
 
-  // 1. Check for non-UFC organizations
+  // 1. Check for non-UFC organizations in full text AND title separately
   const nonUFCKeyword = textContainsAnyKeyword(fullText, NON_UFC_KEYWORDS);
   const isNonUFC = nonUFCKeyword !== null;
+  const nonUFCInTitle = textContainsAnyKeyword(titulo, NON_UFC_KEYWORDS);
+  const isNonUFCInTitle = nonUFCInTitle !== null;
 
-  // 2. Check for UFC keywords
+  // 2. Check for UFC keywords (list + regex patterns like "UFC 312")
   const hasUFCKeyword = textContainsKeyword(fullText, UFC_KEYWORDS);
+  const hasUFCInTitle = textContainsKeyword(titulo, UFC_KEYWORDS);
+  const hasUFCRegex = textMatchesUFCRegex(fullText);
+  const hasUFCRegexInTitle = textMatchesUFCRegex(titulo);
+  const hasAnyUFCSignal = hasUFCKeyword || hasUFCRegex;
+  const hasAnyUFCInTitle = hasUFCInTitle || hasUFCRegexInTitle;
 
   // 3. Find mentioned fighters
   const lutadoresMencionados = findMatchingFighters(fullText, lutadores);
   const hasFighters = lutadoresMencionados.length > 0;
 
-  // 4. Determine if UFC-related
+  // 4. Check suspicious title patterns
+  const normalizedTitle = normalizeText(titulo);
+  const hasSuspiciousTitle = SUSPICIOUS_TITLE_WORDS.some(word =>
+    normalizedTitle.includes(normalizeText(word))
+  ) && !normalizedTitle.includes('ufc');
+
+  // 5. Calculate confidence score
+  const confidence = calculateConfidence(
+    hasAnyUFCSignal, hasAnyUFCInTitle, hasUFCRegex,
+    hasFighters, isNonUFC, isNonUFCInTitle, hasSuspiciousTitle,
+  );
+
+  // 6. Determine if UFC-related
   let ehUFC = false;
 
   // Content that is NEVER UFC news regardless of keywords
   const ALWAYS_REJECT = [
     'zuffa boxing', 'ufc bjj', 'fragrance', 'tattoo care', 'name on canvas',
+    'aew revolution', 'all elite wrestling',
   ];
   const alwaysReject = ALWAYS_REJECT.some(k =>
     normalizeText(fullText).includes(normalizeText(k))
   );
 
+  // Organizations that override fighter mentions when found in the title.
+  const PRIMARY_ORG_KEYWORDS = [
+    'aew', 'wwe', 'pro wrestling', 'all elite wrestling',
+    'wrestlemania', 'smackdown', 'nxt', 'royal rumble',
+    'bellator', 'one championship', 'one fc', 'pfl',
+    'professional fighters league', 'rizin', 'cffc',
+    'combate global', 'pancrase', 'cage warriors',
+    'boxing match', 'boxing fight', 'zuffa boxing',
+    'eddie hearn', 'oscar de la hoya', 'tyson fury', 'usyk',
+    'power slap', 'misfits boxing', 'dazn', 'matchroom',
+    'bkfc', 'bare knuckle', 'karate combat',
+    'jake paul', 'logan paul',
+    'top rank', 'golden boy', 'premier boxing',
+  ];
+  const titleAboutOtherOrg = PRIMARY_ORG_KEYWORDS.some(k =>
+    normalizeText(titulo).includes(normalizeText(k))
+  );
+
   if (alwaysReject) {
     ehUFC = false;
-  } else if (isNonUFC && !hasUFCKeyword && !hasFighters) {
-    // Non-UFC keyword found, no UFC keyword, no UFC fighters → reject
+  } else if (titleAboutOtherOrg && !hasAnyUFCInTitle) {
+    // Title is about another org/sport AND doesn't mention UFC in title
+    ehUFC = false;
+  } else if (hasSuspiciousTitle && !hasAnyUFCInTitle) {
+    // Title contains sports keywords (boxing, wrestling, NFL, etc.) without UFC
+    ehUFC = false;
+  } else if (isNonUFC && !hasAnyUFCSignal && !hasFighters) {
+    // Non-UFC keyword found, no UFC keyword, no UFC fighters
     ehUFC = false;
   } else if (isNonUFC && !hasFighters) {
-    // Non-UFC keyword found and no UFC fighters mentioned → likely not UFC
-    // Even if "UFC" appears (e.g. "PFL rankings for UFC, Bellator and beyond")
+    // Non-UFC keyword found and no UFC fighters mentioned
     ehUFC = false;
-  } else if (hasUFCKeyword || hasFighters) {
-    // Has UFC keyword OR mentions UFC fighters → accept
-    // This keeps articles like "Dana White mocks boxing promoters" (has UFC keyword + Dana White)
-    // and "Shakur wants to fight UFC champion Topuria" (mentions UFC fighter)
+  } else if (isNonUFCInTitle && hasFighters && !hasAnyUFCInTitle) {
+    // Non-UFC org in title + fighters but no UFC keyword in title
+    ehUFC = false;
+  } else if (isNonUFC && hasFighters && !hasAnyUFCSignal) {
+    // FIX: non-UFC keyword + fighters but NO UFC keyword anywhere
+    // Fighter mention alone is not enough when article is about another org
+    ehUFC = false;
+  } else if (hasAnyUFCSignal) {
+    // Has explicit UFC keyword or regex match
+    ehUFC = true;
+  } else if (hasFighters && !isNonUFC && !hasSuspiciousTitle) {
+    // Mentions UFC fighters AND no non-UFC signals
     ehUFC = true;
   }
 
-  // 5. Determine category (passing fighter count for context)
+  // 7. Determine category
   const categoria = determineCategory(fullText, lutadoresMencionados.length);
 
-  // 6. Generate subtitle
+  // 8. Generate subtitle
   const subtitulo = generateSubtitle(descricao);
 
   return {
     eh_ufc: ehUFC,
+    confidence,
     lutadores_mencionados: lutadoresMencionados,
     categoria,
     subtitulo,

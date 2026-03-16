@@ -491,7 +491,7 @@ async function fetchFighterImage(nome: string): Promise<string | null> {
           $('.hero-profile-wrap img').attr('src');
 
         if (imgSrc && imgSrc.startsWith('http')) {
-          return imgSrc;
+          return imgSrc.replace('https://ufc.com/', 'https://www.ufc.com/');
         }
 
         return null;

@@ -97,7 +97,7 @@ function HeroSkeleton() {
         <div className="flex flex-col items-center gap-8 md:flex-row md:justify-center md:gap-16">
           {/* Fighter 1 skeleton */}
           <div className="flex flex-col items-center gap-3">
-            <div className="h-[120px] w-[120px] md:h-[200px] md:w-[200px] rounded-full bg-dark-border/30 animate-shimmer" style={{ backgroundSize: '200% 100%', backgroundImage: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.04) 50%, transparent 100%)' }} />
+            <div className="h-[120px] w-[120px] md:h-[160px] md:w-[160px] rounded-full bg-dark-border/30 animate-shimmer" style={{ backgroundSize: '200% 100%', backgroundImage: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.04) 50%, transparent 100%)' }} />
             <div className="h-6 w-32 rounded bg-dark-border/30 animate-pulse" />
             <div className="h-4 w-20 rounded bg-dark-border/20 animate-pulse" />
           </div>
@@ -105,7 +105,7 @@ function HeroSkeleton() {
           <div className="h-12 w-16 rounded bg-dark-border/20 animate-pulse" />
           {/* Fighter 2 skeleton */}
           <div className="flex flex-col items-center gap-3">
-            <div className="h-[120px] w-[120px] md:h-[200px] md:w-[200px] rounded-full bg-dark-border/30 animate-shimmer" style={{ backgroundSize: '200% 100%', backgroundImage: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.04) 50%, transparent 100%)' }} />
+            <div className="h-[120px] w-[120px] md:h-[160px] md:w-[160px] rounded-full bg-dark-border/30 animate-shimmer" style={{ backgroundSize: '200% 100%', backgroundImage: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.04) 50%, transparent 100%)' }} />
             <div className="h-6 w-32 rounded bg-dark-border/30 animate-pulse" />
             <div className="h-4 w-20 rounded bg-dark-border/20 animate-pulse" />
           </div>
@@ -151,7 +151,7 @@ function FighterPhoto({
     >
       {/* Photo circle */}
       <div
-        className="relative h-[120px] w-[120px] md:h-[200px] md:w-[200px] rounded-full overflow-hidden border-2 border-ufc-gold transition-transform duration-300 hover:scale-105"
+        className="relative h-[120px] w-[120px] md:h-[160px] md:w-[160px] rounded-full overflow-hidden border-2 border-ufc-gold transition-transform duration-300 hover:scale-105"
         style={{ boxShadow: '0 0 30px rgba(210, 10, 10, 0.3)' }}
       >
         {imagemUrl ? (
@@ -160,7 +160,7 @@ function FighterPhoto({
             alt={nome}
             fill
             className="object-cover object-top"
-            sizes="(max-width: 768px) 120px, 200px"
+            sizes="160px"
           />
         ) : (
           <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-[#3a1c1c] via-[#2a2a2a] to-[#1a1a2e]">

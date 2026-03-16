@@ -173,14 +173,15 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     let eventoFinalizadoData: string | null = null;
     const membroEventoPontos: Record<string, { pontos: number; acertos: number; total_lutas: number }> = {};
 
+    // So mostra ranking se pelo menos 2 membros da liga participaram
     const ultimoEventoFinalizado = await queryOne<{ id: string; nome: string; data_evento: string }>(
       `SELECT e.id, e.nome, e.data_evento FROM eventos e
        WHERE e.status = 'finalizado'
-       AND EXISTS (
-         SELECT 1 FROM evento_pontuacao ep
+       AND (
+         SELECT COUNT(DISTINCT ep.usuario_id) FROM evento_pontuacao ep
          WHERE ep.evento_id = e.id
          AND ep.usuario_id = ANY($1::uuid[])
-       )
+       ) >= 2
        ORDER BY e.data_evento DESC LIMIT 1`,
       [membros.map(m => m.usuario_id)]
     );

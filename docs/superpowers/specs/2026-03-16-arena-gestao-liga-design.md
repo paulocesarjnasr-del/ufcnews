@@ -20,11 +20,24 @@
 4. **Transaction pra operacoes compostas** — expulsar = DELETE + UPDATE total_membros atomicamente.
 5. **Zero migrations** — todas as colunas necessarias ja existem no banco.
 
-## 1. Schema — Nenhuma Mudanca
+## 1. Schema — Mudanca minima (tipos apenas)
 
-Colunas existentes confirmadas no banco:
-- `ligas`: nome (varchar), descricao (varchar nullable), tipo (enum), max_membros (int), mostrar_picks_antes (bool), apenas_main_card (bool), ranking_tipo (varchar), chat_ativo (bool), revelar_picks_ao_vivo (bool), total_membros (int)
+Colunas existentes confirmadas no banco (incluindo `updated_at` verificado):
+- `ligas`: nome (varchar), descricao (varchar nullable), tipo (enum), max_membros (int), mostrar_picks_antes (bool), apenas_main_card (bool), ranking_tipo (varchar), chat_ativo (bool), revelar_picks_ao_vivo (bool), total_membros (int), updated_at (timestamptz)
 - `liga_membros`: is_admin (bool), usuario_id (uuid), liga_id (uuid)
+
+**Adicionar ao tipo `Liga`** em `src/types/arena.ts`:
+```typescript
+  ranking_tipo: string;        // 'pontos' | 'percentual'
+  chat_ativo: boolean;
+  revelar_picks_ao_vivo: boolean;
+  updated_at: string;
+```
+
+**Fix bug existente no GET**: a logica `pode_entrar` usa `total_membros < max_membros` que falha quando `max_membros = 0` (ilimitado). Corrigir para:
+```typescript
+pode_entrar: !isMembro && (liga.max_membros === 0 || liga.total_membros < liga.max_membros)
+```
 
 ## 2. API — Expulsar Membro
 
@@ -104,10 +117,9 @@ interface GerenciarLigaModalProps {
 **3 abas:** Banner | Configs | Membros
 
 **Aba Banner:**
-- Renderiza `BannerUpload` inline (nao como modal separado, passa `isOpen={true}` sempre quando aba ativa)
-- Na verdade, como BannerUpload eh um modal, vamos extrair o conteudo visual do BannerUpload pra um componente `BannerEditor` que pode ser usado inline. Ou mais simples: renderiza o conteudo do upload direto sem o wrapper de modal.
-
-Abordagem escolhida: Passa o `BannerUpload` com `isOpen` controlado pela aba ativa. O modal de overlay do BannerUpload sera suprimido porque ja estamos dentro de um modal. Alternativa mais limpa: fazer o BannerUpload aceitar prop `embedded={true}` que remove o overlay/backdrop.
+- Renderiza `BannerUpload` com `embedded={true}` e `isOpen={true}`
+- Em modo embedded: sem backdrop, sem padding extra, conteudo renderiza inline
+- `onClose` em modo embedded eh no-op (passa `() => {}`) pois nao ha modal pra fechar
 
 **Aba Configs:**
 - Formulario com campos editaveis
@@ -170,10 +182,13 @@ interface LigaHeaderProps {
 
 Mudancas:
 - Adicionar estado `showGerenciarModal`
-- Adicionar handler `handleLigaUpdate(updatedFields)` — merge com state `liga`
+- Reutilizar `handleBannerUpdate` existente — passar como `onBannerUpdate` pro `GerenciarLigaModal`
+- Adicionar handler `handleLigaUpdate(updatedFields)` — merge com state `liga` via `setLiga(prev => ({ ...prev, ...updatedFields }))`
 - Adicionar handler `handleMembroExpulso(userId)` — remove do state `membros` + decrementa `liga.total_membros`
-- Trocar `onBannerUpdate` por `onGerenciarClick={() => setShowGerenciarModal(true)}`
+- Trocar `onBannerUpdate` no `LigaHeader` por `onGerenciarClick={() => setShowGerenciarModal(true)}`
 - Renderizar `GerenciarLigaModal` com todas as props
+
+**Nota:** `MembroLiga.id` eh o `usuario_id` (UUID do usuario), NAO o ID da row em `liga_membros`. Ao passar `userId` pro `ConfirmarExpulsaoModal`, usar `membro.id` do array `MembroLiga[]`.
 
 ## 8. Modificacao — `BannerUpload`
 

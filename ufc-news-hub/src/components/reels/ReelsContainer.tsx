@@ -98,9 +98,10 @@ export function ReelsContainer() {
     return <ReelEmptyState />;
   }
 
-  // Mobile: vertical, Desktop: horizontal
+  // Mobile: translateY with vh units (percentage would be relative to total height of all slides)
+  // Desktop: translateX with percentage (works because container width = 1 slide width)
   const transformStyle = isMobile
-    ? { transform: `translateY(-${currentIndex * 100}%)`, transitionDuration: '0.4s' }
+    ? { transform: `translateY(-${currentIndex * 85}vh)`, transitionDuration: '0.4s' }
     : { transform: `translateX(-${currentIndex * 100}%)`, transitionDuration: '0.4s' };
 
   return (
@@ -108,7 +109,7 @@ export function ReelsContainer() {
       {/* Slides container */}
       <div
         ref={containerRef}
-        className="relative overflow-hidden rounded-2xl"
+        className={`relative overflow-hidden rounded-2xl ${isMobile ? 'h-[85vh]' : ''}`}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}

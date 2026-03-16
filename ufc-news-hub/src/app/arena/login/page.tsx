@@ -24,12 +24,12 @@ export default function ArenaLoginPage() {
         </div>
       </OctagonPortalLayout>
     }>
-      <ArenaLoginContent />
+      <LoginContent />
     </Suspense>
   );
 }
 
-function ArenaLoginContent() {
+function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { login, isAuthenticated, isLoading: authLoading } = useArenaAuth();

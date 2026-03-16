@@ -254,7 +254,7 @@ export default function HeroCinematico() {
   const { data, error, isLoading } = useSWR<EventoProximoAPI>(
     '/api/eventos/proximo',
     fetcher,
-    { revalidateOnFocus: false, dedupingInterval: 60000 }
+    { revalidateOnFocus: true, revalidateOnMount: true, dedupingInterval: 30000 }
   );
   const [mounted, setMounted] = useState(false);
 

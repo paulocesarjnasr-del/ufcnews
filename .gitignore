@@ -5,3 +5,4 @@ node_modules
 # Claude Code personal files
 .claude/CLAUDE.local.md
 .claude/settings.local.json
+.env.production

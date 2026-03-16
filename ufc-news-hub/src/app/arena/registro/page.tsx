@@ -16,12 +16,12 @@ export default function ArenaRegistroPage() {
         </div>
       </OctagonPortalLayout>
     }>
-      <ArenaRegistroContent />
+      <RegistroContent />
     </Suspense>
   );
 }
 
-function ArenaRegistroContent() {
+function RegistroContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { registro, isAuthenticated, isLoading: authLoading } = useArenaAuth();

@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Inter, Bebas_Neue } from 'next/font/google';
 import './globals.css';
 
@@ -16,6 +16,13 @@ const bebasNeue = Bebas_Neue({
   display: 'swap',
 });
 
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  themeColor: '#D20A0A',
+};
+
 export const metadata: Metadata = {
   title: 'UFC News Hub - Noticias, Previsoes e Rankings do UFC',
   description:
@@ -23,8 +30,6 @@ export const metadata: Metadata = {
   keywords: ['UFC', 'MMA', 'noticias', 'lutadores', 'lutas', 'previsoes', 'ranking', 'Dana White'],
   authors: [{ name: 'UFC News Hub' }],
   manifest: '/manifest.json',
-  themeColor: '#D20A0A',
-  viewport: 'width=device-width, initial-scale=1, maximum-scale=1',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',

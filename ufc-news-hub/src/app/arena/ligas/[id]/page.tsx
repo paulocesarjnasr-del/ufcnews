@@ -2,13 +2,21 @@
 
 import { useState, useEffect, useCallback, use } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { Copy, Crown } from 'lucide-react';
+import { Crown } from 'lucide-react';
 
 import { useArenaAuth } from '@/hooks/useArenaAuth';
 import { LigaChat } from '@/components/arena/LigaChat';
-import { NIVEL_CONFIG, type Liga, type LigaMembro } from '@/types/arena';
+import { LigaHeader } from '@/components/arena/LigaHeader';
+import { PicksPressure } from '@/components/arena/PicksPressure';
+import { MembroCard } from '@/components/arena/MembroCard';
+import { SairLigaModal } from '@/components/arena/SairLigaModal';
+import { GerenciarLigaModal } from '@/components/arena/GerenciarLigaModal';
+import type { Liga, MembroLiga, EventoAtualLiga } from '@/types/arena';
+
+// ═══════════════════════════════════════════════════════════════
+// Types
+// ═══════════════════════════════════════════════════════════════
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -29,32 +37,37 @@ interface LigaDetalhes extends Liga {
   } | null;
 }
 
-type MembroComUsuario = LigaMembro & {
-  usuario_username: string;
-  usuario_display_name: string | null;
-  usuario_avatar: string | null;
-  usuario_nivel: string;
-};
-
 interface LigaResponse {
   liga: LigaDetalhes;
-  membros: MembroComUsuario[];
+  membros: MembroLiga[];
   is_membro: boolean;
   minha_posicao: number | null;
   pode_entrar: boolean;
+  evento_atual: EventoAtualLiga | null;
+  ultimo_evento: { nome: string; data: string } | null;
 }
+
+// ═══════════════════════════════════════════════════════════════
+// Page
+// ═══════════════════════════════════════════════════════════════
 
 export default function LigaPage({ params }: PageProps) {
   const { id } = use(params);
   const router = useRouter();
   const { usuario, isAuthenticated } = useArenaAuth();
+
   const [liga, setLiga] = useState<LigaDetalhes | null>(null);
-  const [membros, setMembros] = useState<MembroComUsuario[]>([]);
+  const [membros, setMembros] = useState<MembroLiga[]>([]);
   const [isMembro, setIsMembro] = useState(false);
+  const [eventoAtual, setEventoAtual] = useState<EventoAtualLiga | null>(null);
+  const [ultimoEvento, setUltimoEvento] = useState<{ nome: string; data: string } | null>(null);
+  const [showSairModal, setShowSairModal] = useState(false);
+  const [showGerenciarModal, setShowGerenciarModal] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isJoining, setIsJoining] = useState(false);
-  const [copied, setCopied] = useState(false);
   const [error, setError] = useState('');
+
+  // ── Fetch ──
 
   const fetchLiga = useCallback(async () => {
     try {
@@ -64,6 +77,8 @@ export default function LigaPage({ params }: PageProps) {
         setLiga(data.liga);
         setMembros(data.membros || []);
         setIsMembro(data.is_membro || false);
+        setEventoAtual(data.evento_atual ?? null);
+        setUltimoEvento(data.ultimo_evento ?? null);
       } else if (res.status === 404) {
         router.push('/arena/ligas');
       }
@@ -76,7 +91,12 @@ export default function LigaPage({ params }: PageProps) {
 
   useEffect(() => {
     fetchLiga();
+    // Refresh member status every 30s
+    const interval = setInterval(fetchLiga, 30_000);
+    return () => clearInterval(interval);
   }, [fetchLiga]);
+
+  // ── Actions ──
 
   async function handleEntrar() {
     if (!isAuthenticated) {
@@ -94,7 +114,7 @@ export default function LigaPage({ params }: PageProps) {
         body: JSON.stringify({ liga_id: id }),
       });
 
-      const data = await res.json();
+      const data = await res.json() as { error?: string };
 
       if (res.ok) {
         fetchLiga();
@@ -108,13 +128,35 @@ export default function LigaPage({ params }: PageProps) {
     }
   }
 
-  function copyCodigoConvite() {
-    if (liga?.codigo_convite) {
-      navigator.clipboard.writeText(liga.codigo_convite);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    }
+  function handleBannerUpdate(url: string | null) {
+    setLiga((prev) => prev ? { ...prev, imagem_url: url } : prev);
   }
+
+  function handleLigaUpdate(fields: Partial<Liga>) {
+    setLiga((prev) => prev ? { ...prev, ...fields } as LigaDetalhes : prev);
+  }
+
+  function handleMembroExpulso(userId: string) {
+    setMembros((prev) => prev.filter((m) => m.id !== userId));
+    setLiga((prev) => prev ? { ...prev, total_membros: Math.max((prev.total_membros || 1) - 1, 0) } : prev);
+  }
+
+  // ── Derived state ──
+
+  const isAdmin = membros.some((m) => m.id === usuario?.id && m.is_admin);
+
+  // Sort by event points if available, otherwise by season points
+  const hasEventoData = membros.some(m => m.evento_pontos !== undefined);
+  const sortedMembros = [...membros].sort((a, b) => {
+    if (hasEventoData) {
+      return (b.evento_pontos ?? -1) - (a.evento_pontos ?? -1);
+    }
+    return (a.posicao_atual || 999) - (b.posicao_atual || 999);
+  });
+
+  const showPicksDetail = liga?.mostrar_picks_antes ?? false;
+
+  // ── Loading / Not found ──
 
   if (isLoading) {
     return (
@@ -135,65 +177,59 @@ export default function LigaPage({ params }: PageProps) {
     );
   }
 
-  const sortedMembros = [...membros].sort(
-    (a, b) => (a.posicao_atual || 999) - (b.posicao_atual || 999)
-  );
+  // ── Render ──
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-2xl">
-      {/* Header */}
-      <div className="neu-card rounded-xl p-6 mb-6">
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex-1">
-            <h1 className="font-display text-3xl uppercase text-white mb-2">
-              {liga.nome}
-            </h1>
-            <p className="text-sm text-dark-textMuted">
-              {liga.total_membros} membros
-            </p>
-          </div>
 
-          {/* Invite code / Actions */}
-          <div className="flex flex-col items-end gap-2">
-            {isMembro && liga.codigo_convite && (
-              <button
-                onClick={copyCodigoConvite}
-                className="neu-button flex items-center gap-2 rounded-lg px-4 py-2 text-sm transition-colors"
-              >
-                <Copy className="w-4 h-4 text-dark-textMuted" />
-                <code className="font-mono text-ufc-gold tracking-wider">
-                  {liga.codigo_convite}
-                </code>
-                {copied && (
-                  <span className="text-xs text-green-400">Copiado!</span>
-                )}
-              </button>
-            )}
-
-            {!isMembro && liga.tipo === 'publica' && (
-              <button
-                onClick={handleEntrar}
-                disabled={isJoining}
-                className="neu-button rounded-lg bg-ufc-red px-6 py-2 text-sm font-medium text-white hover:bg-ufc-redLight transition-colors disabled:opacity-50"
-              >
-                {isJoining ? 'Entrando...' : 'Entrar na Liga'}
-              </button>
-            )}
-          </div>
-        </div>
-
-        {error && (
-          <p className="mt-3 text-sm text-red-400">{error}</p>
-        )}
+      {/* ── Liga Header ── */}
+      <div className="mb-6">
+        <LigaHeader
+          liga={liga}
+          isAdmin={isAdmin}
+          isMembro={isMembro}
+          onSairClick={() => setShowSairModal(true)}
+          onGerenciarClick={() => setShowGerenciarModal(true)}
+        />
       </div>
 
-      {/* Ranking */}
+      {/* ── Join button (non-members, public leagues) ── */}
+      {!isMembro && liga.tipo === 'publica' && (
+        <div className="neu-card rounded-xl p-4 mb-6">
+          {error && (
+            <p className="text-sm text-red-400 mb-3">{error}</p>
+          )}
+          <button
+            onClick={handleEntrar}
+            disabled={isJoining}
+            className="neu-button w-full rounded-lg bg-ufc-red px-6 py-2.5 text-sm font-medium text-white hover:bg-ufc-redLight transition-colors disabled:opacity-50"
+          >
+            {isJoining ? 'Entrando...' : 'Entrar na Liga'}
+          </button>
+        </div>
+      )}
+
+      {/* ── Picks Pressure (members only, when there is an active event) ── */}
+      {eventoAtual && isMembro && (
+        <PicksPressure
+          eventoAtual={eventoAtual}
+          membros={membros}
+          mostrarNomesPendentes={true}
+        />
+      )}
+
+      {/* ── Member list ── */}
       <div className="neu-card rounded-xl overflow-hidden mb-6">
         <div className="px-5 py-4 border-b border-dark-border flex items-center gap-2">
           <Crown className="w-5 h-5 text-ufc-gold" />
           <h2 className="font-display text-lg uppercase text-white">
-            Ranking
+            {ultimoEvento ? 'Ranking' : 'Membros'}
           </h2>
+          {ultimoEvento && (
+            <span className="text-xs text-dark-textMuted ml-auto">
+              {ultimoEvento.nome}
+            </span>
+          )}
         </div>
 
         {sortedMembros.length === 0 ? (
@@ -201,83 +237,51 @@ export default function LigaPage({ params }: PageProps) {
             Nenhum membro ainda
           </div>
         ) : (
-          <div className="divide-y divide-dark-border/50">
-            {sortedMembros.map((membro, index) => {
-              const nivelConfig = NIVEL_CONFIG[membro.usuario_nivel as keyof typeof NIVEL_CONFIG];
-              const isCurrentUser = membro.usuario_id === usuario?.id;
-
-              // Medal for top 3
-              let medal: string | null = null;
-              if (index === 0) medal = 'text-yellow-400';
-              else if (index === 1) medal = 'text-gray-300';
-              else if (index === 2) medal = 'text-amber-600';
-
-              return (
-                <div
-                  key={membro.id}
-                  className={`flex items-center gap-4 px-5 py-3 ${
-                    isCurrentUser ? 'bg-ufc-red/5' : ''
-                  }`}
-                >
-                  {/* Position */}
-                  <div className="w-8 text-center font-display text-lg">
-                    {medal ? (
-                      <Crown className={`w-5 h-5 mx-auto ${medal}`} />
-                    ) : (
-                      <span className="text-dark-textMuted">{index + 1}</span>
-                    )}
-                  </div>
-
-                  {/* Avatar */}
-                  <div className="w-9 h-9 rounded-full overflow-hidden bg-dark-border flex items-center justify-center flex-shrink-0">
-                    {membro.usuario_avatar ? (
-                      <Image
-                        src={membro.usuario_avatar}
-                        alt={membro.usuario_username}
-                        width={36}
-                        height={36}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <span className="text-dark-textMuted text-sm font-bold">
-                        {membro.usuario_username.charAt(0).toUpperCase()}
-                      </span>
-                    )}
-                  </div>
-
-                  {/* Name */}
-                  <div className="flex-1 min-w-0">
-                    <span className={`font-medium truncate block ${
-                      isCurrentUser ? 'text-ufc-red' : 'text-white'
-                    }`}>
-                      {membro.usuario_display_name || membro.usuario_username}
-                    </span>
-                    <span className="text-xs text-dark-textMuted flex items-center gap-1">
-                      {nivelConfig?.icone} {membro.usuario_nivel}
-                    </span>
-                  </div>
-
-                  {/* Points */}
-                  <div className="text-right">
-                    <p className="font-bold text-ufc-gold">{membro.pontos_temporada || 0}</p>
-                    <p className="text-xs text-dark-textMuted">pts</p>
-                  </div>
-                </div>
-              );
-            })}
+          <div className="p-3 space-y-2">
+            {sortedMembros.map((membro, index) => (
+              <MembroCard
+                key={membro.id}
+                membro={membro}
+                isCurrentUser={membro.id === usuario?.id}
+                showPicksDetail={showPicksDetail}
+                posicao={index + 1}
+              />
+            ))}
           </div>
         )}
       </div>
 
-      {/* Chat */}
-      <LigaChat ligaId={id} />
+      {/* ── Evento Ranking — desativado ate ter ranking ao vivo ── */}
 
-      {/* Back link */}
+      {/* ── Chat (members only) ── */}
+      {isMembro && <LigaChat ligaId={id} />}
+
+      {/* ── Back link ── */}
       <div className="mt-6 text-center">
         <Link href="/arena/ligas" className="text-sm text-dark-textMuted hover:text-ufc-red">
           &larr; Voltar para Ligas
         </Link>
       </div>
+
+      {/* ── Sair Modal ── */}
+      <SairLigaModal
+        ligaId={id}
+        ligaNome={liga.nome}
+        isOpen={showSairModal}
+        onClose={() => setShowSairModal(false)}
+      />
+
+      {isAdmin && (
+        <GerenciarLigaModal
+          liga={liga}
+          membros={membros}
+          isOpen={showGerenciarModal}
+          onClose={() => setShowGerenciarModal(false)}
+          onBannerUpdate={handleBannerUpdate}
+          onLigaUpdate={handleLigaUpdate}
+          onMembroExpulso={handleMembroExpulso}
+        />
+      )}
     </div>
   );
 }

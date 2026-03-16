@@ -3,6 +3,10 @@
     {
       "path": "/api/cron",
       "schedule": "0 12 * * *"
+    },
+    {
+      "path": "/api/arena/cron/scoring",
+      "schedule": "0 22 * * *"
     }
   ]
 }

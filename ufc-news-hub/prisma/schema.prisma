@@ -531,6 +531,7 @@ model usuarios_arena {
   created_at                                   DateTime?          @default(now()) @db.Timestamptz(6)
   updated_at                                   DateTime?          @default(now()) @db.Timestamptz(6)
   last_login_at                                DateTime?          @db.Timestamptz(6)
+  ultimo_acesso                                DateTime?          @default(now()) @db.Timestamptz(6)
   amizades_amizades_amigo_idTousuarios_arena   amizades[]         @relation("amizades_amigo_idTousuarios_arena")
   amizades_amizades_usuario_idTousuarios_arena amizades[]         @relation("amizades_usuario_idTousuarios_arena")
   atividades                                   atividades[]

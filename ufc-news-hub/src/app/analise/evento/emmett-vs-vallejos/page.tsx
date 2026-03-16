@@ -1,6 +1,8 @@
 import { EventAnalysisView, type EventAnalysisData } from '@/components/analise/EventAnalysisView';
 import { enrichEventWithPhotos } from '@/lib/enrich-event-photos';
 
+export const dynamic = 'force-dynamic';
+
 const eventData: EventAnalysisData = {
   evento_nome: 'UFC Fight Night: Emmett vs Vallejos',
   evento_data: '14 de Marco, 2026',

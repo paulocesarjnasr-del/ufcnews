@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import Link from 'next/link';
+import { ChevronLeft, ChevronRight, Home, BarChart3, Target, Calendar } from 'lucide-react';
 import { useReels } from '@/hooks/useReels';
 import { ReelSlide } from './ReelSlide';
 import { ReelProgress } from './ReelProgress';
@@ -86,6 +87,20 @@ export function ReelsContainer() {
     <>
       {/* ══════ MOBILE: vertical scroll snap (md:hidden) ══════ */}
       <div className="relative md:hidden">
+        {/* Mobile nav overlay */}
+        <div className="absolute top-0 left-0 right-0 z-30 flex items-center justify-between px-4 pt-[env(safe-area-inset-top,8px)] pb-2 bg-gradient-to-b from-black/70 to-transparent">
+          <Link href="/" className="flex items-center gap-1">
+            <span className="font-display text-lg text-ufc-red">UFC</span>
+            <span className="font-display text-lg text-white">NEWS</span>
+          </Link>
+          <div className="flex items-center gap-4">
+            <Link href="/" className="text-white/80 active:text-ufc-red"><Home className="h-5 w-5" /></Link>
+            <Link href="/analises" className="text-white/80 active:text-ufc-red"><BarChart3 className="h-5 w-5" /></Link>
+            <Link href="/arena" className="text-white/80 active:text-ufc-red"><Target className="h-5 w-5" /></Link>
+            <Link href="/calendario" className="text-white/80 active:text-ufc-red"><Calendar className="h-5 w-5" /></Link>
+          </div>
+        </div>
+
         <div
           ref={mobileRef}
           className="scrollbar-hide"

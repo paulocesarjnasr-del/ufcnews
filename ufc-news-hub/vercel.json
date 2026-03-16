@@ -2,11 +2,7 @@
   "crons": [
     {
       "path": "/api/cron",
-      "schedule": "*/5 * * * *"
-    },
-    {
-      "path": "/api/arena/cron/scoring",
-      "schedule": "*/5 * * * *"
+      "schedule": "0 12 * * *"
     }
   ]
 }

@@ -6,7 +6,7 @@ interface ReelEndScreenProps {
 
 export function ReelEndScreen({ onRestart }: ReelEndScreenProps) {
   return (
-    <div className="flex w-full flex-shrink-0 flex-col items-center justify-center gap-6 rounded-2xl bg-dark-card h-[85vh] md:h-[70vh]">
+    <div className="flex w-full flex-shrink-0 flex-col items-center justify-center gap-6 rounded-2xl bg-dark-card h-[85vh] snap-start md:h-[70vh]">
       {/* Animated Octagon */}
       <div className="relative">
         <svg

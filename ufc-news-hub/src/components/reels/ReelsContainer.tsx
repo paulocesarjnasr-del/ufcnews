@@ -27,65 +27,80 @@ export function ReelsContainer() {
   const { noticias, isLoading, toggleLike } = useReels();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [commentsNoticiaId, setCommentsNoticiaId] = useState<string | null>(null);
-  const touchStart = useRef(0);
-  const touchDelta = useRef(0);
+  const touchStartX = useRef(0);
+  const touchDeltaX = useRef(0);
   const containerRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
 
   const totalSlides = noticias.length;
 
+  // Scroll to a specific slide
   const goTo = useCallback((index: number) => {
-    setCurrentIndex(Math.max(0, Math.min(index, totalSlides)));
-  }, [totalSlides]);
+    const clamped = Math.max(0, Math.min(index, totalSlides));
+    if (isMobile && containerRef.current) {
+      // Mobile: scroll to position (snap will handle alignment)
+      containerRef.current.scrollTo({
+        top: clamped * containerRef.current.clientHeight,
+        behavior: 'smooth',
+      });
+    } else {
+      setCurrentIndex(clamped);
+    }
+  }, [totalSlides, isMobile]);
 
   const goNext = useCallback(() => {
-    if (currentIndex < totalSlides) {
-      setCurrentIndex(prev => prev + 1);
-    }
-  }, [currentIndex, totalSlides]);
+    if (currentIndex < totalSlides) goTo(currentIndex + 1);
+  }, [currentIndex, totalSlides, goTo]);
 
   const goPrev = useCallback(() => {
-    if (currentIndex > 0) {
-      setCurrentIndex(prev => prev - 1);
-    }
-  }, [currentIndex]);
+    if (currentIndex > 0) goTo(currentIndex - 1);
+  }, [currentIndex, goTo]);
+
+  // Track current slide from native scroll on mobile
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!isMobile || !el) return;
+
+    const handleScroll = () => {
+      const slideHeight = el.clientHeight;
+      if (slideHeight === 0) return;
+      const newIndex = Math.round(el.scrollTop / slideHeight);
+      setCurrentIndex(newIndex);
+    };
+
+    el.addEventListener('scroll', handleScroll, { passive: true });
+    return () => el.removeEventListener('scroll', handleScroll);
+  }, [isMobile]);
 
   // Keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (commentsNoticiaId) return;
-      if (isMobile) {
-        if (e.key === 'ArrowDown') goNext();
-        if (e.key === 'ArrowUp') goPrev();
-      } else {
-        if (e.key === 'ArrowRight') goNext();
-        if (e.key === 'ArrowLeft') goPrev();
-      }
+      if (e.key === 'ArrowDown' || e.key === 'ArrowRight') goNext();
+      if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') goPrev();
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [goNext, goPrev, commentsNoticiaId, isMobile]);
+  }, [goNext, goPrev, commentsNoticiaId]);
 
-  // Touch handlers — Y-axis on mobile, X-axis on desktop
+  // Desktop touch handlers (horizontal swipe)
   const handleTouchStart = (e: React.TouchEvent) => {
-    const touch = e.touches[0];
-    touchStart.current = isMobile ? touch.clientY : touch.clientX;
-    touchDelta.current = 0;
+    if (isMobile) return; // mobile uses native scroll
+    touchStartX.current = e.touches[0].clientX;
+    touchDeltaX.current = 0;
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
-    const touch = e.touches[0];
-    touchDelta.current = (isMobile ? touch.clientY : touch.clientX) - touchStart.current;
+    if (isMobile) return;
+    touchDeltaX.current = e.touches[0].clientX - touchStartX.current;
   };
 
   const handleTouchEnd = () => {
+    if (isMobile) return;
     const threshold = 50;
-    if (touchDelta.current < -threshold) {
-      goNext();
-    } else if (touchDelta.current > threshold) {
-      goPrev();
-    }
-    touchDelta.current = 0;
+    if (touchDeltaX.current < -threshold) goNext();
+    else if (touchDeltaX.current > threshold) goPrev();
+    touchDeltaX.current = 0;
   };
 
   if (isLoading) {
@@ -98,35 +113,33 @@ export function ReelsContainer() {
     return <ReelEmptyState />;
   }
 
-  // CSS custom properties for the transform — avoids needing JS for layout
-  // Mobile: translateY with vh, Desktop: translateX with %
-  // On first render (isMobile=null, index=0) both are translate(0) so no visual issue
-  const mobileTransform = `translateY(-${currentIndex * 85}vh)`;
-  const desktopTransform = `translateX(-${currentIndex * 100}%)`;
-
   return (
     <div className="relative">
-      {/* Slides container — CSS handles height: 85vh mobile, auto desktop */}
+      {/*
+        Mobile: native vertical scroll with CSS snap (no JS transform needed)
+        Desktop: overflow hidden with JS translateX carousel
+      */}
       <div
         ref={containerRef}
-        className="relative overflow-hidden rounded-2xl h-[85vh] md:h-auto"
+        className={[
+          'rounded-2xl',
+          // Mobile: vertical snap scroll
+          'h-[85vh] overflow-y-auto snap-y snap-mandatory scrollbar-hide',
+          // Desktop: horizontal carousel
+          'md:h-auto md:overflow-y-visible md:overflow-x-hidden md:snap-none',
+        ].join(' ')}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
       >
-        {/*
-          Layout is pure CSS: flex-col on mobile, flex-row on desktop.
-          Transform uses CSS custom properties set per breakpoint.
-        */}
         <div
-          className="flex flex-col md:flex-row transition-transform ease-out"
+          className="md:flex md:flex-row md:transition-transform md:ease-out"
           style={{
-            ['--mobile-transform' as string]: mobileTransform,
-            ['--desktop-transform' as string]: desktopTransform,
-            transform: isMobile === null
-              ? undefined // first render: no transform (index 0 anyway)
-              : isMobile ? mobileTransform : desktopTransform,
-            transitionDuration: '0.4s',
+            // Only apply transform on desktop
+            transform: isMobile === false
+              ? `translateX(-${currentIndex * 100}%)`
+              : undefined,
+            transitionDuration: isMobile === false ? '0.4s' : undefined,
           }}
         >
           {noticias.map((noticia, index) => (
@@ -139,7 +152,7 @@ export function ReelsContainer() {
             />
           ))}
 
-          <ReelEndScreen onRestart={() => setCurrentIndex(0)} />
+          <ReelEndScreen onRestart={() => goTo(0)} />
         </div>
       </div>
 
@@ -163,7 +176,7 @@ export function ReelsContainer() {
         </button>
       )}
 
-      {/* Progress — vertical dots on mobile (CSS), horizontal on desktop */}
+      {/* Progress dots */}
       <ReelProgress
         total={totalSlides}
         current={currentIndex >= totalSlides ? totalSlides - 1 : currentIndex}

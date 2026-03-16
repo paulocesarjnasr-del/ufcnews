@@ -286,6 +286,24 @@ export interface EventoAtualLiga {
   membros_com_picks: number;
 }
 
+export interface EventoRankingMembro {
+  usuario_id: string;
+  username: string;
+  display_name: string | null;
+  avatar_url: string | null;
+  pontos: number;
+  acertos: number;
+  total_lutas: number;
+  posicao: number;
+}
+
+export interface EventoRankingLiga {
+  evento_id: string;
+  evento_nome: string;
+  evento_data: string;
+  ranking: EventoRankingMembro[];
+}
+
 export interface LigaVivaResponse {
   liga: LigaComDetalhes;
   membros: MembroLiga[];
@@ -293,6 +311,7 @@ export interface LigaVivaResponse {
   minha_posicao: number | null;
   pode_entrar: boolean;
   evento_atual: EventoAtualLiga | null;
+  ultimo_evento_ranking: EventoRankingLiga | null;
 }
 
 // =============================================

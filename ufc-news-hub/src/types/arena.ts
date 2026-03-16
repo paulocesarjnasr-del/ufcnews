@@ -93,6 +93,7 @@ export interface UsuarioArena {
 
   created_at: string;
   last_login_at: string | null;
+  ultimo_acesso: string | null;
 }
 
 export interface UsuarioArenaPublico {
@@ -249,6 +250,45 @@ export interface PrevisaoEventoResumo {
   pontos_ganhos: number;
   previsoes_perfeitas: number;
   card_perfeito: boolean;
+}
+
+export interface PrevisaoResumida {
+  luta_id: string;
+  vencedor_nome: string;
+  metodo_previsto: string | null;
+  round_previsto: number | null;
+  pontos_confianca: number;
+}
+
+export interface MembroLiga {
+  id: string;
+  username: string;
+  display_name: string | null;
+  avatar_url: string | null;
+  nivel: string;
+  is_admin: boolean;
+  ultimo_acesso: string | null;
+  picks_status: 'done' | 'pending' | null;
+  picks_data?: PrevisaoResumida[];
+  pontos_temporada: number;
+  posicao_atual: number;
+}
+
+export interface EventoAtualLiga {
+  id: string;
+  nome: string;
+  data: string;
+  total_membros: number;
+  membros_com_picks: number;
+}
+
+export interface LigaVivaResponse {
+  liga: LigaComDetalhes;
+  membros: MembroLiga[];
+  is_membro: boolean;
+  minha_posicao: number | null;
+  pode_entrar: boolean;
+  evento_atual: EventoAtualLiga | null;
 }
 
 // =============================================

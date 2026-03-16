@@ -240,13 +240,7 @@ export default function LigaPage({ params }: PageProps) {
         )}
       </div>
 
-      {/* ── Evento Ranking (after member list, before chat) ── */}
-      {ultimoRanking && isMembro && (
-        <EventoRankingLiga
-          ranking={ultimoRanking}
-          currentUserId={usuario?.id}
-        />
-      )}
+      {/* ── Evento Ranking — desativado ate ter ranking ao vivo ── */}
 
       {/* ── Chat (members only) ── */}
       {isMembro && <LigaChat ligaId={id} />}

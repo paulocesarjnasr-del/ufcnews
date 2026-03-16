@@ -3,13 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { formatTimeAgo } from '@/lib/utils';
 import { Home, Newspaper, BarChart3, Target, Calendar, Menu, X, Users } from 'lucide-react';
-
-interface SyncStatus {
-  status: 'running' | 'completed' | 'error';
-  finished_at: string | null;
-}
 
 const mainNav = [
   { href: '/', label: 'Home', icon: Home },
@@ -21,29 +15,12 @@ const mainNav = [
 ];
 
 export function Header() {
-  const [lastSync, setLastSync] = useState<SyncStatus | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pathname = usePathname();
 
   useEffect(() => {
-    fetchLastSync();
-    const interval = setInterval(fetchLastSync, 60000);
-    return () => clearInterval(interval);
-  }, []);
-
-  useEffect(() => {
     setMobileMenuOpen(false);
   }, [pathname]);
-
-  async function fetchLastSync() {
-    try {
-      const res = await fetch('/api/sync');
-      const data = await res.json();
-      setLastSync(data);
-    } catch (error) {
-      console.error('Erro ao buscar status:', error);
-    }
-  }
 
   const isActive = (href: string) => {
     if (href === '/') return pathname === '/';
@@ -87,23 +64,6 @@ export function Header() {
 
         {/* Right side */}
         <div className="flex items-center gap-4">
-          {/* Sync status - hidden on mobile */}
-          <div className="hidden sm:flex items-center gap-2">
-            {lastSync?.status === 'running' ? (
-              <div className="flex items-center gap-2">
-                <span className="relative flex h-2 w-2">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-ufc-red opacity-75"></span>
-                  <span className="relative inline-flex h-2 w-2 rounded-full bg-ufc-red"></span>
-                </span>
-                <span className="text-sm text-dark-textMuted">Sincronizando...</span>
-              </div>
-            ) : lastSync?.finished_at ? (
-              <span className="text-sm text-dark-textMuted">
-                Atualizado {formatTimeAgo(lastSync.finished_at)}
-              </span>
-            ) : null}
-          </div>
-
           {/* Mobile menu button */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}

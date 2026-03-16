@@ -1,9 +1,5 @@
-const CACHE_NAME = 'ufc-news-hub-v2';
+const CACHE_NAME = 'ufc-news-hub-v3';
 const STATIC_ASSETS = [
-  '/',
-  '/arena',
-  '/calendario',
-  '/lutadores',
   '/manifest.json',
 ];
 
@@ -17,7 +13,7 @@ self.addEventListener('install', (event) => {
   self.skipWaiting();
 });
 
-// Activate event - clean up old caches
+// Activate event - clean up ALL old caches and force reload clients
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((cacheNames) => {
@@ -26,6 +22,13 @@ self.addEventListener('activate', (event) => {
           .filter((name) => name !== CACHE_NAME)
           .map((name) => caches.delete(name))
       );
+    }).then(() => {
+      // Force all open tabs to reload with fresh content
+      return self.clients.matchAll({ type: 'window' }).then((clients) => {
+        for (const client of clients) {
+          client.navigate(client.url);
+        }
+      });
     })
   );
   self.clients.claim();

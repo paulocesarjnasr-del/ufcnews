@@ -145,6 +145,10 @@ export interface Liga {
   campeao_id: string | null;
   campeao_desde: string | null;
   defesas_titulo: number;
+  ranking_tipo: string;
+  chat_ativo: boolean;
+  revelar_picks_ao_vivo: boolean;
+  updated_at: string;
   created_at: string;
 }
 

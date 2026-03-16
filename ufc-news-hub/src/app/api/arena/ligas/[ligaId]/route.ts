@@ -74,7 +74,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
           },
         },
         is_membro: false,
-        pode_entrar: liga.total_membros < liga.max_membros,
+        pode_entrar: liga.max_membros === 0 || liga.total_membros < liga.max_membros,
         requer_convite: true,
       });
     }
@@ -203,7 +203,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       membros: membrosFormatados,
       is_membro: isMembro,
       minha_posicao: minhasPosicao,
-      pode_entrar: !isMembro && liga.total_membros < liga.max_membros,
+      pode_entrar: !isMembro && (liga.max_membros === 0 || liga.total_membros < liga.max_membros),
       evento_atual: eventoAtual ? {
         id: eventoAtual.id,
         nome: eventoAtual.nome,
@@ -218,6 +218,115 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       { error: 'Erro interno do servidor' },
       { status: 500 }
     );
+  }
+}
+
+// PATCH - Editar configs da liga
+export async function PATCH(request: NextRequest, { params }: RouteParams) {
+  try {
+    const { ligaId } = await params;
+    const usuario = await getUsuarioAtual();
+
+    if (!usuario) {
+      return NextResponse.json({ error: 'Nao autenticado' }, { status: 401 });
+    }
+
+    // Check admin
+    const membro = await queryOne<{ is_admin: boolean }>(
+      `SELECT is_admin FROM liga_membros WHERE liga_id = $1 AND usuario_id = $2`,
+      [ligaId, usuario.id]
+    );
+
+    if (!membro?.is_admin) {
+      return NextResponse.json({ error: 'Apenas o criador pode editar a liga' }, { status: 403 });
+    }
+
+    const body = await request.json() as Record<string, unknown>;
+
+    const updates: string[] = [];
+    const values: unknown[] = [];
+    let paramIndex = 1;
+
+    // nome
+    if (body.nome !== undefined) {
+      const nome = String(body.nome).trim();
+      if (!nome || nome.length > 50) {
+        return NextResponse.json({ error: 'Nome deve ter entre 1 e 50 caracteres' }, { status: 400 });
+      }
+      updates.push(`nome = $${paramIndex++}`);
+      values.push(nome);
+    }
+
+    // descricao
+    if (body.descricao !== undefined) {
+      const desc = body.descricao ? String(body.descricao).trim() : null;
+      if (desc && desc.length > 200) {
+        return NextResponse.json({ error: 'Descricao deve ter no maximo 200 caracteres' }, { status: 400 });
+      }
+      updates.push(`descricao = $${paramIndex++}`);
+      values.push(desc);
+    }
+
+    // tipo
+    if (body.tipo !== undefined) {
+      if (body.tipo !== 'publica' && body.tipo !== 'privada') {
+        return NextResponse.json({ error: 'Tipo deve ser publica ou privada' }, { status: 400 });
+      }
+      updates.push(`tipo = $${paramIndex++}`);
+      values.push(body.tipo);
+    }
+
+    // max_membros
+    if (body.max_membros !== undefined) {
+      const max = Number(body.max_membros);
+      if (isNaN(max) || max < 0) {
+        return NextResponse.json({ error: 'max_membros deve ser >= 0 (0 = ilimitado)' }, { status: 400 });
+      }
+      if (max > 0) {
+        const liga = await queryOne<{ total_membros: number }>(
+          `SELECT total_membros FROM ligas WHERE id = $1`, [ligaId]
+        );
+        if (liga && max < liga.total_membros) {
+          return NextResponse.json(
+            { error: `max_membros (${max}) nao pode ser menor que membros atuais (${liga.total_membros})` },
+            { status: 400 }
+          );
+        }
+      }
+      updates.push(`max_membros = $${paramIndex++}`);
+      values.push(max);
+    }
+
+    // booleans
+    for (const field of ['mostrar_picks_antes', 'apenas_main_card', 'chat_ativo', 'revelar_picks_ao_vivo'] as const) {
+      if (body[field] !== undefined) {
+        updates.push(`${field} = $${paramIndex++}`);
+        values.push(Boolean(body[field]));
+      }
+    }
+
+    // ranking_tipo
+    if (body.ranking_tipo !== undefined) {
+      if (body.ranking_tipo !== 'pontos' && body.ranking_tipo !== 'percentual') {
+        return NextResponse.json({ error: 'ranking_tipo deve ser pontos ou percentual' }, { status: 400 });
+      }
+      updates.push(`ranking_tipo = $${paramIndex++}`);
+      values.push(body.ranking_tipo);
+    }
+
+    if (updates.length === 0) {
+      return NextResponse.json({ error: 'Nenhum campo para atualizar' }, { status: 400 });
+    }
+
+    values.push(ligaId);
+    const sql = `UPDATE ligas SET ${updates.join(', ')}, updated_at = NOW() WHERE id = $${paramIndex} RETURNING *`;
+    const updated = await queryOne<Liga>(sql, values);
+
+    return NextResponse.json({ success: true, liga: updated });
+  } catch (error) {
+    const msg = error instanceof Error ? error.message : 'Erro desconhecido';
+    console.error('[PATCH /arena/ligas] Erro:', msg);
+    return NextResponse.json({ error: `Erro ao atualizar liga: ${msg}` }, { status: 500 });
   }
 }
 

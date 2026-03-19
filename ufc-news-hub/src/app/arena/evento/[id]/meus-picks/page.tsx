@@ -365,7 +365,15 @@ export default function MeusPicksPage({ params }: PageProps) {
           )}
 
           {/* Actions */}
-          <div className="space-y-3 pt-4">
+          <div className="space-y-3 pt-6">
+            <Link
+              href="/arena"
+              className="flex items-center justify-center gap-2 w-full py-3.5 bg-ufc-red hover:bg-ufc-redLight text-white font-display uppercase tracking-wide rounded-xl transition-all text-sm"
+            >
+              <ChevronLeft className="w-4 h-4" />
+              Voltar para Home
+            </Link>
+
             <ShareButton eventoNome={evento.nome} picks={picks} totalLutas={totalLutas} />
 
             <Link

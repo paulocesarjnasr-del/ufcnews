@@ -60,8 +60,12 @@ export function MethodDistribution() {
         setIsLoading(true);
         const res = await fetch('/api/arena/analytics/metodos');
         if (!res.ok) throw new Error('Erro ao buscar metodos');
-        const json = await res.json();
-        setData(json);
+        const json: unknown = await res.json();
+        // API returns flat array of { metodo_grupo, total }
+        const arr = Array.isArray(json) ? (json as Array<{ metodo_grupo: string; total: number }>) : [];
+        const metodos: MetodoCount[] = arr.map(m => ({ metodo: m.metodo_grupo, count: m.total }));
+        const total = metodos.reduce((sum, m) => sum + m.count, 0);
+        setData({ metodos, total });
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Erro desconhecido');
       } finally {

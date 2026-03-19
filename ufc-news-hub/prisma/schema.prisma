@@ -76,6 +76,20 @@ model atividades {
   @@index([usuario_id], map: "idx_atividades_usuario")
 }
 
+model chat_evento {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  evento_id  String   @db.Uuid
+  usuario_id String   @db.Uuid
+  mensagem   String
+  created_at DateTime @default(now()) @db.Timestamptz()
+
+  evento  eventos        @relation(fields: [evento_id], references: [id], onDelete: Cascade)
+  usuario usuarios_arena @relation(fields: [usuario_id], references: [id], onDelete: Cascade)
+
+  @@index([evento_id, created_at(sort: Desc)])
+  @@index([usuario_id])
+}
+
 model comentarios {
   id                String        @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   noticia_id        String        @db.Uuid
@@ -190,6 +204,7 @@ model eventos {
   last_scraped_at       DateTime?          @db.Timestamptz(6)
   broadcast_info        Json?              @default("{}")
   analises              analises[]
+  chat_evento           chat_evento[]
   duelos                duelos[]
   evento_pontuacao      evento_pontuacao[]
   lutas                 lutas[]
@@ -545,6 +560,7 @@ model usuarios_arena {
   liga_temporadas                              liga_temporadas[]
   ligas_ligas_campeao_idTousuarios_arena       ligas[]            @relation("ligas_campeao_idTousuarios_arena")
   ligas_ligas_criador_idTousuarios_arena       ligas[]            @relation("ligas_criador_idTousuarios_arena")
+  chat_evento                                  chat_evento[]
   notificacoes                                 notificacoes[]
   previsoes                                    previsoes[]
 

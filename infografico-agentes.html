@@ -1,0 +1,958 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UFC News Hub - Mapa dos Agentes</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #0a0a0a;
+    color: #e0e0e0;
+    font-family: 'Inter', sans-serif;
+    overflow-x: hidden;
+  }
+
+  /* ═══════════════════════════════════════════════════════ */
+  /* HEADER                                                  */
+  /* ═══════════════════════════════════════════════════════ */
+  .hero {
+    text-align: center;
+    padding: 60px 20px 40px;
+    background: linear-gradient(180deg, #1a0505 0%, #0a0a0a 100%);
+    border-bottom: 2px solid #D20A0A;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle at 50% 50%, rgba(210,10,10,0.08) 0%, transparent 50%);
+    animation: pulse 4s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 0.5; }
+    50% { transform: scale(1.1); opacity: 1; }
+  }
+  .hero h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 3.5rem;
+    color: #D20A0A;
+    letter-spacing: 4px;
+    position: relative;
+  }
+  .hero .subtitle {
+    font-size: 1.1rem;
+    color: #888;
+    margin-top: 8px;
+    position: relative;
+  }
+  .hero .kid-explain {
+    max-width: 700px;
+    margin: 24px auto 0;
+    background: rgba(210,10,10,0.08);
+    border: 1px solid rgba(210,10,10,0.2);
+    border-radius: 16px;
+    padding: 20px 28px;
+    font-size: 1rem;
+    line-height: 1.7;
+    color: #ccc;
+    position: relative;
+  }
+  .hero .kid-explain .emoji { font-size: 1.3rem; }
+
+  /* ═══════════════════════════════════════════════════════ */
+  /* SECTION TITLES                                          */
+  /* ═══════════════════════════════════════════════════════ */
+  .section-title {
+    text-align: center;
+    padding: 50px 20px 10px;
+  }
+  .section-title h2 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2.4rem;
+    letter-spacing: 3px;
+  }
+  .section-title h2 span { color: #D20A0A; }
+  .section-title .kid-box {
+    max-width: 600px;
+    margin: 12px auto 0;
+    background: rgba(255,215,0,0.06);
+    border: 1px solid rgba(255,215,0,0.15);
+    border-radius: 12px;
+    padding: 14px 20px;
+    font-size: 0.95rem;
+    color: #bbb;
+    line-height: 1.6;
+  }
+
+  /* ═══════════════════════════════════════════════════════ */
+  /* COMPANY ORG CHART                                       */
+  /* ═══════════════════════════════════════════════════════ */
+  .org-chart {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+
+  /* Tier rows */
+  .tier {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+    position: relative;
+  }
+  .tier-label {
+    text-align: center;
+    margin-bottom: 8px;
+  }
+  .tier-label span {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1rem;
+    letter-spacing: 2px;
+    padding: 4px 16px;
+    border-radius: 20px;
+    text-transform: uppercase;
+  }
+  .tier-label .exec { background: rgba(210,10,10,0.2); color: #D20A0A; }
+  .tier-label .dir { background: rgba(59,130,246,0.15); color: #60a5fa; }
+  .tier-label .agent { background: rgba(34,197,94,0.12); color: #4ade80; }
+
+  /* Agent cards */
+  .agent-card {
+    background: #151515;
+    border: 1px solid #2a2a2a;
+    border-radius: 16px;
+    padding: 18px 16px;
+    width: 170px;
+    text-align: center;
+    transition: all 0.3s ease;
+    position: relative;
+    cursor: default;
+  }
+  .agent-card:hover {
+    transform: translateY(-4px);
+    border-color: #D20A0A;
+    box-shadow: 0 8px 30px rgba(210,10,10,0.15);
+  }
+  .agent-card .avatar {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    margin: 0 auto 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+  }
+  .agent-card .avatar.exec-bg { background: linear-gradient(135deg, #D20A0A, #8b0000); }
+  .agent-card .avatar.dir-bg { background: linear-gradient(135deg, #3b82f6, #1d4ed8); }
+  .agent-card .avatar.agent-bg { background: linear-gradient(135deg, #22c55e, #15803d); }
+  .agent-card .avatar.sec-bg { background: linear-gradient(135deg, #f59e0b, #b45309); }
+
+  .agent-card .name {
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: #fff;
+    margin-bottom: 2px;
+  }
+  .agent-card .codename {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 0.75rem;
+    color: #D20A0A;
+    letter-spacing: 1.5px;
+    margin-bottom: 6px;
+  }
+  .agent-card .role {
+    font-size: 0.72rem;
+    color: #888;
+    line-height: 1.4;
+  }
+  .agent-card .model-badge {
+    margin-top: 8px;
+    font-size: 0.6rem;
+    padding: 2px 8px;
+    border-radius: 10px;
+    display: inline-block;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+  .badge-opus { background: rgba(168,85,247,0.15); color: #a855f7; border: 1px solid rgba(168,85,247,0.3); }
+  .badge-sonnet { background: rgba(59,130,246,0.12); color: #60a5fa; border: 1px solid rgba(59,130,246,0.25); }
+  .badge-haiku { background: rgba(34,197,94,0.1); color: #4ade80; border: 1px solid rgba(34,197,94,0.2); }
+
+  /* Connectors */
+  .connectors {
+    display: flex;
+    justify-content: center;
+    height: 40px;
+    position: relative;
+    margin: 0 0 0;
+  }
+  .connectors .line {
+    width: 2px;
+    height: 100%;
+    background: linear-gradient(180deg, #D20A0A, #3b82f6);
+  }
+  .conn-spread {
+    display: flex;
+    justify-content: center;
+    height: 30px;
+    position: relative;
+  }
+  .conn-spread::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    height: 2px;
+    background: #2a2a2a;
+  }
+
+  /* Division boxes */
+  .divisions {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    flex-wrap: wrap;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+  .division {
+    background: #111;
+    border: 1px solid #222;
+    border-radius: 20px;
+    padding: 20px 16px 16px;
+    flex: 1;
+    min-width: 280px;
+    max-width: 380px;
+  }
+  .division-header {
+    text-align: center;
+    margin-bottom: 14px;
+  }
+  .division-header h3 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.1rem;
+    letter-spacing: 2px;
+  }
+  .division-header .div-content { color: #60a5fa; }
+  .division-header .div-analytics { color: #a855f7; }
+  .division-header .div-ops { color: #f59e0b; }
+  .division-header .director-name {
+    font-size: 0.75rem;
+    color: #666;
+    margin-top: 2px;
+  }
+  .division .agents-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+  }
+  .mini-card {
+    background: #1a1a1a;
+    border: 1px solid #2a2a2a;
+    border-radius: 12px;
+    padding: 10px 12px;
+    width: calc(50% - 4px);
+    min-width: 120px;
+    transition: all 0.2s;
+    cursor: default;
+  }
+  .mini-card:hover {
+    border-color: #444;
+    background: #1f1f1f;
+  }
+  .mini-card .mc-icon { font-size: 1.1rem; margin-bottom: 4px; }
+  .mini-card .mc-name { font-size: 0.75rem; font-weight: 600; color: #ddd; }
+  .mini-card .mc-codename { font-size: 0.6rem; color: #D20A0A; font-family: 'Bebas Neue', sans-serif; letter-spacing: 1px; }
+  .mini-card .mc-role { font-size: 0.62rem; color: #777; margin-top: 3px; line-height: 1.3; }
+  .mini-card .mc-model { font-size: 0.55rem; margin-top: 4px; }
+
+  /* ═══════════════════════════════════════════════════════ */
+  /* CLAUDE CODE AGENTS (PIPELINE)                           */
+  /* ═══════════════════════════════════════════════════════ */
+  .pipeline-section {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+
+  .pipeline {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+  }
+
+  .pipeline-step {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    width: 100%;
+    max-width: 700px;
+    position: relative;
+  }
+  .pipeline-step .step-num {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: #D20A0A;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.3rem;
+    flex-shrink: 0;
+  }
+  .pipeline-step .step-card {
+    flex: 1;
+    background: #151515;
+    border: 1px solid #2a2a2a;
+    border-radius: 14px;
+    padding: 16px 20px;
+    transition: all 0.3s;
+  }
+  .pipeline-step .step-card:hover {
+    border-color: #D20A0A;
+    box-shadow: 0 4px 20px rgba(210,10,10,0.1);
+  }
+  .pipeline-step .step-card h4 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.1rem;
+    color: #D20A0A;
+    letter-spacing: 1.5px;
+    margin-bottom: 4px;
+  }
+  .pipeline-step .step-card .step-desc {
+    font-size: 0.82rem;
+    color: #999;
+    line-height: 1.5;
+  }
+  .pipeline-step .step-card .step-trigger {
+    font-size: 0.68rem;
+    color: #555;
+    margin-top: 6px;
+    font-family: monospace;
+  }
+
+  .pipeline-arrow {
+    width: 2px;
+    height: 30px;
+    background: linear-gradient(180deg, #D20A0A, #D20A0A55);
+    margin-left: 21px;
+  }
+
+  .human-gate {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 8px 20px;
+    background: rgba(255,215,0,0.08);
+    border: 1px dashed rgba(255,215,0,0.3);
+    border-radius: 10px;
+    margin: 0 auto;
+    max-width: 300px;
+  }
+  .human-gate span {
+    font-size: 0.8rem;
+    color: #fbbf24;
+    font-weight: 600;
+  }
+
+  /* Support agents */
+  .support-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 14px;
+    max-width: 1000px;
+    margin: 20px auto 0;
+    padding: 0 20px;
+  }
+  .support-card {
+    background: #131313;
+    border: 1px solid #222;
+    border-radius: 14px;
+    padding: 16px;
+    transition: all 0.3s;
+  }
+  .support-card:hover {
+    border-color: #444;
+    transform: translateY(-2px);
+  }
+  .support-card .sc-icon { font-size: 1.3rem; margin-bottom: 6px; }
+  .support-card h4 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 0.95rem;
+    color: #60a5fa;
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+  }
+  .support-card .sc-desc {
+    font-size: 0.78rem;
+    color: #888;
+    line-height: 1.5;
+  }
+  .support-card .sc-trigger {
+    font-size: 0.65rem;
+    color: #555;
+    margin-top: 8px;
+    font-family: monospace;
+    background: #0a0a0a;
+    padding: 3px 8px;
+    border-radius: 6px;
+    display: inline-block;
+  }
+
+  /* ═══════════════════════════════════════════════════════ */
+  /* STATS INFOGRAPHIC                                       */
+  /* ═══════════════════════════════════════════════════════ */
+  .stats-row {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    max-width: 900px;
+    margin: 30px auto;
+    padding: 0 20px;
+  }
+  .stat-box {
+    background: #151515;
+    border: 1px solid #2a2a2a;
+    border-radius: 16px;
+    padding: 24px 20px;
+    text-align: center;
+    flex: 1;
+    min-width: 150px;
+    max-width: 200px;
+  }
+  .stat-box .stat-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 3rem;
+    color: #D20A0A;
+    line-height: 1;
+  }
+  .stat-box .stat-label {
+    font-size: 0.75rem;
+    color: #888;
+    margin-top: 4px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  /* ═══════════════════════════════════════════════════════ */
+  /* COMPARISON TABLE                                        */
+  /* ═══════════════════════════════════════════════════════ */
+  .compare-section {
+    max-width: 900px;
+    margin: 30px auto;
+    padding: 0 20px;
+  }
+  .compare-table {
+    width: 100%;
+    border-collapse: collapse;
+    border-radius: 16px;
+    overflow: hidden;
+  }
+  .compare-table th {
+    background: #1a1a1a;
+    padding: 14px 16px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 0.9rem;
+    letter-spacing: 1.5px;
+    text-align: left;
+    border-bottom: 2px solid #D20A0A;
+  }
+  .compare-table td {
+    padding: 12px 16px;
+    font-size: 0.8rem;
+    border-bottom: 1px solid #1a1a1a;
+    vertical-align: top;
+  }
+  .compare-table tr:nth-child(even) td { background: #111; }
+  .compare-table tr:hover td { background: #1a1a1a; }
+  .compare-table .feat { color: #ddd; font-weight: 600; }
+  .compare-table .company-col { color: #D20A0A; }
+  .compare-table .claude-col { color: #60a5fa; }
+
+  /* ═══════════════════════════════════════════════════════ */
+  /* FOOTER                                                  */
+  /* ═══════════════════════════════════════════════════════ */
+  footer {
+    text-align: center;
+    padding: 40px 20px;
+    border-top: 1px solid #1a1a1a;
+    margin-top: 40px;
+  }
+  footer p {
+    font-size: 0.75rem;
+    color: #444;
+  }
+  footer .brand {
+    font-family: 'Bebas Neue', sans-serif;
+    color: #D20A0A;
+    font-size: 1rem;
+    letter-spacing: 2px;
+  }
+
+  /* ═══════════════════════════════════════════════════════ */
+  /* RESPONSIVE                                              */
+  /* ═══════════════════════════════════════════════════════ */
+  @media (max-width: 768px) {
+    .hero h1 { font-size: 2.2rem; }
+    .agent-card { width: 140px; padding: 14px 10px; }
+    .divisions { flex-direction: column; align-items: center; }
+    .division { max-width: 100%; }
+    .stat-box { min-width: 120px; }
+    .pipeline-step { flex-direction: column; text-align: center; }
+    .pipeline-arrow { margin-left: 0; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- HEADER                                                  -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="hero">
+  <h1>MAPA DOS AGENTES</h1>
+  <p class="subtitle">UFC News Hub - Todos os robozinhos que fazem o site funcionar</p>
+  <div class="kid-explain">
+    <span class="emoji">🤖</span> <strong>Explicacao para crianca de 5 anos:</strong><br><br>
+    Imagina que o UFC News Hub e um <strong>restaurante gigante de noticias de luta</strong>.<br><br>
+    Tem dois tipos de ajudantes:<br>
+    <span class="emoji">🏢</span> A <strong style="color:#D20A0A">Empresa de IA</strong> sao 14 robozinhos que moram DENTRO do site. Eles trabalham todo dia: escrevem noticias, analisam lutas, cuidam da seguranca. E tipo uma empresa de verdade, com chefe, gerentes e funcionarios.<br><br>
+    <span class="emoji">🛠️</span> Os <strong style="color:#60a5fa">Agentes do Claude Code</strong> sao 10 robozinhos que moram no MEU computador. Eles me ajudam a CONSTRUIR o site: criar analises de lutas, verificar se ta tudo certo, achar problemas. E tipo uma equipe de construcao.
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- STATS                                                   -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="stats-row">
+  <div class="stat-box">
+    <div class="stat-num">24</div>
+    <div class="stat-label">Agentes no Total</div>
+  </div>
+  <div class="stat-box">
+    <div class="stat-num">14</div>
+    <div class="stat-label">IA Company</div>
+  </div>
+  <div class="stat-box">
+    <div class="stat-num">10</div>
+    <div class="stat-label">Claude Code</div>
+  </div>
+  <div class="stat-box">
+    <div class="stat-num">3</div>
+    <div class="stat-label">Modelos de IA</div>
+  </div>
+  <div class="stat-box">
+    <div class="stat-num">30+</div>
+    <div class="stat-label">Ferramentas</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- PART 1: AI COMPANY                                      -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="section-title">
+  <h2>PARTE 1: <span>A EMPRESA DE IA</span></h2>
+  <div class="kid-box">
+    🏢 Imagina uma empresa com chefe, gerentes e funcionarios. O chefe manda nos gerentes, e os gerentes mandam nos funcionarios. Cada um tem um trabalho especial. Eles moram DENTRO do site e trabalham sozinhos todo dia.
+  </div>
+</div>
+
+<!-- Executive Tier -->
+<div class="org-chart">
+  <div class="tier-label"><span class="exec">EXECUTIVOS - OS CHEFES</span></div>
+  <div class="tier">
+    <div class="agent-card">
+      <div class="avatar exec-bg">👔</div>
+      <div class="name">Ricardo Miura</div>
+      <div class="codename">UFC COMMAND</div>
+      <div class="role">CEO - O Chefao. Decide o que cada um faz e cobra resultados.</div>
+      <div class="model-badge badge-opus">Opus 4.6</div>
+    </div>
+    <div class="agent-card">
+      <div class="avatar sec-bg">🛡️</div>
+      <div class="name">Helena Bastos</div>
+      <div class="codename">SHIELD</div>
+      <div class="role">CSO - A Guarda. Protege o site de hackers e problemas de seguranca.</div>
+      <div class="model-badge badge-opus">Opus 4.6</div>
+    </div>
+  </div>
+
+  <!-- Connector -->
+  <div class="connectors"><div class="line"></div></div>
+
+  <!-- Director Tier -->
+  <div class="tier-label"><span class="dir">DIRETORES - OS GERENTES</span></div>
+  <div class="tier">
+    <div class="agent-card">
+      <div class="avatar dir-bg">📰</div>
+      <div class="name">Marco Ventura</div>
+      <div class="codename">OCTAGON PRESS</div>
+      <div class="role">Diretor de Conteudo. Cuida de tudo que e escrito no site.</div>
+      <div class="model-badge badge-sonnet">Sonnet 4.5</div>
+    </div>
+    <div class="agent-card">
+      <div class="avatar dir-bg">📊</div>
+      <div class="name">Sofia Nakamura</div>
+      <div class="codename">FIGHT IQ</div>
+      <div class="role">Diretora de Analytics. Cuida das previsoes e estatisticas.</div>
+      <div class="model-badge badge-sonnet">Sonnet 4.5</div>
+    </div>
+    <div class="agent-card">
+      <div class="avatar dir-bg">⚙️</div>
+      <div class="name">Diego Ferreira</div>
+      <div class="codename">CAGE CONTROL</div>
+      <div class="role">Diretor de Operacoes. Cuida da saude do sistema inteiro.</div>
+      <div class="model-badge badge-sonnet">Sonnet 4.5</div>
+    </div>
+  </div>
+
+  <!-- Connector -->
+  <div class="connectors"><div class="line" style="background: linear-gradient(180deg, #3b82f6, #22c55e);"></div></div>
+
+  <!-- Agent Divisions -->
+  <div class="tier-label"><span class="agent">AGENTES - OS FUNCIONARIOS</span></div>
+
+  <div class="divisions">
+    <!-- Content Division -->
+    <div class="division">
+      <div class="division-header">
+        <h3 class="div-content">📰 DIVISAO DE CONTEUDO</h3>
+        <div class="director-name">Chefiados por Marco Ventura</div>
+      </div>
+      <div class="agents-grid">
+        <div class="mini-card">
+          <div class="mc-icon">✍️</div>
+          <div class="mc-name">Lucas Braga</div>
+          <div class="mc-codename">ROUNDUP</div>
+          <div class="mc-role">Reescreve noticias em PT-BR</div>
+          <div class="mc-model"><span class="model-badge badge-sonnet">Sonnet</span></div>
+        </div>
+        <div class="mini-card">
+          <div class="mc-icon">🎤</div>
+          <div class="mc-name">Thiago Rocha</div>
+          <div class="mc-codename">HYPE MAN</div>
+          <div class="mc-role">Cria enquetes e engajamento</div>
+          <div class="mc-model"><span class="model-badge badge-sonnet">Sonnet</span></div>
+        </div>
+        <div class="mini-card">
+          <div class="mc-icon">🌍</div>
+          <div class="mc-name">Camila Lopes</div>
+          <div class="mc-codename">POLYGLOT</div>
+          <div class="mc-role">Traduz conteudo</div>
+          <div class="mc-model"><span class="model-badge badge-haiku">Haiku</span></div>
+        </div>
+        <div class="mini-card">
+          <div class="mc-icon">🔍</div>
+          <div class="mc-name">Marina Costa</div>
+          <div class="mc-codename">MEGAPHONE</div>
+          <div class="mc-role">SEO e crescimento</div>
+          <div class="mc-model"><span class="model-badge badge-haiku">Haiku</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Analytics Division -->
+    <div class="division">
+      <div class="division-header">
+        <h3 class="div-analytics">📊 DIVISAO DE ANALYTICS</h3>
+        <div class="director-name">Chefiados por Sofia Nakamura</div>
+      </div>
+      <div class="agents-grid">
+        <div class="mini-card">
+          <div class="mc-icon">🔮</div>
+          <div class="mc-name">Rafael Souza</div>
+          <div class="mc-codename">ORACLE</div>
+          <div class="mc-role">Analisa lutas e faz previsoes</div>
+          <div class="mc-model"><span class="model-badge badge-sonnet">Sonnet</span></div>
+        </div>
+        <div class="mini-card">
+          <div class="mc-icon">📈</div>
+          <div class="mc-name">Beatriz Ramos</div>
+          <div class="mc-codename">STAT SHEET</div>
+          <div class="mc-role">Compila estatisticas</div>
+          <div class="mc-model"><span class="model-badge badge-haiku">Haiku</span></div>
+        </div>
+        <div class="mini-card">
+          <div class="mc-icon">📡</div>
+          <div class="mc-name">Igor Tavares</div>
+          <div class="mc-codename">PULSE</div>
+          <div class="mc-role">Detecta tendencias</div>
+          <div class="mc-model"><span class="model-badge badge-sonnet">Sonnet</span></div>
+        </div>
+        <div class="mini-card">
+          <div class="mc-icon">🏟️</div>
+          <div class="mc-name">Felipe Santos</div>
+          <div class="mc-codename">CAGE MASTER</div>
+          <div class="mc-role">Gerencia a Arena</div>
+          <div class="mc-model"><span class="model-badge badge-haiku">Haiku</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Ops Division -->
+    <div class="division">
+      <div class="division-header">
+        <h3 class="div-ops">⚙️ DIVISAO DE OPERACOES</h3>
+        <div class="director-name">Chefiados por Diego Ferreira</div>
+      </div>
+      <div class="agents-grid">
+        <div class="mini-card">
+          <div class="mc-icon">🐕</div>
+          <div class="mc-name">Andre Monteiro</div>
+          <div class="mc-codename">WATCHDOG</div>
+          <div class="mc-role">Monitora scraping</div>
+          <div class="mc-model"><span class="model-badge badge-haiku">Haiku</span></div>
+        </div>
+        <div class="mini-card">
+          <div class="mc-icon">👨‍⚖️</div>
+          <div class="mc-name">Juliana Pires</div>
+          <div class="mc-codename">REFEREE</div>
+          <div class="mc-role">Modera comentarios</div>
+          <div class="mc-model"><span class="model-badge badge-haiku">Haiku</span></div>
+        </div>
+        <div class="mini-card">
+          <div class="mc-icon">💓</div>
+          <div class="mc-name">Pedro Almeida</div>
+          <div class="mc-codename">VITALS</div>
+          <div class="mc-role">Saude do sistema</div>
+          <div class="mc-model"><span class="model-badge badge-haiku">Haiku</span></div>
+        </div>
+        <div class="mini-card">
+          <div class="mc-icon">📋</div>
+          <div class="mc-name">Marcos Lima</div>
+          <div class="mc-codename">CARD BUILDER</div>
+          <div class="mc-role">Sync de eventos</div>
+          <div class="mc-model"><span class="model-badge badge-haiku">Haiku</span></div>
+        </div>
+        <div class="mini-card">
+          <div class="mc-icon">👁️</div>
+          <div class="mc-name">Fernanda Reis</div>
+          <div class="mc-codename">PIXEL EYE</div>
+          <div class="mc-role">Audita a interface</div>
+          <div class="mc-model"><span class="model-badge badge-sonnet">Sonnet</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- PART 2: CLAUDE CODE AGENTS                              -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="section-title" style="margin-top: 40px;">
+  <h2>PARTE 2: <span>AGENTES DO CLAUDE CODE</span></h2>
+  <div class="kid-box">
+    🛠️ Esses robozinhos moram no meu computador. Quando eu falo "analise o card da semana", eles fazem uma linha de montagem: um busca os dados, outro analisa as lutas, outro confere se ta certo, e o ultimo monta a pagina do evento. E tipo uma fabrica!
+  </div>
+</div>
+
+<!-- Pipeline -->
+<div class="pipeline-section">
+  <div style="text-align:center; margin-bottom: 20px;">
+    <span style="font-family:'Bebas Neue'; font-size:1.3rem; color:#D20A0A; letter-spacing:2px;">PIPELINE SEMANAL DE ANALISES</span>
+    <p style="font-size:0.8rem; color:#666; margin-top:4px;">A linha de montagem que roda toda semana antes de cada evento</p>
+  </div>
+
+  <div class="pipeline">
+    <!-- Step 1 -->
+    <div class="pipeline-step">
+      <div class="step-num">1</div>
+      <div class="step-card">
+        <h4>🕷️ CARD SCRAPER</h4>
+        <div class="step-desc">Vai ate o site do UFC e pega todas as lutas do proximo evento: quem luta contra quem, em que peso, se e main card ou preliminar.</div>
+        <div class="step-trigger">"card scraper" | "qual o proximo card?"</div>
+      </div>
+    </div>
+
+    <div class="pipeline-arrow"></div>
+
+    <!-- Human Gate -->
+    <div class="human-gate">
+      <span>🚦 PORTAO HUMANO - Voce confirma o card</span>
+    </div>
+
+    <div class="pipeline-arrow"></div>
+
+    <!-- Step 2 -->
+    <div class="pipeline-step">
+      <div class="step-num">2</div>
+      <div class="step-card">
+        <h4>🥊 FIGHT ANALYST MAIN CARD</h4>
+        <div class="step-desc">Cria analises COMPLETAS com 15 secoes para cada luta do main card. Pesquisa tudo: stats, historico, tendencias, apostas.</div>
+        <div class="step-trigger">"fight analyst: Holloway vs Oliveira"</div>
+      </div>
+    </div>
+
+    <div class="pipeline-arrow"></div>
+
+    <!-- Step 3 -->
+    <div class="pipeline-step">
+      <div class="step-num">3</div>
+      <div class="step-card">
+        <h4>🥋 FIGHT ANALYST PRELIMS</h4>
+        <div class="step-desc">Cria analises RAPIDAS com 6 secoes para cada luta preliminar. Mais curtas, mas com toda informacao importante.</div>
+        <div class="step-trigger">"fight analyst prelims: UFC 326"</div>
+      </div>
+    </div>
+
+    <div class="pipeline-arrow"></div>
+
+    <!-- Step 4 -->
+    <div class="pipeline-step">
+      <div class="step-num">4</div>
+      <div class="step-card">
+        <h4>✅ CARD VALIDATOR</h4>
+        <div class="step-desc">Confere se TUDO esta certo: arquivos existem? Nomes batem? Componentes certos? Nenhuma luta faltando? Se falhar, manda refazer.</div>
+        <div class="step-trigger">"card validator" | "valida as analises"</div>
+      </div>
+    </div>
+
+    <div class="pipeline-arrow"></div>
+
+    <!-- Step 5 -->
+    <div class="pipeline-step">
+      <div class="step-num">5</div>
+      <div class="step-card">
+        <h4>📄 EVENT PAGE GENERATOR</h4>
+        <div class="step-desc">Pega todas as analises prontas e monta a pagina do evento com todas as lutas, previsoes e links organizados.</div>
+        <div class="step-trigger">"event page generator" | "gera a pagina do evento"</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Support Agents -->
+  <div style="text-align:center; margin: 50px 0 16px;">
+    <span style="font-family:'Bebas Neue'; font-size:1.3rem; color:#60a5fa; letter-spacing:2px;">AGENTES DE SUPORTE</span>
+    <p style="font-size:0.8rem; color:#666; margin-top:4px;">Robozinhos que ajudam quando precisa, mas nao fazem parte da linha de montagem</p>
+  </div>
+
+  <div class="support-grid">
+    <div class="support-card">
+      <div class="sc-icon">📝</div>
+      <h4>NEWS CAPTION GENERATOR</h4>
+      <div class="sc-desc">Cria titulos criativos e legendas para reels automaticamente quando noticias novas chegam.</div>
+      <div class="sc-trigger">automatico no sync</div>
+    </div>
+    <div class="support-card">
+      <div class="sc-icon">⚡</div>
+      <h4>PERFORMANCE AUDITOR</h4>
+      <div class="sc-desc">Checa se o site ta rapido: banco de dados, API, tamanho dos arquivos. Acha gargalos.</div>
+      <div class="sc-trigger">QPERF</div>
+    </div>
+    <div class="support-card">
+      <div class="sc-icon">🔧</div>
+      <h4>SCRAPER DEBUGGER</h4>
+      <div class="sc-desc">Quando o robozinho que pega noticias quebra, esse aqui descobre o que deu errado e conserta.</div>
+      <div class="sc-trigger">quando scraper falha</div>
+    </div>
+    <div class="support-card">
+      <div class="sc-icon">🔒</div>
+      <h4>SECURITY REVIEWER</h4>
+      <div class="sc-desc">Procura buracos de seguranca: senhas expostas, injecao de codigo, falhas de autenticacao.</div>
+      <div class="sc-trigger">QSEC</div>
+    </div>
+    <div class="support-card">
+      <div class="sc-icon">🎨</div>
+      <h4>UI REVIEWER</h4>
+      <div class="sc-desc">Confere se o design ta bonito e consistente: cores, botoes, neumorfismo, responsivo.</div>
+      <div class="sc-trigger">QCHECK</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- COMPARISON TABLE                                        -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div class="section-title" style="margin-top: 40px;">
+  <h2>COMPARACAO: <span>EMPRESA vs CONSTRUCAO</span></h2>
+  <div class="kid-box">
+    🤔 Qual a diferenca? A Empresa de IA sao os robozinhos que <strong>moram no site e trabalham todo dia sozinhos</strong>. Os Agentes do Claude Code sao os que <strong>eu chamo quando preciso construir algo novo</strong>. Um e o restaurante funcionando, o outro e a equipe que reforma o restaurante.
+  </div>
+</div>
+
+<div class="compare-section">
+  <table class="compare-table">
+    <thead>
+      <tr>
+        <th></th>
+        <th class="company-col">🏢 EMPRESA DE IA</th>
+        <th class="claude-col">🛠️ CLAUDE CODE</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="feat">Onde moram?</td>
+        <td>Dentro do site (servidor)</td>
+        <td>No meu computador (CLI)</td>
+      </tr>
+      <tr>
+        <td class="feat">Quando trabalham?</td>
+        <td>Todo dia, automaticamente</td>
+        <td>Quando eu chamo</td>
+      </tr>
+      <tr>
+        <td class="feat">Quantos sao?</td>
+        <td>14 agentes</td>
+        <td>10 agentes</td>
+      </tr>
+      <tr>
+        <td class="feat">Tem chefe?</td>
+        <td>Sim! CEO Ricardo comanda tudo</td>
+        <td>Nao, sao independentes</td>
+      </tr>
+      <tr>
+        <td class="feat">Hierarquia?</td>
+        <td>3 niveis: Executivo, Diretor, Agente</td>
+        <td>Plana (pipeline sequencial)</td>
+      </tr>
+      <tr>
+        <td class="feat">Modelos de IA?</td>
+        <td>Opus (chefes), Sonnet (gerentes), Haiku (agentes)</td>
+        <td>Opus, Sonnet, Haiku (por funcao)</td>
+      </tr>
+      <tr>
+        <td class="feat">Exemplo do que fazem?</td>
+        <td>Escrever noticias, moderar comentarios, monitorar sistema</td>
+        <td>Criar analises de lutas, validar codigo, auditar seguranca</td>
+      </tr>
+      <tr>
+        <td class="feat">Precisam de aprovacao?</td>
+        <td>Sim, algumas acoes precisam de admin</td>
+        <td>Sim, Human Gate no pipeline</td>
+      </tr>
+      <tr>
+        <td class="feat">Analogia</td>
+        <td>🍕 <em>O restaurante funcionando</em></td>
+        <td>🔨 <em>A equipe que reforma o restaurante</em></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!-- FOOTER                                                  -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<footer>
+  <p class="brand">UFC NEWS HUB</p>
+  <p>Infografico gerado em Marco 2026 | 24 agentes trabalhando juntos</p>
+</footer>
+
+</body>
+</html>

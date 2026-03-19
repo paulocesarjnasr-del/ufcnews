@@ -35,10 +35,11 @@ async function verificarMembro(ligaId: string, usuarioId: string): Promise<boole
 
 // ═══════════════════════════════════════════════════════════════
 // GET /api/arena/ligas/[ligaId]/chat
-// Retorna as ultimas 50 mensagens em ordem cronologica
+// Retorna mensagens em ordem cronologica
+// Query params: after (ISO timestamp), limit (max 100, default 50)
 // ═══════════════════════════════════════════════════════════════
 
-export async function GET(_request: NextRequest, { params }: RouteParams) {
+export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
     const usuario = await getUsuarioAtual();
 
@@ -59,7 +60,12 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
       );
     }
 
-    // Busca as 50 mais recentes (DESC) e reverte para ordem cronologica (ASC)
+    const { searchParams } = new URL(request.url);
+    const after = searchParams.get('after');
+    const limit = Math.min(parseInt(searchParams.get('limit') ?? '50', 10) || 50, 100);
+
+    // Busca as mais recentes (DESC) e reverte para ordem cronologica (ASC)
+    // Se `after` for fornecido, retorna apenas mensagens posteriores ao timestamp
     const mensagens = await query<ChatMessage>(
       `SELECT
         lc.id,
@@ -73,12 +79,13 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
        FROM (
          SELECT * FROM liga_chat
          WHERE liga_id = $1
+           ${after ? 'AND created_at > $3' : ''}
          ORDER BY created_at DESC
-         LIMIT 50
+         LIMIT $2
        ) lc
        JOIN usuarios_arena ua ON ua.id = lc.usuario_id
        ORDER BY lc.created_at ASC`,
-      [ligaId]
+      after ? [ligaId, limit, after] : [ligaId, limit]
     );
 
     return NextResponse.json(
@@ -139,9 +146,9 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
 
     const mensagem = ((body as Record<string, unknown>).mensagem as string).trim();
 
-    if (mensagem.length < 1 || mensagem.length > 500) {
+    if (mensagem.length < 1 || mensagem.length > 280) {
       return NextResponse.json(
-        { error: 'Mensagem deve ter entre 1 e 500 caracteres' },
+        { error: 'Mensagem deve ter entre 1 e 280 caracteres' },
         { status: 400 }
       );
     }

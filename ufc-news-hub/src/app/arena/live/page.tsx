@@ -1,11 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useMemo, useEffect } from 'react';
 import useSWR from 'swr';
 import useSWRImmutable from 'swr/immutable';
 import { Calendar, MapPin, ChevronRight, ArrowLeft } from 'lucide-react';
 import { LiveResultCard } from '@/components/arena/LiveResultCard';
 import { LiveLeaderboard } from '@/components/arena/LiveLeaderboard';
+import { LiveCurrentFight } from '@/components/arena/LiveCurrentFight';
+import { LiveChat } from '@/components/arena/LiveChat';
 import { useProximoEvento } from '@/hooks/useProximoEvento';
 
 // ═══════════════════════════════════════════════════════════════
@@ -104,9 +106,11 @@ function useCountdown(targetDate: string | undefined) {
 function EventResultView({
   eventoId,
   onBack,
+  liga,
 }: {
   eventoId: string;
   onBack?: () => void;
+  liga: { id: string; nome: string } | null;
 }) {
   // Smart fetching: SWR polls while ao_vivo, caches forever when finalizado
   const { data, error } = useSWR<LiveData>(
@@ -122,6 +126,41 @@ function EventResultView({
       dedupingInterval: 5000,
     }
   );
+
+  // ── Ranking movement tracking ──
+  const prevPositions = useRef<Map<string, number>>(new Map());
+  const [movimentos, setMovimentos] = useState<Record<string, number>>({});
+
+  useEffect(() => {
+    if (!data?.leaderboard) return;
+    const newMovimentos: Record<string, number> = {};
+    data.leaderboard.forEach((entry, i) => {
+      const pos = i + 1;
+      const prev = prevPositions.current.get(entry.usuario_id);
+      if (prev !== undefined && prev !== pos) {
+        newMovimentos[entry.usuario_id] = prev - pos;
+      }
+    });
+    const newMap = new Map<string, number>();
+    data.leaderboard.forEach((entry, i) => newMap.set(entry.usuario_id, i + 1));
+    prevPositions.current = newMap;
+    if (Object.keys(newMovimentos).length > 0) setMovimentos(newMovimentos);
+  }, [data?.leaderboard]);
+
+  // ── Current fight selection ──
+  const currentFight = useMemo(() => {
+    if (!data?.lutas) return null;
+    const live = data.lutas.find(l => l.status === 'ao_vivo');
+    if (live) return live;
+    const finished = [...data.lutas]
+      .filter(l => l.status === 'finalizada')
+      .sort((a, b) => b.ordem - a.ordem);
+    if (finished.length > 0) return finished[0];
+    const upcoming = [...data.lutas]
+      .filter(l => l.status !== 'finalizada')
+      .sort((a, b) => a.ordem - b.ordem);
+    return upcoming[0] ?? null;
+  }, [data?.lutas]);
 
   if (!data && !error) {
     return (
@@ -219,6 +258,9 @@ function EventResultView({
         </div>
       </div>
 
+      {/* Current fight spotlight */}
+      {currentFight && <LiveCurrentFight luta={currentFight} />}
+
       {/* Fight result cards */}
       <section className="space-y-3">
         {sortedLutas.map((luta) => (
@@ -240,7 +282,12 @@ function EventResultView({
 
       {/* Leaderboard */}
       <section>
-        <LiveLeaderboard leaderboard={leaderboard} meuUsuarioId={usuario_id} />
+        <LiveLeaderboard leaderboard={leaderboard} meuUsuarioId={usuario_id} movimentos={movimentos} />
+      </section>
+
+      {/* Live Chat */}
+      <section>
+        <LiveChat eventoId={eventoId} ligaId={liga?.id} ligaNome={liga?.nome} />
       </section>
     </div>
   );
@@ -347,6 +394,18 @@ export default function ArenaLivePage() {
   const { evento, isAoVivo, isLoading } = useProximoEvento();
   const [selectedEventoId, setSelectedEventoId] = useState<string | null>(null);
 
+  // Fetch user's active liga for chat tab support
+  const [liga, setLiga] = useState<{ id: string; nome: string } | null>(null);
+
+  useEffect(() => {
+    fetch('/api/arena/ligas?tipo=minhas&limit=1')
+      .then(r => r.ok ? r.json() : null)
+      .then((d: { ligas?: Array<{ id: string; nome: string }> } | null) => {
+        if (d?.ligas?.[0]) setLiga(d.ligas[0]);
+      })
+      .catch(() => {});
+  }, []);
+
   if (isLoading) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
@@ -361,13 +420,14 @@ export default function ArenaLivePage() {
       <EventResultView
         eventoId={selectedEventoId}
         onBack={() => setSelectedEventoId(null)}
+        liga={liga}
       />
     );
   }
 
   // Live event happening now
   if (isAoVivo && evento) {
-    return <EventResultView eventoId={evento.id} />;
+    return <EventResultView eventoId={evento.id} liga={liga} />;
   }
 
   // No live event → show countdown + recent events

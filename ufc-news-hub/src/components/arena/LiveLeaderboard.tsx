@@ -10,6 +10,7 @@ interface LeaderboardEntry {
 interface LiveLeaderboardProps {
   leaderboard: LeaderboardEntry[];
   meuUsuarioId: string | null;
+  movimentos?: Record<string, number>;
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -30,7 +31,7 @@ function getPositionStyle(position: number): {
 // Component
 // ═══════════════════════════════════════════════════════════════
 
-export function LiveLeaderboard({ leaderboard, meuUsuarioId }: LiveLeaderboardProps) {
+export function LiveLeaderboard({ leaderboard, meuUsuarioId, movimentos }: LiveLeaderboardProps) {
   if (leaderboard.length === 0) {
     return (
       <div className="neu-card rounded-lg p-4 text-center text-sm text-dark-textMuted">
@@ -79,6 +80,14 @@ export function LiveLeaderboard({ leaderboard, meuUsuarioId }: LiveLeaderboardPr
                   }`}
                 >
                   {entry.display_name ?? entry.username}
+                  {movimentos?.[entry.usuario_id] != null && movimentos[entry.usuario_id] !== 0 && (
+                    <span className={`text-xs font-bold ml-1 ${
+                      movimentos[entry.usuario_id] > 0 ? 'text-green-400' : 'text-red-400'
+                    }`}>
+                      {movimentos[entry.usuario_id] > 0 ? '↑' : '↓'}
+                      {Math.abs(movimentos[entry.usuario_id])}
+                    </span>
+                  )}
                   {isMe && (
                     <span className="ml-1 text-xs font-normal text-dark-textMuted">
                       (voce)

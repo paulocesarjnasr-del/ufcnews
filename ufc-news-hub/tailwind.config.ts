@@ -65,6 +65,10 @@ const config: Config = {
         'draw-octagon': 'draw-octagon 2s ease-out forwards',
         // Arena Octagon Portal animations
         'float': 'float 6s ease-in-out infinite',
+        // Ao Vivo animations
+        'glow-red-border': 'glow-red-border 2s ease-in-out infinite',
+        'flash-result': 'flash-result 1.5s ease-out',
+        'slide-in-up': 'slide-in-up 0.4s ease-out',
         'glow-pulse-border': 'glow-pulse-border 3s ease-in-out infinite',
         'ticker': 'ticker linear infinite',
       },
@@ -151,6 +155,20 @@ const config: Config = {
         'ticker': {
           '0%': { transform: 'translateX(0)' },
           '100%': { transform: 'translateX(-50%)' },
+        },
+        // Ao Vivo keyframes
+        'glow-red-border': {
+          '0%, 100%': { borderColor: 'rgba(210, 10, 10, 0.3)', boxShadow: '0 0 15px rgba(210, 10, 10, 0.1)' },
+          '50%': { borderColor: 'rgba(210, 10, 10, 0.7)', boxShadow: '0 0 30px rgba(210, 10, 10, 0.3)' },
+        },
+        'flash-result': {
+          '0%': { backgroundColor: 'rgba(34, 197, 94, 0.3)' },
+          '50%': { backgroundColor: 'rgba(34, 197, 94, 0.1)' },
+          '100%': { backgroundColor: 'transparent' },
+        },
+        'slide-in-up': {
+          '0%': { transform: 'translateY(20px)', opacity: '0' },
+          '100%': { transform: 'translateY(0)', opacity: '1' },
         },
       },
     },

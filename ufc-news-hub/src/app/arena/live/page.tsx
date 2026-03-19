@@ -3,7 +3,7 @@
 import { useState, useRef, useMemo, useEffect } from 'react';
 import useSWR from 'swr';
 import useSWRImmutable from 'swr/immutable';
-import { Calendar, MapPin, ChevronRight, ArrowLeft } from 'lucide-react';
+import { Calendar, MapPin, ChevronRight, ArrowLeft, Trophy } from 'lucide-react';
 import { LiveResultCard } from '@/components/arena/LiveResultCard';
 import { LiveLeaderboard } from '@/components/arena/LiveLeaderboard';
 import { LiveCurrentFight } from '@/components/arena/LiveCurrentFight';
@@ -187,108 +187,134 @@ function EventResultView({
   const isLive = data.evento.status === 'ao_vivo';
   const isFinished = data.evento.status === 'finalizado';
 
-  const sortedLutas = [...lutas].sort((a, b) => {
-    const aFinished = a.status === 'finalizada' ? 0 : 1;
-    const bFinished = b.status === 'finalizada' ? 0 : 1;
-    if (aFinished !== bFinished) return aFinished - bFinished;
-    return b.ordem - a.ordem;
-  });
+  // Ascending order by card position (natural card order)
+  const sortedLutas = [...lutas].sort((a, b) => a.ordem - b.ordem);
 
   return (
-    <div className="mx-auto max-w-2xl space-y-6 px-4 py-6">
+    <div
+      className={`mx-auto max-w-6xl px-4 py-6 ${
+        isLive
+          ? 'animate-glow-red-border rounded-2xl border-2 border-ufc-red/30'
+          : ''
+      }`}
+    >
       {/* Back button (when viewing a past event) */}
       {onBack && (
         <button
           onClick={onBack}
-          className="flex items-center gap-1.5 text-sm text-dark-textMuted hover:text-dark-text transition-colors"
+          className="mb-4 flex items-center gap-1.5 text-sm text-dark-textMuted hover:text-dark-text transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
           Voltar
         </button>
       )}
 
-      {/* Event header */}
-      <div className="neu-card rounded-xl p-5">
-        <div className="flex items-start justify-between gap-3">
-          <div className="min-w-0">
-            <h1 className="font-display text-2xl uppercase leading-tight text-dark-text">
-              {data.evento.nome}
-            </h1>
-            {data.evento.local_evento && (
-              <p className="mt-1 text-sm text-dark-textMuted">
-                {data.evento.local_evento}
-              </p>
-            )}
+      {/* AO VIVO banner */}
+      {isLive && (
+        <div className="flex items-center justify-center gap-2 py-2 bg-ufc-red rounded-xl mb-4">
+          <span className="relative flex h-3 w-3">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-white opacity-75" />
+            <span className="relative inline-flex h-3 w-3 rounded-full bg-white" />
+          </span>
+          <span className="font-display text-lg uppercase text-white tracking-widest">Ao Vivo</span>
+          <span className="text-white/60 text-sm">&middot; {lutas_finalizadas}/{totalLutas} lutas</span>
+        </div>
+      )}
+
+      {/* 2-column grid: content + chat sidebar */}
+      <div className="lg:grid lg:grid-cols-3 lg:gap-6">
+        {/* Left column: event content */}
+        <div className="lg:col-span-2 space-y-5">
+          {/* Event header */}
+          <div className="neu-card rounded-xl p-5">
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <h1 className="font-display text-2xl uppercase leading-tight text-dark-text">
+                  {data.evento.nome}
+                </h1>
+                {data.evento.local_evento && (
+                  <p className="mt-1 text-sm text-dark-textMuted">
+                    {data.evento.local_evento}
+                  </p>
+                )}
+              </div>
+              {/* Status badge */}
+              {isLive ? (
+                <div className="flex shrink-0 items-center gap-2 rounded-full bg-ufc-red/10 px-3 py-1.5">
+                  <span className="relative flex h-2.5 w-2.5">
+                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-ufc-red opacity-75" />
+                    <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-ufc-red" />
+                  </span>
+                  <span className="font-display text-sm font-bold uppercase tracking-widest text-ufc-red">
+                    Ao Vivo
+                  </span>
+                </div>
+              ) : isFinished ? (
+                <div className="flex shrink-0 items-center gap-2 rounded-full bg-green-500/10 px-3 py-1.5">
+                  <span className="font-display text-sm font-bold uppercase tracking-widest text-green-400">
+                    Finalizado
+                  </span>
+                </div>
+              ) : null}
+            </div>
+
+            {/* Progress bar */}
+            <div className="mt-4">
+              <div className="mb-1.5 flex items-center justify-between text-xs text-dark-textMuted">
+                <span>
+                  {lutas_finalizadas}/{totalLutas} lutas finalizadas
+                </span>
+              </div>
+              <div className="neu-inset h-2 rounded-full overflow-hidden">
+                <div
+                  className="h-full rounded-full bg-ufc-red transition-all duration-700"
+                  style={{
+                    width: totalLutas > 0 ? `${(lutas_finalizadas / totalLutas) * 100}%` : '0%',
+                  }}
+                />
+              </div>
+            </div>
           </div>
-          {/* Status badge */}
-          {isLive ? (
-            <div className="flex shrink-0 items-center gap-2 rounded-full bg-ufc-red/10 px-3 py-1.5">
-              <span className="relative flex h-2.5 w-2.5">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-ufc-red opacity-75" />
-                <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-ufc-red" />
-              </span>
-              <span className="font-display text-sm font-bold uppercase tracking-widest text-ufc-red">
-                Ao Vivo
-              </span>
+
+          {/* Current fight spotlight */}
+          {currentFight && <LiveCurrentFight luta={currentFight} />}
+
+          {/* Fight result cards */}
+          <section className="space-y-3">
+            {sortedLutas.map((luta) => (
+              <LiveResultCard
+                key={luta.luta_id}
+                lutador1_nome={luta.lutador1_nome}
+                lutador2_nome={luta.lutador2_nome}
+                vencedor_id={luta.vencedor_id}
+                lutador1_id={luta.lutador1_id}
+                lutador2_id={luta.lutador2_id}
+                metodo={luta.metodo}
+                round_final={luta.round_final}
+                tipo={luta.tipo}
+                status={luta.status}
+                userPick={luta.userPick}
+              />
+            ))}
+          </section>
+
+          {/* Leaderboard with header */}
+          <section>
+            <div className="flex items-center gap-2 mb-3">
+              <Trophy className="w-5 h-5 text-ufc-red" />
+              <h2 className="font-display text-lg uppercase tracking-wide text-dark-text">
+                Ranking <span className="text-ufc-red">Ao Vivo</span>
+              </h2>
             </div>
-          ) : isFinished ? (
-            <div className="flex shrink-0 items-center gap-2 rounded-full bg-green-500/10 px-3 py-1.5">
-              <span className="font-display text-sm font-bold uppercase tracking-widest text-green-400">
-                Finalizado
-              </span>
-            </div>
-          ) : null}
+            <LiveLeaderboard leaderboard={leaderboard} meuUsuarioId={usuario_id} movimentos={movimentos} />
+          </section>
         </div>
 
-        {/* Progress bar */}
-        <div className="mt-4">
-          <div className="mb-1.5 flex items-center justify-between text-xs text-dark-textMuted">
-            <span>
-              {lutas_finalizadas}/{totalLutas} lutas finalizadas
-            </span>
-          </div>
-          <div className="neu-inset h-2 rounded-full overflow-hidden">
-            <div
-              className="h-full rounded-full bg-ufc-red transition-all duration-700"
-              style={{
-                width: totalLutas > 0 ? `${(lutas_finalizadas / totalLutas) * 100}%` : '0%',
-              }}
-            />
-          </div>
+        {/* Right column: Chat sidebar */}
+        <div className="lg:col-span-1 mt-5 lg:mt-0 lg:sticky lg:top-4 lg:self-start">
+          <LiveChat eventoId={eventoId} ligaId={liga?.id} ligaNome={liga?.nome} />
         </div>
       </div>
-
-      {/* Current fight spotlight */}
-      {currentFight && <LiveCurrentFight luta={currentFight} />}
-
-      {/* Fight result cards */}
-      <section className="space-y-3">
-        {sortedLutas.map((luta) => (
-          <LiveResultCard
-            key={luta.luta_id}
-            lutador1_nome={luta.lutador1_nome}
-            lutador2_nome={luta.lutador2_nome}
-            vencedor_id={luta.vencedor_id}
-            lutador1_id={luta.lutador1_id}
-            lutador2_id={luta.lutador2_id}
-            metodo={luta.metodo}
-            round_final={luta.round_final}
-            tipo={luta.tipo}
-            status={luta.status}
-            userPick={luta.userPick}
-          />
-        ))}
-      </section>
-
-      {/* Leaderboard */}
-      <section>
-        <LiveLeaderboard leaderboard={leaderboard} meuUsuarioId={usuario_id} movimentos={movimentos} />
-      </section>
-
-      {/* Live Chat */}
-      <section>
-        <LiveChat eventoId={eventoId} ligaId={liga?.id} ligaNome={liga?.nome} />
-      </section>
     </div>
   );
 }

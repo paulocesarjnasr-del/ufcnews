@@ -131,7 +131,7 @@ export function LiveChat({ eventoId, ligaId, ligaNome }: LiveChatProps) {
             <div className="flex gap-1">
               <button
                 onClick={() => setActiveTab('geral')}
-                className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
+                className={`px-3 py-1 rounded-full text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ufc-red/60 ${
                   activeTab === 'geral' ? 'bg-ufc-red text-white' : 'text-white/40 hover:text-white/60'
                 }`}
               >
@@ -139,7 +139,7 @@ export function LiveChat({ eventoId, ligaId, ligaNome }: LiveChatProps) {
               </button>
               <button
                 onClick={() => setActiveTab('liga')}
-                className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
+                className={`px-3 py-1 rounded-full text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ufc-red/60 ${
                   activeTab === 'liga' ? 'bg-ufc-red text-white' : 'text-white/40 hover:text-white/60'
                 }`}
               >
@@ -184,12 +184,12 @@ export function LiveChat({ eventoId, ligaId, ligaNome }: LiveChatProps) {
           onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
           placeholder="Digite sua mensagem..."
           maxLength={280}
-          className="flex-1 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-ufc-red/50"
+          className="flex-1 neu-inset rounded-lg px-3 py-2 text-sm text-dark-text placeholder:text-dark-textMuted focus:outline-none focus:ring-1 focus:ring-ufc-red/50"
         />
         <button
           onClick={handleSend}
           disabled={!input.trim() || isSending || cooldown}
-          className="w-9 h-9 flex items-center justify-center rounded-lg bg-ufc-red hover:bg-ufc-redLight disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+          className="w-11 h-11 flex items-center justify-center rounded-xl neu-button bg-ufc-red hover:bg-ufc-redLight disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
         >
           <Send className="w-4 h-4 text-white" />
         </button>

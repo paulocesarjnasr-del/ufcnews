@@ -34,14 +34,14 @@ function getPositionStyle(position: number): {
 export function LiveLeaderboard({ leaderboard, meuUsuarioId, movimentos }: LiveLeaderboardProps) {
   if (leaderboard.length === 0) {
     return (
-      <div className="neu-card rounded-lg p-4 text-center text-sm text-dark-textMuted">
+      <div className="rounded-lg border border-dark-border/40 bg-black/40 backdrop-blur-md p-4 text-center text-sm text-dark-textMuted">
         Nenhuma pontuacao registrada ainda.
       </div>
     );
   }
 
   return (
-    <div className="neu-card overflow-hidden rounded-lg">
+    <div className="overflow-hidden rounded-lg border border-dark-border/40 bg-black/40 backdrop-blur-md">
       {/* Title */}
       <div className="border-b border-dark-border px-4 py-3">
         <h3 className="font-display text-sm uppercase tracking-wide text-dark-text">
@@ -100,7 +100,7 @@ export function LiveLeaderboard({ leaderboard, meuUsuarioId, movimentos }: LiveL
               </div>
 
               {/* Points */}
-              <span className="shrink-0 text-sm font-bold tabular-nums text-ufc-gold">
+              <span className="shrink-0 text-sm font-bold tabular-nums text-yellow-400">
                 {entry.pontos_totais} pts
               </span>
             </li>

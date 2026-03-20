@@ -59,7 +59,7 @@ export function FloatingReactions() {
             key={label}
             onClick={() => addReaction(emoji)}
             className="w-10 h-10 flex items-center justify-center rounded-full bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/20 hover:scale-110 active:scale-95 transition-all text-lg"
-            title={label}
+            aria-label={`Reagir com ${label}`}
           >
             {emoji}
           </button>

@@ -81,14 +81,6 @@ function StatusBadgeFinished() {
   );
 }
 
-function StatusBadgeNext() {
-  return (
-    <span className="rounded-full bg-amber-400/15 px-2.5 py-0.5 text-xs font-bold uppercase tracking-wider text-amber-300 ring-1 ring-amber-400/30 shadow-[0_0_6px_rgba(251,191,36,0.2)]">
-      PROXIMA
-    </span>
-  );
-}
-
 function StatusBadgeScheduled() {
   return (
     <span className="rounded-full bg-white/5 px-2 py-0.5 text-xs font-medium uppercase tracking-wide text-white/30">
@@ -115,8 +107,6 @@ export function LiveResultCard({
 }: LiveResultCardProps) {
   const isFinished = status === 'finalizada';
   const isLive = status === 'ao_vivo';
-  const isScheduled = status === 'agendada';
-  const isNext = status === 'proxima';
 
   const winner1 = isFinished && vencedor_id === lutador1_id;
   const winner2 = isFinished && vencedor_id === lutador2_id;
@@ -144,10 +134,6 @@ export function LiveResultCard({
     wrapperClass =
       'relative overflow-hidden rounded-xl border border-green-500/30 bg-gradient-to-r from-green-950/40 to-black/60 backdrop-blur-md transition-all duration-300';
     wrapperStyle = { boxShadow: '0 0 12px rgba(34,197,94,0.12)' };
-  } else if (isNext) {
-    wrapperClass =
-      'relative overflow-hidden rounded-xl border border-white/20 bg-black/40 backdrop-blur-md transition-all duration-300';
-    wrapperStyle = { boxShadow: '0 0 10px rgba(255,255,255,0.04)' };
   } else {
     // agendada
     wrapperClass =
@@ -159,8 +145,6 @@ export function LiveResultCard({
     <StatusBadgeLive />
   ) : isFinished ? (
     <StatusBadgeFinished />
-  ) : isNext ? (
-    <StatusBadgeNext />
   ) : (
     <StatusBadgeScheduled />
   );
@@ -172,7 +156,7 @@ export function LiveResultCard({
     <div className={wrapperClass} style={wrapperStyle}>
       {/* Live animated red sweep */}
       {isLive && (
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-ufc-red/8 via-transparent to-transparent" />
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-ufc-red/10 via-transparent to-transparent" />
       )}
 
       {/* Header: tipo badge + status badge */}
@@ -182,8 +166,6 @@ export function LiveResultCard({
             ? 'border-b border-ufc-red/30 bg-black/30'
             : isFinished
             ? 'border-b border-green-500/15 bg-black/20'
-            : isNext
-            ? 'border-b border-white/10 bg-black/20'
             : 'border-b border-white/5 bg-transparent'
         }`}
       >
@@ -208,8 +190,6 @@ export function LiveResultCard({
                 ? { color: '#4ade80', textShadow: '0 0 10px rgba(34, 197, 94, 0.5)' }
                 : isLive
                 ? { color: '#ffffff', textShadow: '0 0 10px rgba(210, 10, 10, 0.5)' }
-                : isNext
-                ? { color: '#ffffff' }
                 : { color: 'rgba(255,255,255,0.7)' }
             }
           >
@@ -252,8 +232,6 @@ export function LiveResultCard({
                 live
               </span>
             </div>
-          ) : isNext ? (
-            <span className="font-display text-xl text-white/40">⚡VS⚡</span>
           ) : (
             <span className="font-display text-xl text-white/15">VS</span>
           )}
@@ -272,8 +250,6 @@ export function LiveResultCard({
                 ? { color: '#4ade80', textShadow: '0 0 10px rgba(34, 197, 94, 0.5)' }
                 : isLive
                 ? { color: '#ffffff', textShadow: '0 0 10px rgba(210, 10, 10, 0.5)' }
-                : isNext
-                ? { color: '#ffffff' }
                 : { color: 'rgba(255,255,255,0.7)' }
             }
           >
@@ -294,7 +270,7 @@ export function LiveResultCard({
             ? 'border-ufc-red/20'
             : isFinished
             ? 'border-green-500/15'
-            : 'border-white/8'
+            : 'border-white/10'
         }`}
       />
 
@@ -305,8 +281,8 @@ export function LiveResultCard({
             !pickSettled
               ? 'bg-transparent'
               : pickCorrect
-              ? 'bg-green-500/8'
-              : 'bg-red-500/8'
+              ? 'bg-green-500/10'
+              : 'bg-red-500/10'
           }`}
         >
           <div className="flex items-center justify-between gap-2">
@@ -367,12 +343,10 @@ export function LiveResultCard({
           className={`px-4 py-2 text-center text-xs ${
             isLive
               ? 'font-bold uppercase tracking-widest text-ufc-red animate-pulse'
-              : isNext
-              ? 'font-semibold text-amber-300/60 uppercase tracking-wide'
               : 'text-white/25'
           }`}
         >
-          {isLive ? 'Em andamento' : isNext ? 'Proxima luta' : 'Aguardando'}
+          {isLive ? 'Em andamento' : 'Aguardando'}
         </div>
       ) : null}
     </div>

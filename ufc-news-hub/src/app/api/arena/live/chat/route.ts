@@ -60,8 +60,10 @@ export async function GET(request: NextRequest) {
       { headers: { 'Cache-Control': 'no-store' } }
     );
   } catch (error) {
-    console.error('[API /arena/live/chat GET] Error:', error);
-    return NextResponse.json({ error: 'Erro interno' }, { status: 500 });
+    const err = error instanceof Error ? error : new Error(String(error));
+    console.error('[API /arena/live/chat GET] Error:', err.message);
+    console.error('[API /arena/live/chat GET] Stack:', err.stack);
+    return NextResponse.json({ error: 'Erro interno', detail: err.message }, { status: 500 });
   }
 }
 
@@ -118,7 +120,9 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(novaMensagem, { status: 201 });
   } catch (error) {
-    console.error('[API /arena/live/chat POST] Error:', error);
-    return NextResponse.json({ error: 'Erro interno' }, { status: 500 });
+    const err = error instanceof Error ? error : new Error(String(error));
+    console.error('[API /arena/live/chat POST] Error:', err.message);
+    console.error('[API /arena/live/chat POST] Stack:', err.stack);
+    return NextResponse.json({ error: 'Erro interno', detail: err.message }, { status: 500 });
   }
 }

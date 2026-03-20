@@ -6,3 +6,4 @@ node_modules
 .claude/CLAUDE.local.md
 .claude/settings.local.json
 .env.production
+.env.vercel

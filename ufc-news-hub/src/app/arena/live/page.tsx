@@ -170,8 +170,8 @@ function EventResultView({
       const statusOrder: Record<string, number> = { ao_vivo: 0, agendada: 1, finalizada: 2 };
       const statusDiff = (statusOrder[a.status] ?? 1) - (statusOrder[b.status] ?? 1);
       if (statusDiff !== 0) return statusDiff;
-      if (a.status === 'finalizada') return b.ordem - a.ordem;
-      return a.ordem - b.ordem;
+      // ordem no banco: main_event=1, prelims=7-14. DESC = prelims primeiro (ordem real do evento)
+      return b.ordem - a.ordem;
     });
   }, [data?.lutas]);
 
@@ -201,13 +201,7 @@ function EventResultView({
   const isFinished = data.evento.status === 'finalizado';
 
   return (
-    <div
-      className={`mx-auto max-w-6xl px-4 py-6 ${
-        isLive
-          ? 'animate-glow-red-border rounded-2xl border-2 border-ufc-red/30'
-          : ''
-      }`}
-    >
+    <div className="mx-auto max-w-6xl px-4 py-6">
       {/* Back button (when viewing a past event) */}
       {onBack && (
         <button

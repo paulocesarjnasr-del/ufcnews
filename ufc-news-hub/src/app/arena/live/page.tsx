@@ -10,6 +10,7 @@ import { LiveCurrentFight } from '@/components/arena/LiveCurrentFight';
 import { LiveChat } from '@/components/arena/LiveChat';
 import { FloatingReactions } from '@/components/arena/FloatingReactions';
 import { useProximoEvento } from '@/hooks/useProximoEvento';
+import { useArenaAuth } from '@/hooks/useArenaAuth';
 
 // ═══════════════════════════════════════════════════════════════
 // Types
@@ -115,6 +116,8 @@ function EventResultView({
   onBack?: () => void;
   liga: { id: string; nome: string } | null;
 }) {
+  const { isAuthenticated, usuario } = useArenaAuth();
+
   // Smart fetching: SWR polls while ao_vivo, caches forever when finalizado
   const { data, error } = useSWR<LiveData>(
     `/api/arena/live?evento_id=${eventoId}`,
@@ -385,7 +388,12 @@ function EventResultView({
 
         {/* Right column: Chat sidebar + Reactions */}
         <div className="lg:col-span-1 mt-5 lg:mt-0 lg:sticky lg:top-4 lg:self-start space-y-3">
-          <FloatingReactions />
+          <FloatingReactions
+            currentFight={currentFight}
+            eventoId={eventoId}
+            isAuthenticated={isAuthenticated}
+            username={usuario?.username}
+          />
           <LiveChat eventoId={eventoId} ligaId={liga?.id} ligaNome={liga?.nome} />
         </div>
       </div>

@@ -21,6 +21,8 @@ interface FightResult {
   ordem: number;
   categoria_peso: string;
   is_titulo: boolean;
+  lutador1_foto: string | null;
+  lutador2_foto: string | null;
 }
 
 interface UserPick {
@@ -118,7 +120,9 @@ export async function GET(request: NextRequest) {
            l.status::text AS status,
            l.ordem,
            l.categoria_peso,
-           COALESCE(l.is_titulo, false) AS is_titulo
+           COALESCE(l.is_titulo, false) AS is_titulo,
+           lut1.imagem_url AS lutador1_foto,
+           lut2.imagem_url AS lutador2_foto
          FROM lutas l
          JOIN lutadores lut1 ON lut1.id = l.lutador1_id
          JOIN lutadores lut2 ON lut2.id = l.lutador2_id

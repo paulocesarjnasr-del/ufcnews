@@ -33,6 +33,8 @@ interface Luta {
   lutador1_nome: string;
   lutador2_id: string;
   lutador2_nome: string;
+  lutador1_foto: string | null;
+  lutador2_foto: string | null;
   userPick: UserPick | null;
 }
 

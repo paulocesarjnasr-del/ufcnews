@@ -126,10 +126,7 @@
       "Bash(rm:*)",
       "WebFetch(domain:ufc-news.vercel.app)",
       "Bash(for dir:*)",
-      "Read(//Users/gabz_cresta/Desktop/ufcnews/ufc-news-hub/src/app/analise/$dir/**)",
-      "Bash(for file:*)",
-      "Bash(sed -i '' 's/\\\\.\\\\.\\\\.analisePT\\\\.full_analysis\\\\.radar_apostador\\\\.odds/...analisePT.full_analysis.radar_apostador!.odds/' \"$file\")",
-      "Bash(npx vercel:*)"
+      "Read(//Users/gabz_cresta/Desktop/ufcnews/ufc-news-hub/src/app/analise/$dir/**)"
     ]
   },
   "enabledMcpjsonServers": [

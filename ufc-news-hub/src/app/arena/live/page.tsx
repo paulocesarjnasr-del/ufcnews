@@ -154,17 +154,21 @@ function EventResultView({
   }, [data?.leaderboard]);
 
   // ── Current fight selection ──
+  // ordem no banco: 14=first prelim (happens first), 1=main event (happens last)
   const currentFight = useMemo(() => {
     if (!data?.lutas) return null;
+    // 1. If a fight is live, show it
     const live = data.lutas.find(l => l.status === 'ao_vivo');
     if (live) return live;
+    // 2. Show the most recently finished fight (lowest ordem = latest chronologically)
     const finished = [...data.lutas]
       .filter(l => l.status === 'finalizada')
-      .sort((a, b) => b.ordem - a.ordem);
+      .sort((a, b) => a.ordem - b.ordem);
     if (finished.length > 0) return finished[0];
+    // 3. Show the next upcoming fight (highest ordem = next chronologically)
     const upcoming = [...data.lutas]
       .filter(l => l.status !== 'finalizada')
-      .sort((a, b) => a.ordem - b.ordem);
+      .sort((a, b) => b.ordem - a.ordem);
     return upcoming[0] ?? null;
   }, [data?.lutas]);
 

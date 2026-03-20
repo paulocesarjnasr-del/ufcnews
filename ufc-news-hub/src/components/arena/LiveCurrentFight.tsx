@@ -36,6 +36,12 @@ function tipoLabel(tipo: string): string {
   return map[tipo] ?? tipo.toUpperCase();
 }
 
+function tipoColor(tipo: string): string {
+  if (tipo === 'main_event') return 'text-red-500';
+  if (tipo === 'co_main') return 'text-ufc-gold';
+  return 'text-white/40';
+}
+
 export function LiveCurrentFight({ luta }: LiveCurrentFightProps) {
   const isLive = luta.status === 'ao_vivo';
   const isFinished = luta.status === 'finalizada';
@@ -55,37 +61,40 @@ export function LiveCurrentFight({ luta }: LiveCurrentFightProps) {
   const pickWrong = pick?.acertou_vencedor === false;
   const pickPending = pick?.acertou_vencedor === null;
 
-  // ── Container classes per state ────────────────────────────────────────────
-  const cardClasses = isLive
-    ? 'relative overflow-hidden rounded-2xl backdrop-blur-md animate-slide-in-up border-2 border-ufc-red/60 bg-gradient-to-br from-red-950/90 via-black/80 to-red-950/60 animate-glow-red-border'
+  // ── Card glow per state ──────────────────────────────────────
+  const cardShadow = isLive
+    ? '0 0 30px rgba(210,10,10,0.25), 0 0 60px rgba(210,10,10,0.1), 0 0 80px rgba(59,130,246,0.05)'
     : isFinished
-    ? 'relative overflow-hidden rounded-2xl backdrop-blur-md animate-slide-in-up border-2 border-green-500/40 bg-gradient-to-br from-green-950/60 via-black/80 to-green-950/40'
-    : 'relative overflow-hidden rounded-2xl backdrop-blur-md animate-slide-in-up border border-white/10 bg-gradient-to-br from-[#111] to-[#0a0a0a]';
+    ? '0 0 30px rgba(34,197,94,0.15), 0 0 60px rgba(34,197,94,0.06)'
+    : '0 0 25px rgba(59,130,246,0.08), 0 0 50px rgba(59,130,246,0.04)';
 
-  const containerShadow = isLive
-    ? { boxShadow: '0 0 30px rgba(210,10,10,0.4), 0 0 60px rgba(210,10,10,0.15)' }
+  const borderColor = isLive
+    ? 'border-red-500/40'
     : isFinished
-    ? { boxShadow: '0 0 30px rgba(34,197,94,0.2), 0 0 60px rgba(34,197,94,0.08)' }
-    : undefined;
+    ? 'border-green-500/25'
+    : 'border-white/10';
 
   return (
-    <div className={cardClasses} style={containerShadow}>
+    <div
+      className={`relative overflow-hidden rounded-2xl bg-zinc-900/90 backdrop-blur-sm ${borderColor} border transition-all duration-300 animate-slide-in-up bg-hex-pattern`}
+      style={{ boxShadow: cardShadow }}
+    >
+      {/* Ambient glow overlay */}
+      <div
+        className="pointer-events-none absolute inset-0 rounded-2xl"
+        style={{
+          background: isLive
+            ? 'radial-gradient(ellipse 90% 50% at 50% 0%, rgba(210,10,10,0.18) 0%, rgba(210,10,10,0.05) 40%, transparent 65%)'
+            : isFinished
+            ? 'radial-gradient(ellipse 80% 50% at 50% 0%, rgba(34,197,94,0.1) 0%, transparent 60%)'
+            : 'radial-gradient(ellipse 80% 50% at 50% 0%, rgba(59,130,246,0.06) 0%, transparent 60%)',
+        }}
+      />
 
-      {/* Live: red radial glow at top center */}
+      {/* Live: scanline texture */}
       {isLive && (
         <div
-          className="pointer-events-none absolute inset-0"
-          style={{
-            background:
-              'radial-gradient(ellipse 80% 50% at 50% 0%, rgba(210,10,10,0.35) 0%, rgba(210,10,10,0.12) 40%, transparent 70%)',
-          }}
-        />
-      )}
-
-      {/* Live: scanline texture overlay */}
-      {isLive && (
-        <div
-          className="pointer-events-none absolute inset-0 opacity-[0.04]"
+          className="pointer-events-none absolute inset-0 opacity-[0.03]"
           style={{
             backgroundImage:
               'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255,255,255,1) 2px, rgba(255,255,255,1) 3px)',
@@ -93,53 +102,38 @@ export function LiveCurrentFight({ luta }: LiveCurrentFightProps) {
         />
       )}
 
-      {/* Finished: green flash */}
+      {/* Finished: green flash animation */}
       {isFinished && (
         <div className="pointer-events-none absolute inset-0 animate-flash-result rounded-2xl" />
       )}
 
-      {/* Finished: green radial glow */}
-      {isFinished && (
-        <div
-          className="pointer-events-none absolute inset-0"
-          style={{
-            background:
-              'radial-gradient(ellipse 70% 40% at 50% 0%, rgba(34,197,94,0.18) 0%, transparent 65%)',
-          }}
-        />
-      )}
-
       <div className="relative z-10 p-5 space-y-5">
 
-        {/* ── Header row: fight type + status badge ── */}
+        {/* ── Header: fight type + status badge ── */}
         <div className="flex items-center justify-between">
-          <span
-            className={`text-[11px] font-display tracking-[0.2em] uppercase ${
-              isLive ? 'text-ufc-red' : isFinished ? 'text-green-400/70' : 'text-white/30'
-            }`}
-          >
+          <span className={`text-[11px] font-black tracking-[0.2em] uppercase ${tipoColor(luta.tipo)}`}>
             {tipoLabel(luta.tipo)}
           </span>
 
           {isLive && (
-            <div
-              className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-ufc-red font-display uppercase tracking-widest"
-              style={{ boxShadow: '0 0 16px rgba(210,10,10,0.6), 0 0 32px rgba(210,10,10,0.25)' }}
+            <button
+              className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-red-600"
+              style={{ boxShadow: '0 0 15px rgba(220,38,38,0.5), 0 0 30px rgba(220,38,38,0.25)' }}
             >
               <span className="relative flex h-2.5 w-2.5">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-white opacity-80" />
-                <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-white" />
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-yellow-400 opacity-80" />
+                <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-yellow-400" />
               </span>
-              <span className="text-[12px] font-black text-white tracking-widest">
-                EM ANDAMENTO
+              <span className="text-[11px] font-black text-white tracking-widest uppercase">
+                AO VIVO
               </span>
-            </div>
+            </button>
           )}
 
           {isFinished && (
             <div
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-green-500/15 border border-green-500/40"
-              style={{ boxShadow: '0 0 12px rgba(34,197,94,0.2)' }}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-green-500/10 border border-green-500/30"
+              style={{ boxShadow: '0 0 12px rgba(34,197,94,0.15)' }}
             >
               <Trophy className="w-3.5 h-3.5 text-green-400" />
               <span className="text-[11px] font-bold text-green-400 uppercase tracking-widest">
@@ -149,16 +143,16 @@ export function LiveCurrentFight({ luta }: LiveCurrentFightProps) {
           )}
 
           {isNext && (
-            <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/[0.04] border border-white/[0.08]">
-              <Clock className="w-3 h-3 text-white/25" />
-              <span className="text-[10px] font-bold text-white/25 uppercase tracking-widest">
+            <div className="flex items-center gap-1.5 px-3 py-1 rounded-full border border-white/10 bg-transparent">
+              <Clock className="w-3 h-3 text-white/30" />
+              <span className="text-[10px] font-bold text-white/30 uppercase tracking-widest">
                 Proxima
               </span>
             </div>
           )}
         </div>
 
-        {/* ── Fighter names + VS divider ── */}
+        {/* ── Fighter names + VS ── */}
         <div className="flex items-center gap-3 sm:gap-4">
 
           {/* Fighter 1 */}
@@ -168,15 +162,10 @@ export function LiveCurrentFight({ luta }: LiveCurrentFightProps) {
             }`}
           >
             {isFinished && winnerIs1 && (
-              <div className="mb-1 flex items-center justify-center gap-1">
-                <div
-                  className="px-2 py-0.5 rounded-sm bg-green-500/20 border border-green-400/40"
-                  style={{ boxShadow: '0 0 8px rgba(34,197,94,0.3)' }}
-                >
-                  <span className="text-[9px] font-black text-green-400 uppercase tracking-[0.2em]">
-                    VENCEDOR
-                  </span>
-                </div>
+              <div className="mb-1.5 flex items-center justify-center">
+                <span className="text-[9px] font-black text-green-400 uppercase tracking-[0.2em] px-2 py-0.5 rounded-sm bg-green-500/15 border border-green-400/30">
+                  VENCEDOR
+                </span>
               </div>
             )}
             <div
@@ -189,9 +178,9 @@ export function LiveCurrentFight({ luta }: LiveCurrentFightProps) {
               }`}
               style={
                 isLive
-                  ? { textShadow: '0 0 20px rgba(210,10,10,0.6), 0 0 40px rgba(210,10,10,0.3)' }
+                  ? { textShadow: '0 0 20px rgba(255,255,255,0.15), 0 0 40px rgba(210,10,10,0.2)' }
                   : isFinished && winnerIs1
-                  ? { textShadow: '0 0 20px rgba(34,197,94,0.5), 0 0 40px rgba(34,197,94,0.25)' }
+                  ? { textShadow: '0 0 20px rgba(34,197,94,0.4)' }
                   : undefined
               }
             >
@@ -203,35 +192,39 @@ export function LiveCurrentFight({ luta }: LiveCurrentFightProps) {
           <div className="flex flex-col items-center shrink-0 gap-0">
             {isLive ? (
               <>
-                {/* Top gradient line */}
                 <div
                   className="w-px h-6"
-                  style={{
-                    background: 'linear-gradient(to bottom, transparent, rgba(210,10,10,0.8))',
-                  }}
+                  style={{ background: 'linear-gradient(to bottom, transparent, rgba(210,10,10,0.6))' }}
                 />
-                {/* Red diamond with zap */}
                 <div
-                  className="w-8 h-8 rotate-45 bg-ufc-red flex items-center justify-center animate-pulse-red"
+                  className="w-8 h-8 rotate-45 bg-red-600 flex items-center justify-center"
                   style={{
-                    boxShadow:
-                      '0 0 16px rgba(210,10,10,0.8), 0 0 32px rgba(210,10,10,0.4), 0 0 48px rgba(210,10,10,0.2)',
+                    boxShadow: '0 0 16px rgba(220,38,38,0.6), 0 0 32px rgba(220,38,38,0.3)',
                   }}
                 >
                   <Zap className="-rotate-45 w-4 h-4 text-white fill-white" />
                 </div>
-                {/* Bottom gradient line */}
                 <div
                   className="w-px h-6"
-                  style={{
-                    background: 'linear-gradient(to top, transparent, rgba(210,10,10,0.8))',
-                  }}
+                  style={{ background: 'linear-gradient(to top, transparent, rgba(210,10,10,0.6))' }}
                 />
               </>
-            ) : isFinished ? (
-              <span className="font-display text-sm text-green-500/30 tracking-widest">VS</span>
+            ) : isFinished && luta.metodo ? (
+              <div className="text-center">
+                <div className="rounded-md bg-green-500/10 px-3 py-1.5 border border-green-500/20">
+                  <p
+                    className="text-xs font-black uppercase tracking-widest text-green-400 whitespace-nowrap"
+                    style={{ textShadow: '0 0 6px rgba(34,197,94,0.3)' }}
+                  >
+                    {luta.metodo}
+                  </p>
+                  {luta.round_final != null && (
+                    <p className="text-[10px] font-semibold text-green-400/50">R{luta.round_final}</p>
+                  )}
+                </div>
+              </div>
             ) : (
-              <span className="font-display text-sm text-white/15 tracking-widest">VS</span>
+              <span className="text-sm text-white/15 font-medium">vs</span>
             )}
           </div>
 
@@ -242,15 +235,10 @@ export function LiveCurrentFight({ luta }: LiveCurrentFightProps) {
             }`}
           >
             {isFinished && winnerIs2 && (
-              <div className="mb-1 flex items-center justify-center gap-1">
-                <div
-                  className="px-2 py-0.5 rounded-sm bg-green-500/20 border border-green-400/40"
-                  style={{ boxShadow: '0 0 8px rgba(34,197,94,0.3)' }}
-                >
-                  <span className="text-[9px] font-black text-green-400 uppercase tracking-[0.2em]">
-                    VENCEDOR
-                  </span>
-                </div>
+              <div className="mb-1.5 flex items-center justify-center">
+                <span className="text-[9px] font-black text-green-400 uppercase tracking-[0.2em] px-2 py-0.5 rounded-sm bg-green-500/15 border border-green-400/30">
+                  VENCEDOR
+                </span>
               </div>
             )}
             <div
@@ -263,9 +251,9 @@ export function LiveCurrentFight({ luta }: LiveCurrentFightProps) {
               }`}
               style={
                 isLive
-                  ? { textShadow: '0 0 20px rgba(210,10,10,0.6), 0 0 40px rgba(210,10,10,0.3)' }
+                  ? { textShadow: '0 0 20px rgba(255,255,255,0.15), 0 0 40px rgba(210,10,10,0.2)' }
                   : isFinished && winnerIs2
-                  ? { textShadow: '0 0 20px rgba(34,197,94,0.5), 0 0 40px rgba(34,197,94,0.25)' }
+                  ? { textShadow: '0 0 20px rgba(34,197,94,0.4)' }
                   : undefined
               }
             >
@@ -274,150 +262,121 @@ export function LiveCurrentFight({ luta }: LiveCurrentFightProps) {
           </div>
         </div>
 
-        {/* ── Result method + round (finished only) ── */}
-        {isFinished && luta.metodo && (
-          <div className="text-center">
-            <span
-              className="inline-block px-4 py-1.5 rounded-sm border border-green-500/30 bg-green-500/10 text-sm font-display uppercase tracking-widest text-green-300"
-              style={{ boxShadow: '0 0 12px rgba(34,197,94,0.15)' }}
-            >
-              {luta.metodo}
-              {luta.round_final ? (
-                <span className="ml-2 text-green-400/60">R{luta.round_final}</span>
-              ) : null}
-            </span>
-          </div>
-        )}
-
-        {/* ── Divider ── */}
+        {/* ── Gradient divider ── */}
         <div
           className="h-px w-full"
           style={{
             background: isLive
-              ? 'linear-gradient(to right, transparent, rgba(210,10,10,0.5), transparent)'
+              ? 'linear-gradient(to right, transparent, rgba(210,10,10,0.4), transparent)'
               : isFinished
-              ? 'linear-gradient(to right, transparent, rgba(34,197,94,0.3), transparent)'
-              : 'linear-gradient(to right, transparent, rgba(255,255,255,0.07), transparent)',
+              ? 'linear-gradient(to right, transparent, rgba(34,197,94,0.25), transparent)'
+              : 'linear-gradient(to right, transparent, rgba(255,255,255,0.06), transparent)',
           }}
         />
 
-        {/* ── User pick section ── */}
+        {/* ── User pick section (inner card) ── */}
         {pick ? (
           <div
-            className={`flex items-center gap-3 px-4 py-3 rounded-xl border transition-all ${
+            className={`rounded-xl px-4 py-3 transition-all ${
               pickCorrect
-                ? 'border-green-500/40 bg-green-500/10'
+                ? 'bg-green-500/10 border border-green-500/20'
                 : pickWrong
-                ? 'border-red-500/30 bg-red-900/10'
-                : isLive
-                ? 'border-ufc-red/25 bg-ufc-red/5'
-                : 'border-white/[0.07] bg-white/[0.03]'
+                ? 'bg-red-500/10 border border-red-500/20'
+                : 'bg-black/40 border border-white/5'
             }`}
             style={
               pickCorrect
-                ? { boxShadow: '0 0 20px rgba(34,197,94,0.15), inset 0 0 20px rgba(34,197,94,0.05)' }
-                : pickWrong
-                ? { boxShadow: '0 0 20px rgba(210,10,10,0.12), inset 0 0 20px rgba(210,10,10,0.04)' }
+                ? { boxShadow: 'inset 0 0 20px rgba(34,197,94,0.05)' }
                 : undefined
             }
           >
-            {/* Icon */}
-            <div
-              className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 ${
-                pickCorrect
-                  ? 'bg-green-500/20'
-                  : pickWrong
-                  ? 'bg-red-500/15'
-                  : isLive
-                  ? 'bg-ufc-red/10'
-                  : 'bg-white/[0.06]'
-              }`}
-              style={
-                pickCorrect
-                  ? { boxShadow: '0 0 10px rgba(34,197,94,0.3)' }
-                  : pickWrong
-                  ? { boxShadow: '0 0 10px rgba(210,10,10,0.2)' }
-                  : undefined
-              }
-            >
-              {pickCorrect ? (
-                <CheckCircle2 className="w-5 h-5 text-green-400" />
-              ) : pickWrong ? (
-                <XCircle className="w-5 h-5 text-red-400" />
-              ) : (
-                <Zap
-                  className={`w-5 h-5 ${isLive ? 'text-ufc-red' : 'text-white/30'}`}
-                />
+            <div className="flex items-center gap-3">
+              {/* Icon */}
+              <div className="shrink-0">
+                {pickCorrect ? (
+                  <CheckCircle2
+                    className="w-6 h-6 text-green-400"
+                    style={{ filter: 'drop-shadow(0 0 8px rgba(34,197,94,0.6))' }}
+                  />
+                ) : pickWrong ? (
+                  <XCircle
+                    className="w-6 h-6 text-red-400"
+                    style={{ filter: 'drop-shadow(0 0 8px rgba(239,68,68,0.6))' }}
+                  />
+                ) : (
+                  <Zap
+                    className="w-6 h-6 text-yellow-400 fill-yellow-400 animate-glow-neon-yellow"
+                    style={{ filter: 'drop-shadow(0 0 10px rgba(250,204,21,0.7))' }}
+                  />
+                )}
+              </div>
+
+              {/* Pick info */}
+              <div className="flex-1 min-w-0">
+                <div
+                  className={`text-[10px] uppercase tracking-widest font-bold mb-0.5 ${
+                    pickCorrect
+                      ? 'text-green-400/60'
+                      : pickWrong
+                      ? 'text-red-400/50'
+                      : 'text-white/30'
+                  }`}
+                >
+                  Seu Pick
+                </div>
+                <div
+                  className={`font-display text-xl uppercase tracking-wide truncate ${
+                    pickCorrect
+                      ? 'text-green-300'
+                      : pickWrong
+                      ? 'text-red-400'
+                      : 'text-yellow-400'
+                  }`}
+                  style={
+                    pickCorrect
+                      ? { textShadow: '0 0 12px rgba(34,197,94,0.4)' }
+                      : pickWrong
+                      ? { textShadow: '0 0 12px rgba(239,68,68,0.3)' }
+                      : { textShadow: '0 0 10px rgba(250,204,21,0.4)' }
+                  }
+                >
+                  {pickName}
+                </div>
+              </div>
+
+              {/* Points badge */}
+              {pickCorrect && (
+                <div className="shrink-0 flex flex-col items-end">
+                  <span
+                    className="font-display text-2xl text-green-300 leading-tight"
+                    style={{ textShadow: '0 0 14px rgba(34,197,94,0.6)' }}
+                  >
+                    +{pick.pontos_ganhos}
+                  </span>
+                  <span className="text-[9px] text-green-400/60 uppercase tracking-widest">pts</span>
+                </div>
+              )}
+              {pickWrong && (
+                <div className="shrink-0">
+                  <span className="font-display text-xl text-red-400/50 leading-tight">0 pts</span>
+                </div>
+              )}
+              {pickPending && (
+                <div className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-red-600/10 border border-red-500/20">
+                  <span className="relative flex h-2 w-2">
+                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-500/60" />
+                    <span className="relative inline-flex h-2 w-2 rounded-full bg-red-500" />
+                  </span>
+                  <span className="text-[10px] text-red-400/80 uppercase tracking-widest font-bold">
+                    Ao vivo
+                  </span>
+                </div>
               )}
             </div>
-
-            {/* Pick info */}
-            <div className="flex-1 min-w-0">
-              <div
-                className={`text-[10px] uppercase tracking-widest font-bold mb-0.5 ${
-                  pickCorrect
-                    ? 'text-green-400/70'
-                    : pickWrong
-                    ? 'text-red-400/60'
-                    : 'text-white/30'
-                }`}
-              >
-                Seu Pick
-              </div>
-              <div
-                className={`font-display text-lg uppercase tracking-wide truncate ${
-                  pickCorrect
-                    ? 'text-green-300'
-                    : pickWrong
-                    ? 'text-red-400'
-                    : isLive
-                    ? 'text-white'
-                    : 'text-white/60'
-                }`}
-                style={
-                  pickCorrect
-                    ? { textShadow: '0 0 12px rgba(34,197,94,0.4)' }
-                    : pickWrong
-                    ? { textShadow: '0 0 12px rgba(210,10,10,0.3)' }
-                    : undefined
-                }
-              >
-                {pickName}
-              </div>
-            </div>
-
-            {/* Points badge */}
-            {pickCorrect && (
-              <div className="shrink-0 flex flex-col items-end">
-                <span
-                  className="font-display text-2xl text-green-300 leading-tight"
-                  style={{ textShadow: '0 0 14px rgba(34,197,94,0.6)' }}
-                >
-                  +{pick.pontos_ganhos}
-                </span>
-                <span className="text-[9px] text-green-400/60 uppercase tracking-widest">pts</span>
-              </div>
-            )}
-            {pickWrong && (
-              <div className="shrink-0">
-                <span className="font-display text-xl text-red-400/60 leading-tight">0 pts</span>
-              </div>
-            )}
-            {pickPending && (
-              <div className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-500/10 border border-amber-400/20">
-                <span className="relative flex h-2 w-2">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-400/60" />
-                  <span className="relative inline-flex h-2 w-2 rounded-full bg-amber-400" />
-                </span>
-                <span className="text-[10px] text-amber-400/80 uppercase tracking-widest font-bold">
-                  Ao vivo
-                </span>
-              </div>
-            )}
           </div>
         ) : (
-          <div className="flex items-center justify-center gap-2 py-2">
-            <Zap className="w-3.5 h-3.5 text-white/15" />
+          <div className="rounded-xl bg-black/40 border border-white/5 px-4 py-2.5 flex items-center justify-center gap-2">
+            <Zap className="w-4 h-4 text-white/15" />
             <span className="text-xs text-white/20 italic">Sem pick para esta luta</span>
           </div>
         )}

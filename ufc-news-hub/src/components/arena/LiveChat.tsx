@@ -75,14 +75,16 @@ export function LiveChat({ eventoId, ligaId, ligaNome }: LiveChatProps) {
     setLocalMessages([]);
   }, [activeTab]);
 
+  const messageCount = localMessages.length;
   useEffect(() => {
     const container = scrollContainerRef.current;
-    if (!container) return;
+    if (!container || messageCount === 0) return;
     const isNearBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 100;
     if (isNearBottom) {
-      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+      // scrollTop no container apenas — NÃO usar scrollIntoView que rola a página inteira
+      container.scrollTop = container.scrollHeight;
     }
-  }, [localMessages]);
+  }, [messageCount]);
 
   const handleSend = useCallback(async () => {
     if (!input.trim() || isSending || cooldown) return;
@@ -109,9 +111,16 @@ export function LiveChat({ eventoId, ligaId, ligaNome }: LiveChatProps) {
       });
 
       if (res.ok) {
-        const msg = await res.json() as ChatMessage;
+        const raw: unknown = await res.json();
+        // Chat global retorna ChatMessage direto, liga retorna { mensagem: ChatMessage }
+        const msg = (raw && typeof raw === 'object' && 'mensagem' in raw && typeof (raw as Record<string, unknown>).mensagem === 'object')
+          ? (raw as { mensagem: ChatMessage }).mensagem
+          : raw as ChatMessage;
         setLocalMessages(prev => [...prev, msg]);
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+        // Scroll apenas o container do chat, não a página
+        if (scrollContainerRef.current) {
+          scrollContainerRef.current.scrollTop = scrollContainerRef.current.scrollHeight;
+        }
 
         setCooldown(true);
         setTimeout(() => setCooldown(false), 2000);

@@ -249,11 +249,11 @@ export function criarCookieToken(token: string): string {
   const maxAge = 7 * 24 * 60 * 60;
   const isProduction = process.env.NODE_ENV === 'production';
   const secure = isProduction ? '; Secure' : '';
-  return `arena_token=${token}; Path=/; HttpOnly; SameSite=Strict; Max-Age=${maxAge}${secure}`;
+  return `arena_token=${token}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${maxAge}${secure}`;
 }
 
 export function removerCookieToken(): string {
-  return 'arena_token=; Path=/; HttpOnly; SameSite=Strict; Max-Age=0';
+  return 'arena_token=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0';
 }
 
 // ═══════════════════════════════════════════════════════════════

@@ -76,7 +76,7 @@ function formatDate(dateStr: string) {
 }
 
 export default function CardMonitorPage() {
-  const { authFetch } = useAdminAuth();
+  const { authFetch, isAuthenticated } = useAdminAuth();
   const [logs, setLogs] = useState<MonitorLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [checking, setChecking] = useState(false);
@@ -97,8 +97,8 @@ export default function CardMonitorPage() {
   }, [authFetch]);
 
   useEffect(() => {
-    fetchLogs();
-  }, [fetchLogs]);
+    if (isAuthenticated) fetchLogs();
+  }, [fetchLogs, isAuthenticated]);
 
   const runManualCheck = async () => {
     setChecking(true);

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { validateToken } from '@/lib/admin-sessions';
 import * as cheerio from 'cheerio';
 import {
   ensureMonitorTable,
@@ -114,11 +115,15 @@ async function scrapeNextEvent(): Promise<{ evento_nome: string; evento_data: st
 }
 
 export async function GET(request: NextRequest) {
-  // Verify cron secret
+  // Verify auth: accept either CRON_SECRET or admin token
   const authHeader = request.headers.get('authorization');
+  const bearerToken = authHeader?.replace('Bearer ', '') || '';
   const cronSecret = process.env.CRON_SECRET;
 
-  if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
+  const isCronAuth = cronSecret && authHeader === `Bearer ${cronSecret}`;
+  const isAdminAuth = validateToken(bearerToken);
+
+  if (!isCronAuth && !isAdminAuth) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 

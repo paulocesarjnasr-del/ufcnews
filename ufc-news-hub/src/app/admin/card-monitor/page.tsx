@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { useAdminAuth } from '@/components/admin/AdminAuthContext';
 import { AlertTriangle, CheckCircle2, Clock, RefreshCw, Shield, XCircle, Plus, Minus, ArrowLeftRight } from 'lucide-react';
 
 interface CardChange {
@@ -75,25 +76,15 @@ function formatDate(dateStr: string) {
 }
 
 export default function CardMonitorPage() {
+  const { authFetch } = useAdminAuth();
   const [logs, setLogs] = useState<MonitorLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [checking, setChecking] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const getToken = () => {
-    if (typeof document === 'undefined') return '';
-    return document.cookie
-      .split('; ')
-      .find((row) => row.startsWith('admin_token='))
-      ?.split('=')[1] || '';
-  };
-
   const fetchLogs = useCallback(async () => {
     try {
-      const token = getToken();
-      const res = await fetch('/api/admin/card-monitor', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await authFetch('/api/admin/card-monitor');
       if (!res.ok) throw new Error('Erro ao buscar logs');
       const data = await res.json() as { logs: MonitorLog[] };
       setLogs(data.logs);
@@ -103,7 +94,7 @@ export default function CardMonitorPage() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [authFetch]);
 
   useEffect(() => {
     fetchLogs();
@@ -112,10 +103,7 @@ export default function CardMonitorPage() {
   const runManualCheck = async () => {
     setChecking(true);
     try {
-      const token = getToken();
-      const res = await fetch('/api/cron/card-monitor', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await authFetch('/api/cron/card-monitor');
       const data = await res.json();
       if (data.error) {
         setError(data.error);

@@ -5,7 +5,9 @@ import type { CardChange } from './card-monitor';
 // Card Monitor Email Alerts
 // ═══════════════════════════════════════════════════════════
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+function getResendClient(): Resend {
+  return new Resend(process.env.RESEND_API_KEY);
+}
 
 const ALERT_RECIPIENTS = (process.env.CARD_MONITOR_EMAILS || 'paulocesarjnasr@gmail.com').split(',');
 
@@ -109,7 +111,7 @@ export async function sendCardChangeAlert(
   `;
 
   try {
-    const { error } = await resend.emails.send({
+    const { error } = await getResendClient().emails.send({
       from: 'Card Monitor <onboarding@resend.dev>',
       to: ALERT_RECIPIENTS,
       subject: `[CARD ALERT] ${eventoNome} - ${changes.length} mudanca${changes.length > 1 ? 's' : ''} detectada${changes.length > 1 ? 's' : ''}`,

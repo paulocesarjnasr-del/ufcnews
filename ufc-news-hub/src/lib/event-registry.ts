@@ -33,6 +33,15 @@ export interface EventRegistryEntry {
 
 export const EVENT_REGISTRY: EventRegistryEntry[] = [
   {
+    slug: 'adesanya-vs-pyfer',
+    evento_nome: 'UFC Fight Night: Adesanya vs Pyfer',
+    evento_data: '28 de Marco, 2026',
+    evento_local: 'Climate Pledge Arena, Seattle, Washington, EUA',
+    evento_datetime: '2026-03-29T00:00:00Z', // 8pm EDT = midnight UTC
+    main_event: { fighter1: 'Israel Adesanya', fighter2: 'Joe Pyfer' },
+    total_fights: 13,
+  },
+  {
     slug: 'emmett-vs-vallejos',
     evento_nome: 'UFC Fight Night: Emmett vs Vallejos',
     evento_data: '14 de Marco, 2026',

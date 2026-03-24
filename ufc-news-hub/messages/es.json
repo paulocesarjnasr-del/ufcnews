@@ -1,0 +1,14 @@
+{
+  "nav": {
+    "home": "Inicio",
+    "noticias": "Noticias",
+    "lutadores": "Luchadores",
+    "analises": "Analisis",
+    "arena": "Arena",
+    "calendario": "Calendario"
+  },
+  "metadata": {
+    "title": "UFC News Hub - Noticias, Predicciones y Rankings de UFC",
+    "description": "La plataforma #1 para fanaticos de UFC."
+  }
+}

@@ -4,8 +4,10 @@ import { MainLayout } from '@/components/layout/MainLayout';
 import { NewsGrid } from '@/components/ui/NewsGrid';
 import { NewsGridSkeleton } from '@/components/ui/LoadingSkeleton';
 import { useNoticias } from '@/hooks/useNoticias';
+import { useTranslations } from 'next-intl';
 
 export default function LutadoresPage() {
+  const t = useTranslations('pages');
   const {
     noticias,
     isLoading,
@@ -18,10 +20,10 @@ export default function LutadoresPage() {
     <MainLayout>
       <div className="mb-6">
         <h1 className="font-display text-2xl uppercase text-dark-text md:text-3xl">
-          <span className="text-category-lutadores">Lutadores</span>
+          <span className="text-category-lutadores">{t('lutadores_title')}</span>
         </h1>
         <p className="mt-1 text-dark-textMuted">
-          Contratos, lesoes, rankings e declaracoes dos atletas
+          {t('lutadores_subtitle')}
         </p>
       </div>
 

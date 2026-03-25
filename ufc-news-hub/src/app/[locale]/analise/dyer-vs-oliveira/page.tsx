@@ -4,7 +4,7 @@ import { Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { PrelimsAnalysisView } from '@/components/analise/PrelimsAnalysisView';
 import type { PrelimsAnalise } from '@/types/analise';
-import type { Lang } from '@/lib/i18n-labels';
+
 
 const analisePT: PrelimsAnalise = {
   id: 'dyer-vs-oliveira',
@@ -425,9 +425,9 @@ const analiseEN: PrelimsAnalise = {
 
 function PageContent() {
   const searchParams = useSearchParams();
-  const lang = (searchParams.get('lang') === 'en' ? 'en' : 'pt') as Lang;
+  const lang = (searchParams.get('lang') === 'en' ? 'en' : 'pt');
   const analise = lang === 'en' ? analiseEN : analisePT;
-  return <PrelimsAnalysisView analise={analise} lang={lang} />;
+  return <PrelimsAnalysisView analise={analise} />;
 }
 
 export default function Page() {

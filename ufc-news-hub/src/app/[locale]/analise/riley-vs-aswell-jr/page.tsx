@@ -4,7 +4,7 @@ import { Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { FullAnalysisView } from '@/components/analise/FullAnalysisView';
 import type { FullSingleAnalise } from '@/types/analise';
-import type { Lang } from '@/lib/i18n-labels';
+
 
 const analisePT: FullSingleAnalise = {
   id: 'riley-vs-aswell-jr',
@@ -601,9 +601,9 @@ const analiseEN: FullSingleAnalise = {
 
 function PageContent() {
   const searchParams = useSearchParams();
-  const lang = (searchParams.get('lang') === 'en' ? 'en' : 'pt') as Lang;
+  const lang = (searchParams.get('lang') === 'en' ? 'en' : 'pt');
   const analise = lang === 'en' ? analiseEN : analisePT;
-  return <FullAnalysisView analise={analise} lang={lang} />;
+  return <FullAnalysisView analise={analise} />;
 }
 
 export default function Page() {

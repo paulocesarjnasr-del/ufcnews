@@ -4,7 +4,7 @@ import { Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { FullAnalysisView } from '@/components/analise/FullAnalysisView';
 import type { FullSingleAnalise } from '@/types/analise';
-import type { Lang } from '@/lib/i18n-labels';
+
 
 const analisePT: FullSingleAnalise = {
   id: 'grasso-vs-barber',
@@ -496,8 +496,8 @@ const analisePT: FullSingleAnalise = {
 
 function PageContent() {
   const searchParams = useSearchParams();
-  const lang = (searchParams.get('lang') === 'en' ? 'en' : 'pt') as Lang;
-  return <FullAnalysisView analise={analisePT} lang={lang} />;
+  const lang = (searchParams.get('lang') === 'en' ? 'en' : 'pt');
+  return <FullAnalysisView analise={analisePT} />;
 }
 
 export default function Page() {

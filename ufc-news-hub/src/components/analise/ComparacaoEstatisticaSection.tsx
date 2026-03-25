@@ -1,5 +1,5 @@
 import type { ComparacaoEstatisticaSectionData } from '@/types/analise';
-import { getLabels, type Lang } from '@/lib/i18n-labels';
+import { useTranslations } from 'next-intl';
 import { SectionHeader } from './SectionHeader';
 import { StatBar } from './StatBar';
 
@@ -14,18 +14,16 @@ export function ComparacaoEstatisticaSection({
   fighter1Name,
   fighter2Name,
   sectionNumber,
-  lang = 'pt',
 }: {
   data: ComparacaoEstatisticaSectionData;
   fighter1Name: string;
   fighter2Name: string;
   sectionNumber?: string;
-  lang?: Lang;
 }) {
-  const t = getLabels(lang);
+  const t = useTranslations('analise');
   return (
     <section>
-      <SectionHeader number={sectionNumber ?? "05"} title={t.comparacao_title} accent={t.comparacao_accent} />
+      <SectionHeader number={sectionNumber ?? "05"} title={t('comparacao_title')} accent={t('comparacao_accent')} />
 
       <div className="rounded-lg border border-dark-border bg-dark-card p-6 md:p-8">
         <div className="mb-6 flex items-center justify-between text-xs uppercase tracking-wider text-dark-textMuted">

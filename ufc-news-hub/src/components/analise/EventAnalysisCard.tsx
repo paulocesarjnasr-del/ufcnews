@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import FighterImage from '@/components/ui/FighterImage';
-import { getLabels, type Lang } from '@/lib/i18n-labels';
+import { useTranslations } from 'next-intl';
 
 export interface EventFightCard {
   slug: string;
@@ -49,23 +49,20 @@ export function EventAnalysisCard({
   size = 'card',
   showMeta = true,
   showPrediction = true,
-  lang = 'pt',
 }: {
   fight: EventFightCard;
   size?: 'card' | 'prelim';
   showMeta?: boolean;
   showPrediction?: boolean;
-  lang?: Lang;
 }) {
   const [isHovered, setIsHovered] = useState(false);
   const styles = sizeStyles[size];
-  const t = getLabels(lang);
-  const langParam = lang === 'en' ? '?lang=en' : '';
+  const t = useTranslations('analise');
   const isWinnerFighter1 = fight.predicted_winner === fight.fighter1.nome;
 
   return (
     <Link
-      href={`/analise/${fight.slug}${langParam}`}
+      href={`/analise/${fight.slug}`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       className={`group block rounded-2xl ${styles.container} transition-all duration-300
@@ -152,7 +149,7 @@ export function EventAnalysisCard({
           )}
           {showPrediction && (
             <span className={`text-neutral-300 ${styles.prediction}`}>
-              → {fight.predicted_winner} {t.por} {fight.predicted_method}
+              → {fight.predicted_winner} {t('por')} {fight.predicted_method}
             </span>
           )}
         </div>

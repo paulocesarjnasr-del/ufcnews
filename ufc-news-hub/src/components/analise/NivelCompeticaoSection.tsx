@@ -1,12 +1,12 @@
 import type { NivelCompeticaoSectionData } from '@/types/analise';
-import { getLabels, type Lang } from '@/lib/i18n-labels';
+import { useTranslations } from 'next-intl';
 import { SectionHeader } from './SectionHeader';
 
-export function NivelCompeticaoSection({ data, lang = 'pt' }: { data: NivelCompeticaoSectionData; lang?: Lang }) {
-  const t = getLabels(lang);
+export function NivelCompeticaoSection({ data}: { data: NivelCompeticaoSectionData }) {
+  const t = useTranslations('analise');
   return (
     <section>
-      <SectionHeader number="03" title={t.nivel_title} accent={t.nivel_accent} />
+      <SectionHeader number="03" title={t('nivel_title')} accent={t('nivel_accent')} />
 
       <div className="grid gap-6 md:grid-cols-2">
         {/* Fighter 1 */}

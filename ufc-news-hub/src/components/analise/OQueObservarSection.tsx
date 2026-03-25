@@ -1,13 +1,13 @@
 import type { OQueObservarSectionData } from '@/types/analise';
-import { getLabels, type Lang } from '@/lib/i18n-labels';
+import { useTranslations } from 'next-intl';
 import { SectionHeader } from './SectionHeader';
 import { resolveIcon } from './icon-resolver';
 
-export function OQueObservarSection({ data, lang = 'pt' }: { data: OQueObservarSectionData; lang?: Lang }) {
-  const t = getLabels(lang);
+export function OQueObservarSection({ data}: { data: OQueObservarSectionData }) {
+  const t = useTranslations('analise');
   return (
     <section>
-      <SectionHeader number="12" title={t.observar_title} accent={t.observar_accent} />
+      <SectionHeader number="12" title={t('observar_title')} accent={t('observar_accent')} />
 
       <div className="space-y-4">
         {data.points.map((item) => {

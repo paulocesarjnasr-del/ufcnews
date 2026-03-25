@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Instagram, MessageCircle, Video, Smartphone, Type, Copy, Check, Mic } from 'lucide-react';
 import type { CreatorKitSectionData } from '@/types/analise';
-import { getLabels, type Lang } from '@/lib/i18n-labels';
+import { useTranslations } from 'next-intl';
 import { SectionHeader } from './SectionHeader';
 
 const slideColorMap = {
@@ -40,8 +40,8 @@ function HeadlineItem({ text }: { text: string }) {
   );
 }
 
-export function CreatorKitSection({ data, lang = 'pt' }: { data: CreatorKitSectionData; lang?: Lang }) {
-  const t = getLabels(lang);
+export function CreatorKitSection({ data}: { data: CreatorKitSectionData }) {
+  const t = useTranslations('analise');
   const [activeTab, setActiveTab] = useState<'instagram' | 'twitter' | 'video' | 'tiktok' | 'podcast' | 'headlines'>('instagram');
 
   const tabs = [
@@ -55,7 +55,7 @@ export function CreatorKitSection({ data, lang = 'pt' }: { data: CreatorKitSecti
 
   return (
     <section>
-      <SectionHeader number="13" title={t.creator_title} accent={t.creator_accent} />
+      <SectionHeader number="13" title={t('creator_title')} accent={t('creator_accent')} />
 
       {/* Tabs */}
       <div className="mb-6 flex gap-2 flex-wrap">

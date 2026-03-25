@@ -1,5 +1,5 @@
 import type { CaminhosVitoriaSectionData, CaminhoVitoria } from '@/types/analise';
-import { getLabels, type Lang } from '@/lib/i18n-labels';
+import { useTranslations } from 'next-intl';
 import { SectionHeader } from './SectionHeader';
 
 function ScenarioList({
@@ -45,7 +45,7 @@ function ScenarioList({
   );
 }
 
-export function CaminhosVitoriaSection({ data, lang = 'pt' }: { data: CaminhosVitoriaSectionData; lang?: Lang }) {
+export function CaminhosVitoriaSection({ data}: { data: CaminhosVitoriaSectionData }) {
   // Validate: if scenario sums don't match total, recalculate proportionally
   const normalizeScenarios = (scenarios: CaminhoVitoria[], total: number): CaminhoVitoria[] => {
     const sum = scenarios.reduce((s, sc) => s + sc.probability, 0);
@@ -60,10 +60,10 @@ export function CaminhosVitoriaSection({ data, lang = 'pt' }: { data: CaminhosVi
   const f1Scenarios = normalizeScenarios(data.fighter1.scenarios, data.fighter1.total_probability);
   const f2Scenarios = normalizeScenarios(data.fighter2.scenarios, data.fighter2.total_probability);
 
-  const t = getLabels(lang);
+  const t = useTranslations('analise');
   return (
     <section>
-      <SectionHeader number="10" title={t.caminhos_title} accent={t.caminhos_accent} />
+      <SectionHeader number="10" title={t('caminhos_title')} accent={t('caminhos_accent')} />
 
       <div className="grid gap-8 lg:grid-cols-2">
         <ScenarioList

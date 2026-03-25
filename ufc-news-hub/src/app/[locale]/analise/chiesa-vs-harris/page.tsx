@@ -4,7 +4,7 @@ import { Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { FullAnalysisView } from '@/components/analise/FullAnalysisView';
 import type { FullSingleAnalise } from '@/types/analise';
-import type { Lang } from '@/lib/i18n-labels';
+
 
 const analisePT: FullSingleAnalise = {
   id: 'chiesa-vs-harris',
@@ -570,7 +570,7 @@ const analiseEN: FullSingleAnalise = {
 
 function ChiesaVsHarrisContent() {
   const searchParams = useSearchParams();
-  const lang = (searchParams.get('lang') as Lang) || 'pt';
+  const lang = (searchParams.get('lang')) || 'pt';
   const analise = lang === 'en' ? analiseEN : analisePT;
   return <FullAnalysisView analise={analise} />;
 }

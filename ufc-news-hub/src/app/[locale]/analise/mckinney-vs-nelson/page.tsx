@@ -4,7 +4,7 @@ import { Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { FullAnalysisView } from '@/components/analise/FullAnalysisView';
 import type { FullSingleAnalise } from '@/types/analise';
-import type { Lang } from '@/lib/i18n-labels';
+
 
 const analisePT: FullSingleAnalise = {
   id: 'mckinney-vs-nelson',
@@ -514,7 +514,7 @@ const analisePT: FullSingleAnalise = {
 
 function AnaliseContent() {
   const searchParams = useSearchParams();
-  const lang = (searchParams.get('lang') as Lang) || 'pt';
+  const lang = (searchParams.get('lang')) || 'pt';
 
   const analise = lang === 'pt' ? analisePT : analisePT;
 

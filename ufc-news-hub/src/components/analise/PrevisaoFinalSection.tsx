@@ -1,15 +1,15 @@
 import { Zap, AlertTriangle } from 'lucide-react';
 import type { PrevisaoFinalSectionData } from '@/types/analise';
-import { getLabels, type Lang } from '@/lib/i18n-labels';
+import { useTranslations } from 'next-intl';
 import { SectionHeader } from './SectionHeader';
 
-export function PrevisaoFinalSection({ data, sectionNumber, lang = 'pt' }: { data: PrevisaoFinalSectionData; sectionNumber?: string; lang?: Lang }) {
+export function PrevisaoFinalSection({ data, sectionNumber}: { data: PrevisaoFinalSectionData; sectionNumber?: string }) {
   const winnerColor = data.winner_side === 'fighter1' ? 'text-ufc-red' : 'text-blue-400';
 
-  const t = getLabels(lang);
+  const t = useTranslations('analise');
   return (
     <section>
-      <SectionHeader number={sectionNumber ?? "11"} title={t.previsao_title} accent={t.previsao_accent} />
+      <SectionHeader number={sectionNumber ?? "11"} title={t('previsao_title')} accent={t('previsao_accent')} />
 
       <div className="rounded-xl border-2 border-ufc-red/30 bg-gradient-to-br from-dark-card via-dark-card to-ufc-red/5 p-8 md:p-12">
         <div className="text-center mb-8">

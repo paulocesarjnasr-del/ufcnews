@@ -1,5 +1,5 @@
 import type { IntangiveisSectionData } from '@/types/analise';
-import { getLabels, type Lang } from '@/lib/i18n-labels';
+import { useTranslations } from 'next-intl';
 import { SectionHeader } from './SectionHeader';
 import { resolveIcon } from './icon-resolver';
 
@@ -10,11 +10,11 @@ const riskColorMap = {
   neutral: 'text-dark-textMuted bg-dark-bg border-dark-border',
 };
 
-export function IntangiveisSection({ data, lang = 'pt' }: { data: IntangiveisSectionData; lang?: Lang }) {
-  const t = getLabels(lang);
+export function IntangiveisSection({ data}: { data: IntangiveisSectionData }) {
+  const t = useTranslations('analise');
   return (
     <section>
-      <SectionHeader number="09" title={t.intangiveis_title} accent={t.intangiveis_accent} />
+      <SectionHeader number="09" title={t('intangiveis_title')} accent={t('intangiveis_accent')} />
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {data.items.map((item, i) => {

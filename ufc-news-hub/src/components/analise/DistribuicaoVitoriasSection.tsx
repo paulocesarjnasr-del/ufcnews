@@ -1,6 +1,6 @@
 import { BarChart3 } from 'lucide-react';
 import type { DistribuicaoVitoriasSectionData, WinMethodBreakdown } from '@/types/analise';
-import { getLabels, type Lang } from '@/lib/i18n-labels';
+import { useTranslations } from 'next-intl';
 import { SectionHeader } from './SectionHeader';
 
 function WinBreakdownCard({ nome, data, accentClass }: { nome: string; data: { nome: string } & WinMethodBreakdown; accentClass: string }) {
@@ -53,11 +53,11 @@ function WinBreakdownCard({ nome, data, accentClass }: { nome: string; data: { n
   );
 }
 
-export function DistribuicaoVitoriasSection({ data, sectionNumber, lang = 'pt' }: { data: DistribuicaoVitoriasSectionData; sectionNumber?: string; lang?: Lang }) {
-  const t = getLabels(lang);
+export function DistribuicaoVitoriasSection({ data, sectionNumber}: { data: DistribuicaoVitoriasSectionData; sectionNumber?: string }) {
+  const t = useTranslations('analise');
   return (
     <section>
-      <SectionHeader number={sectionNumber ?? "07"} title={t.distribuicao_title} accent={t.distribuicao_accent} />
+      <SectionHeader number={sectionNumber ?? "07"} title={t('distribuicao_title')} accent={t('distribuicao_accent')} />
 
       <div className="grid gap-6 md:grid-cols-2">
         <WinBreakdownCard nome={data.fighter1.nome} data={data.fighter1} accentClass="text-ufc-red" />

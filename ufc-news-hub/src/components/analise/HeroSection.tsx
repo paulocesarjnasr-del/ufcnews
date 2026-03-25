@@ -1,7 +1,7 @@
 import type { HeroSectionData } from '@/types/analise';
-import type { Lang } from '@/lib/i18n-labels';
+import { useTranslations } from 'next-intl';
 
-export function HeroSection({ data, lang = 'pt' }: { data: HeroSectionData; lang?: Lang }) {
+export function HeroSection({ data}: { data: HeroSectionData }) {
   const f1 = data.fighter1;
   const f2 = data.fighter2;
 

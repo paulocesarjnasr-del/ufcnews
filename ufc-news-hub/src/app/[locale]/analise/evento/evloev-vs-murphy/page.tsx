@@ -1,7 +1,7 @@
 import { EventAnalysisView, type EventAnalysisData } from '@/components/analise/EventAnalysisView';
 import { enrichEventWithPhotos } from '@/lib/enrich-event-photos';
 import type { EventCreatorKitData } from '@/types/event-creator-kit';
-import type { Lang } from '@/lib/i18n-labels';
+
 
 export const dynamic = 'force-dynamic';
 
@@ -516,8 +516,8 @@ export default async function EventoEvloevVsMurphyPage({
   searchParams: Promise<{ lang?: string }>;
 }) {
   const params = await searchParams;
-  const lang = (params.lang === 'en' ? 'en' : 'pt') as Lang;
+  const lang = (params.lang === 'en' ? 'en' : 'pt');
   const data = lang === 'en' ? eventDataEN : eventDataPT;
   const enrichedData = await enrichEventWithPhotos(data);
-  return <EventAnalysisView data={enrichedData} lang={lang} />;
+  return <EventAnalysisView data={enrichedData} />;
 }

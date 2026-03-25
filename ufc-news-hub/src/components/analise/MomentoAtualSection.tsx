@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { TrendingUp, Activity, AlertTriangle, X } from 'lucide-react';
 import type { MomentoAtualSectionData, MomentoAtualFighter } from '@/types/analise';
-import { getLabels, type Lang } from '@/lib/i18n-labels';
+import { useTranslations } from 'next-intl';
 import { SectionHeader } from './SectionHeader';
 
 function FighterTimeline({ fighter }: { fighter: MomentoAtualFighter }) {
@@ -139,11 +139,11 @@ function FighterTimeline({ fighter }: { fighter: MomentoAtualFighter }) {
   );
 }
 
-export function MomentoAtualSection({ data, lang = 'pt' }: { data: MomentoAtualSectionData; lang?: Lang }) {
-  const t = getLabels(lang);
+export function MomentoAtualSection({ data}: { data: MomentoAtualSectionData }) {
+  const t = useTranslations('analise');
   return (
     <section>
-      <SectionHeader number="02" title={t.momento_title} accent={t.momento_accent} />
+      <SectionHeader number="02" title={t('momento_title')} accent={t('momento_accent')} />
       <div className="grid gap-8 lg:grid-cols-2">
         <FighterTimeline fighter={data.fighter1} />
         <FighterTimeline fighter={data.fighter2} />

@@ -1,6 +1,6 @@
 import { BarChart3 } from 'lucide-react';
 import type { PerfilHabilidadesSectionData, SkillBarData } from '@/types/analise';
-import { getLabels, type Lang } from '@/lib/i18n-labels';
+import { useTranslations } from 'next-intl';
 import { SectionHeader } from './SectionHeader';
 
 function valueToLabel(value: number): string {
@@ -60,18 +60,16 @@ export function PerfilHabilidadesSection({
   fighter1Name,
   fighter2Name,
   sectionNumber,
-  lang = 'pt',
 }: {
   data: PerfilHabilidadesSectionData;
   fighter1Name: string;
   fighter2Name: string;
   sectionNumber?: string;
-  lang?: Lang;
 }) {
-  const t = getLabels(lang);
+  const t = useTranslations('analise');
   return (
     <section>
-      <SectionHeader number={sectionNumber ?? "06"} title={t.habilidades_title} accent={t.habilidades_accent} />
+      <SectionHeader number={sectionNumber ?? "06"} title={t('habilidades_title')} accent={t('habilidades_accent')} />
 
       <div className="rounded-lg border border-dark-border bg-dark-card p-6 md:p-8">
         <div className="mb-6 flex items-center justify-center gap-8 text-sm">

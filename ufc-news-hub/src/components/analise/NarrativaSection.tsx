@@ -1,5 +1,5 @@
 import type { NarrativaSectionData, FuturoCenario } from '@/types/analise';
-import { getLabels, type Lang } from '@/lib/i18n-labels';
+import { useTranslations } from 'next-intl';
 import { SectionHeader } from './SectionHeader';
 
 function FuturoCard({ cenario, side, nextFightLabel }: { cenario: FuturoCenario; side: 'fighter1' | 'fighter2'; nextFightLabel: string }) {
@@ -54,11 +54,11 @@ function FuturoCard({ cenario, side, nextFightLabel }: { cenario: FuturoCenario;
   );
 }
 
-export function NarrativaSection({ data, fighter1Name, fighter2Name, lang = 'pt' }: { data: NarrativaSectionData; fighter1Name?: string; fighter2Name?: string; lang?: Lang }) {
-  const t = getLabels(lang);
+export function NarrativaSection({ data, fighter1Name, fighter2Name}: { data: NarrativaSectionData; fighter1Name?: string; fighter2Name?: string }) {
+  const t = useTranslations('analise');
   return (
     <section>
-      <SectionHeader number="01" title={t.narrativa_title} accent={t.narrativa_accent} />
+      <SectionHeader number="01" title={t('narrativa_title')} accent={t('narrativa_accent')} />
 
       <div className="rounded-lg border border-dark-border bg-dark-card p-6 md:p-8">
         <div
@@ -71,9 +71,9 @@ export function NarrativaSection({ data, fighter1Name, fighter2Name, lang = 'pt'
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-dark-border">
-                  <th className="py-3 px-4 text-left font-display uppercase tracking-wider text-dark-textMuted">{t.dimensao}</th>
-                  <th className="py-3 px-4 text-left font-display uppercase tracking-wider text-ufc-red">{fighter1Name || t.lutador_fallback_1}</th>
-                  <th className="py-3 px-4 text-left font-display uppercase tracking-wider text-blue-400">{fighter2Name || t.lutador_fallback_2}</th>
+                  <th className="py-3 px-4 text-left font-display uppercase tracking-wider text-dark-textMuted">{t('dimensao')}</th>
+                  <th className="py-3 px-4 text-left font-display uppercase tracking-wider text-ufc-red">{fighter1Name || t('lutador_fallback_1')}</th>
+                  <th className="py-3 px-4 text-left font-display uppercase tracking-wider text-blue-400">{fighter2Name || t('lutador_fallback_2')}</th>
                 </tr>
               </thead>
               <tbody className="text-gray-200">
@@ -95,14 +95,14 @@ export function NarrativaSection({ data, fighter1Name, fighter2Name, lang = 'pt'
         <div className="mt-8">
           <div className="mb-6 text-center">
             <p className="font-display text-2xl uppercase tracking-wider text-dark-text">
-              {t.dois_destinos}<span className="text-ufc-gold">,</span> {t.uma_luta}
+              {t('dois_destinos')}<span className="text-ufc-gold">,</span> {t('uma_luta')}
             </p>
             <p className="mt-1 text-sm text-dark-textMuted">O que muda no universo do MMA dependendo de quem vence</p>
           </div>
 
           <div className="grid gap-6 lg:grid-cols-2">
-            <FuturoCard cenario={data.prognostico.fighter1_vence} side="fighter1" nextFightLabel={t.proxima_luta} />
-            <FuturoCard cenario={data.prognostico.fighter2_vence} side="fighter2" nextFightLabel={t.proxima_luta} />
+            <FuturoCard cenario={data.prognostico.fighter1_vence} side="fighter1" nextFightLabel={t('proxima_luta')} />
+            <FuturoCard cenario={data.prognostico.fighter2_vence} side="fighter2" nextFightLabel={t('proxima_luta')} />
           </div>
         </div>
       )}

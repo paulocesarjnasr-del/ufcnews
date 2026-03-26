@@ -308,6 +308,15 @@ function EventResultView({
     );
   }
 
+  // Next pending pick: must be before early returns (hooks can't be conditional)
+  const nextPendingPick = useMemo(() => {
+    if (!data?.lutas) return null;
+    const pending = data.lutas
+      .filter(l => l.status !== 'finalizada' && l.userPick && l.userPick.acertou_vencedor === null)
+      .sort((a, b) => a.ordem - b.ordem);
+    return pending[0]?.userPick ?? null;
+  }, [data?.lutas]);
+
   if (!data) return null;
 
   const { lutas, leaderboard, lutas_finalizadas, usuario_id } = data;
@@ -317,15 +326,6 @@ function EventResultView({
   const myEventPoints = usuario_id
     ? leaderboard.find(e => e.usuario_id === usuario_id)?.pontos_totais ?? 0
     : 0;
-
-  // Next pending pick: find next unsettled fight (by ordem ASC) where user has a pick
-  const nextPendingPick = useMemo(() => {
-    if (!lutas) return null;
-    const pending = lutas
-      .filter(l => l.status !== 'finalizada' && l.userPick && l.userPick.acertou_vencedor === null)
-      .sort((a, b) => a.ordem - b.ordem);
-    return pending[0]?.userPick ?? null;
-  }, [lutas]);
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-6">

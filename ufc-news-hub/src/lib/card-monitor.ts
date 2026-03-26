@@ -256,7 +256,7 @@ async function matchLutador(nome: string): Promise<string | null> {
   );
   if (exact) return exact.id;
 
-  // Fuzzy: match by last name + first initial
+  // Fuzzy: match by last name
   const parts = trimmed.split(' ');
   const lastName = parts[parts.length - 1];
   if (lastName.length < 2) return null;
@@ -267,7 +267,20 @@ async function matchLutador(nome: string): Promise<string | null> {
      ORDER BY LENGTH(nome) ASC LIMIT 1`,
     [lastName]
   );
-  return fuzzy?.id ?? null;
+  if (fuzzy) return fuzzy.id;
+
+  // Not found: auto-create fighter with basic data
+  const created = await queryOne<{ id: string }>(
+    `INSERT INTO lutadores (nome, vitorias, derrotas, empates)
+     VALUES ($1, 0, 0, 0)
+     RETURNING id`,
+    [trimmed]
+  );
+  if (created) {
+    console.info(`[Card Sync] Lutador criado automaticamente: ${trimmed}`);
+    return created.id;
+  }
+  return null;
 }
 
 // ═══════════════════════════════════════════════════════════

@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { ComentarioComRespostas } from '@/types';
 import { CommentCard } from './CommentCard';
 import { CommentSkeletonList } from './CommentSkeleton';
@@ -27,6 +28,7 @@ export function CommentList({
   onReport,
   isSubmitting,
 }: CommentListProps) {
+  const t = useTranslations('comments');
   if (isLoading) {
     return <CommentSkeletonList count={3} />;
   }
@@ -49,7 +51,7 @@ export function CommentList({
           />
         </svg>
         <h3 className="mt-4 text-lg font-medium text-dark-text">
-          Nenhum comentário ainda
+          {t('no_comments')}
         </h3>
         <p className="mt-2 text-sm text-dark-textMuted">
           Seja o primeiro a comentar nesta notícia!

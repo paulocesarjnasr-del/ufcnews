@@ -374,5 +374,12 @@
     "no_upcoming": "Aucun evenement programme",
     "location": "Lieu",
     "date": "Date"
+  },
+  "comments": {
+    "error_loading": "Erreur lors du chargement des commentaires. Essayez de recharger la page.",
+    "no_comments": "Aucun commentaire pour le moment",
+    "error_submit": "Erreur lors de l'envoi du commentaire",
+    "reply": "Repondre",
+    "comment": "Commenter"
   }
 }

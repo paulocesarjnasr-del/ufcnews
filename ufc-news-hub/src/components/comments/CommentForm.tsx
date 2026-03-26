@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { useState, useEffect, FormEvent } from 'react';
 import { useAutorStorage } from '@/hooks/useComentarios';
 import {
@@ -34,6 +35,7 @@ export function CommentForm({
   isReply = false,
   replyingTo,
 }: CommentFormProps) {
+  const t = useTranslations('comments');
   const { getAutor, saveAutor } = useAutorStorage();
 
   const [nome, setNome] = useState('');
@@ -99,7 +101,7 @@ export function CommentForm({
         onCancel();
       }
     } else {
-      setError(result.error || 'Erro ao enviar comentário');
+      setError(result.error || t('error_submit'));
     }
   };
 
@@ -236,9 +238,9 @@ export function CommentForm({
               Enviando...
             </span>
           ) : isReply ? (
-            'Responder'
+            t('reply')
           ) : (
-            'Comentar'
+            t('comment')
           )}
         </button>
 

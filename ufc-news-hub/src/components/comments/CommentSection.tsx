@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { useComentarios } from '@/hooks/useComentarios';
 import { CommentForm } from './CommentForm';
 import { CommentList } from './CommentList';
@@ -9,6 +10,7 @@ interface CommentSectionProps {
 }
 
 export function CommentSection({ noticiaId }: CommentSectionProps) {
+  const t = useTranslations('comments');
   const {
     comentarios,
     total,
@@ -31,7 +33,7 @@ export function CommentSection({ noticiaId }: CommentSectionProps) {
       {/* Error state */}
       {error && (
         <div className="mb-6 rounded-lg border border-ufc-red/30 bg-ufc-red/10 p-4 text-sm text-ufc-red">
-          Erro ao carregar comentários. Tente recarregar a página.
+          {t('error_loading')}
         </div>
       )}
 

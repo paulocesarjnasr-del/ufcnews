@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import Image from 'next/image';
 import { ComentarioComRespostas } from '@/types';

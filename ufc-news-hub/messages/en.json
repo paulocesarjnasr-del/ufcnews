@@ -374,5 +374,12 @@
     "no_upcoming": "No scheduled events",
     "location": "Location",
     "date": "Date"
+  },
+  "comments": {
+    "error_loading": "Error loading comments. Try reloading the page.",
+    "no_comments": "No comments yet",
+    "error_submit": "Error submitting comment",
+    "reply": "Reply",
+    "comment": "Comment"
   }
 }

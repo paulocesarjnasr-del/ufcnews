@@ -380,20 +380,34 @@ function EventResultView({
                   </p>
                 )}
               </div>
-              {/* Event points status block — right aligned */}
+              {/* Event points status block — premium gold indicator */}
               {usuario_id ? (
-                <div className="shrink-0 rounded-xl border border-ufc-gold/30 bg-ufc-gold/5 px-4 py-3 text-right">
-                  <p className="text-[9px] font-bold uppercase tracking-[0.15em] text-ufc-gold/70">
+                <div
+                  className="shrink-0 relative rounded-xl px-5 py-3 text-right overflow-hidden"
+                  style={{
+                    background: 'radial-gradient(ellipse at 40% 30%, #D4AF37 0%, #A67C00 60%, #7A5C00 100%)',
+                    boxShadow: 'inset 0 1px 1px rgba(255,223,120,0.4), inset 0 -1px 2px rgba(0,0,0,0.3), 0 0 20px rgba(212,175,55,0.15)',
+                    border: '1px solid rgba(212,175,55,0.5)',
+                  }}
+                >
+                  {/* Subtle top highlight for 3D depth */}
+                  <div
+                    className="absolute inset-x-0 top-0 h-[1px]"
+                    style={{ background: 'linear-gradient(90deg, transparent, rgba(255,223,120,0.6), transparent)' }}
+                  />
+                  <p className="text-[9px] font-medium uppercase tracking-[0.15em] text-black/50">
                     Seus pontos no evento
                   </p>
-                  <p className={`font-display text-2xl sm:text-3xl tabular-nums mt-0.5 ${
-                    myEventPoints > 0 ? 'text-ufc-gold' : 'text-ufc-gold/40'
-                  }`}>
+                  <p className={`font-display text-2xl sm:text-3xl tabular-nums mt-0.5 font-black ${
+                    myEventPoints > 0 ? 'text-[#1a1400]' : 'text-black/30'
+                  }`}
+                    style={{ textShadow: '0 1px 0 rgba(255,223,120,0.4)' }}
+                  >
                     {myEventPoints.toLocaleString()} PTS
                   </p>
                   {nextPendingPick && (
-                    <p className="text-[10px] text-ufc-gold/50 mt-1">
-                      Proximo palpite: <span className="text-ufc-gold font-semibold">+{nextPendingPick.pontos_confianca} pts</span>
+                    <p className="text-[10px] text-black/40 mt-1">
+                      Proximo palpite: <span className="text-[#1a1400] font-bold">+{nextPendingPick.pontos_confianca} pts</span>
                     </p>
                   )}
                 </div>

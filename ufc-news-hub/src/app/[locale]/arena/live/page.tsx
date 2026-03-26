@@ -369,8 +369,8 @@ function EventResultView({
         <div className="lg:col-span-2 space-y-5">
           {/* Event header */}
           <div className="neu-card rounded-xl p-5">
-            <div className="flex items-start justify-between gap-3">
-              <div className="min-w-0">
+            <div className="flex items-start justify-between gap-4">
+              <div className="min-w-0 flex-1">
                 <h1 className="font-display text-2xl uppercase leading-tight text-dark-text">
                   {data.evento.nome}
                 </h1>
@@ -380,33 +380,31 @@ function EventResultView({
                   </p>
                 )}
               </div>
-              {/* Event points badge — for non-logged users show status */}
-              {!usuario_id && isFinished ? (
-                <div className="flex shrink-0 items-center gap-2 rounded-full bg-green-500/10 px-3 py-1.5">
+              {/* Event points status block — right aligned */}
+              {usuario_id ? (
+                <div className="shrink-0 rounded-xl border border-ufc-gold/30 bg-ufc-gold/5 px-4 py-3 text-right">
+                  <p className="text-[9px] font-bold uppercase tracking-[0.15em] text-ufc-gold/70">
+                    Seus pontos no evento
+                  </p>
+                  <p className={`font-display text-2xl sm:text-3xl tabular-nums mt-0.5 ${
+                    myEventPoints > 0 ? 'text-ufc-gold' : 'text-ufc-gold/40'
+                  }`}>
+                    {myEventPoints.toLocaleString()} PTS
+                  </p>
+                  {nextPendingPick && (
+                    <p className="text-[10px] text-ufc-gold/50 mt-1">
+                      Proximo palpite: <span className="text-ufc-gold font-semibold">+{nextPendingPick.pontos_confianca} pts</span>
+                    </p>
+                  )}
+                </div>
+              ) : isFinished ? (
+                <div className="shrink-0 rounded-full bg-green-500/10 px-3 py-1.5">
                   <span className="font-display text-sm font-bold uppercase tracking-widest text-green-400">
                     {t('finished')}
                   </span>
                 </div>
               ) : null}
             </div>
-
-            {/* Event points card */}
-            {usuario_id && (
-              <div className="mt-4 neu-inset rounded-xl p-4">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-dark-textMuted">
-                  Seus pontos acumulados nesse evento
-                </p>
-                <p className={`font-display text-3xl tabular-nums mt-1 ${
-                  myEventPoints > 0 ? 'text-ufc-gold' : 'text-dark-text'
-                }`}>
-                  {myEventPoints.toLocaleString()} PTS
-                </p>
-                {nextPendingPick && (
-                  <p className="text-xs text-dark-textMuted mt-2">
-                    Proximo palpite: <span className="text-ufc-gold font-bold">+{nextPendingPick.pontos_confianca} pts</span>
-                  </p>
-                )}
-              </div>
             )}
 
             {/* Progress bar */}

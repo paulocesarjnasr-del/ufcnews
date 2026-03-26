@@ -283,9 +283,9 @@ function EventResultView({
   // Chronological = lowest ordem first (prelims happen before main event)
   const sortedLutas = useMemo(() => {
     if (!data?.lutas) return [];
-    const finished = [...data.lutas].filter(l => l.status === 'finalizada').sort((a, b) => a.ordem - b.ordem);
+    const finished = [...data.lutas].filter(l => l.status === 'finalizada').sort((a, b) => b.ordem - a.ordem);
     const live = [...data.lutas].filter(l => l.status === 'ao_vivo');
-    const upcoming = [...data.lutas].filter(l => l.status !== 'finalizada' && l.status !== 'ao_vivo').sort((a, b) => b.ordem - a.ordem);
+    const upcoming = [...data.lutas].filter(l => l.status !== 'finalizada' && l.status !== 'ao_vivo').sort((a, b) => a.ordem - b.ordem);
     return [...finished, ...live, ...upcoming];
   }, [data?.lutas]);
 

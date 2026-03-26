@@ -290,6 +290,15 @@ function EventResultView({
     return [...finished, ...live, ...upcoming];
   }, [data?.lutas]);
 
+  // Next pending pick (must be before early returns — React hooks rules)
+  const nextPendingPick = useMemo(() => {
+    if (!data?.lutas) return null;
+    const pending = data.lutas
+      .filter(l => l.status !== 'finalizada' && l.userPick && l.userPick.acertou_vencedor === null)
+      .sort((a, b) => a.ordem - b.ordem);
+    return pending[0]?.userPick ?? null;
+  }, [data?.lutas]);
+
   if (!data && !error) {
     return (
       <div className="flex min-h-[40vh] items-center justify-center">
@@ -307,15 +316,6 @@ function EventResultView({
       </div>
     );
   }
-
-  // Next pending pick: must be before early returns (hooks can't be conditional)
-  const nextPendingPick = useMemo(() => {
-    if (!data?.lutas) return null;
-    const pending = data.lutas
-      .filter(l => l.status !== 'finalizada' && l.userPick && l.userPick.acertou_vencedor === null)
-      .sort((a, b) => a.ordem - b.ordem);
-    return pending[0]?.userPick ?? null;
-  }, [data?.lutas]);
 
   if (!data) return null;
 

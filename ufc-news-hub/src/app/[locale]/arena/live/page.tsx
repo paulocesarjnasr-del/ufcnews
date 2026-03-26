@@ -65,6 +65,7 @@ interface UserPick {
   vencedor_previsto_id: string;
   acertou_vencedor: boolean | null;
   pontos_ganhos: number;
+  pontos_confianca: number;
 }
 
 interface Luta {
@@ -317,6 +318,15 @@ function EventResultView({
     ? leaderboard.find(e => e.usuario_id === usuario_id)?.pontos_totais ?? 0
     : 0;
 
+  // Next pending pick: find next unsettled fight (by ordem ASC) where user has a pick
+  const nextPendingPick = useMemo(() => {
+    if (!lutas) return null;
+    const pending = lutas
+      .filter(l => l.status !== 'finalizada' && l.userPick && l.userPick.acertou_vencedor === null)
+      .sort((a, b) => a.ordem - b.ordem);
+    return pending[0]?.userPick ?? null;
+  }, [lutas]);
+
   return (
     <div className="mx-auto max-w-6xl px-4 py-6">
       {/* GTA-style pick result overlay */}
@@ -370,20 +380,8 @@ function EventResultView({
                   </p>
                 )}
               </div>
-              {/* Event points badge */}
-              {usuario_id ? (
-                <div className={`flex shrink-0 items-center gap-2 rounded-full px-3 py-1.5 ${
-                  myEventPoints > 0
-                    ? 'bg-ufc-gold/10 border border-ufc-gold/30'
-                    : 'bg-white/5 border border-white/10'
-                }`}>
-                  <span className={`font-display text-sm font-bold tabular-nums ${
-                    myEventPoints > 0 ? 'text-ufc-gold' : 'text-dark-textMuted'
-                  }`}>
-                    {myEventPoints > 0 ? `+${myEventPoints}` : '0'} pts
-                  </span>
-                </div>
-              ) : isFinished ? (
+              {/* Event points badge — for non-logged users show status */}
+              {!usuario_id && isFinished ? (
                 <div className="flex shrink-0 items-center gap-2 rounded-full bg-green-500/10 px-3 py-1.5">
                   <span className="font-display text-sm font-bold uppercase tracking-widest text-green-400">
                     {t('finished')}
@@ -391,6 +389,25 @@ function EventResultView({
                 </div>
               ) : null}
             </div>
+
+            {/* Event points card */}
+            {usuario_id && (
+              <div className="mt-4 neu-inset rounded-xl p-4">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-dark-textMuted">
+                  Seus pontos acumulados nesse evento
+                </p>
+                <p className={`font-display text-3xl tabular-nums mt-1 ${
+                  myEventPoints > 0 ? 'text-ufc-gold' : 'text-dark-text'
+                }`}>
+                  {myEventPoints.toLocaleString()} PTS
+                </p>
+                {nextPendingPick && (
+                  <p className="text-xs text-dark-textMuted mt-2">
+                    Proximo palpite: <span className="text-ufc-gold font-bold">+{nextPendingPick.pontos_confianca} pts</span>
+                  </p>
+                )}
+              </div>
+            )}
 
             {/* Progress bar */}
             <div className="mt-4">

@@ -121,6 +121,7 @@ interface UserPick {
   vencedor_previsto_id: string;
   acertou_vencedor: boolean | null;
   pontos_ganhos: number;
+  pontos_confianca: number;
 }
 
 interface LeaderboardRow {
@@ -257,7 +258,8 @@ export async function GET(request: NextRequest) {
            p.luta_id,
            p.vencedor_previsto_id,
            p.acertou_vencedor,
-           COALESCE(p.pontos_ganhos, 0) AS pontos_ganhos
+           COALESCE(p.pontos_ganhos, 0) AS pontos_ganhos,
+           COALESCE(p.pontos_confianca, 100) AS pontos_confianca
          FROM previsoes p
          WHERE p.evento_id = $1
            AND p.usuario_id = $2`,

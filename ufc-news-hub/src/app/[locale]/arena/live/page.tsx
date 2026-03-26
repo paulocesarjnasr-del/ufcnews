@@ -171,10 +171,10 @@ function EventResultView({
     {
       refreshInterval: (latestData: LiveData | undefined) => {
         if (latestData?.evento?.status === 'finalizado') return 0;
-        return 15000; // 15s polling while live
+        return 5000; // 5s polling while live — fast updates for peak moment
       },
       revalidateOnFocus: true,
-      dedupingInterval: 3000,
+      dedupingInterval: 2000,
     }
   );
 

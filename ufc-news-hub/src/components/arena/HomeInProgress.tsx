@@ -8,6 +8,7 @@ import { MinhasLigas } from '@/components/arena/MinhasLigas';
 import { UserStats } from '@/components/arena/UserStats';
 import { OctagonTexture, FightPreview, sortLutas, type Evento } from '@/components/arena/shared';
 import { EventHeader } from '@/components/arena/EventHeader';
+import { useTranslations } from 'next-intl';
 
 interface HomeInProgressProps {
   evento: Evento | null;
@@ -17,6 +18,7 @@ interface HomeInProgressProps {
 }
 
 export function HomeInProgress({ evento, picks, picksCount, totalLutas }: HomeInProgressProps) {
+  const t = useTranslations('arena');
   const { usuario } = useArenaAuth();
   const remaining = totalLutas - picksCount;
   const progressPercent = totalLutas > 0 ? (picksCount / totalLutas) * 100 : 0;
@@ -33,8 +35,8 @@ export function HomeInProgress({ evento, picks, picksCount, totalLutas }: HomeIn
             <EventHeader evento={evento} size="sm" />
           ) : (
             <div className="text-center pt-8">
-              <h2 className="font-display text-2xl text-white uppercase">Nenhum evento agendado</h2>
-              <p className="text-sm text-white/50 mt-2">Fique ligado para o proximo card!</p>
+              <h2 className="font-display text-2xl text-white uppercase">{t('no_event_scheduled')}</h2>
+              <p className="text-sm text-white/50 mt-2">{t('stay_tuned')}</p>
             </div>
           )}
 
@@ -42,7 +44,7 @@ export function HomeInProgress({ evento, picks, picksCount, totalLutas }: HomeIn
             <div className="rounded-xl border border-white/10 bg-black/50 backdrop-blur-md p-5 space-y-4">
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-semibold text-white">Seus Palpites</span>
+                  <span className="text-sm font-semibold text-white">{t('your_predictions')}</span>
                   <span className="text-xs text-white/50">{picksCount}/{totalLutas}</span>
                 </div>
                 <div className="h-2 rounded-full bg-white/10 overflow-hidden">
@@ -58,14 +60,14 @@ export function HomeInProgress({ evento, picks, picksCount, totalLutas }: HomeIn
                 className="group flex items-center justify-center gap-2 w-full py-3.5 bg-ufc-red hover:bg-ufc-redLight text-white font-display uppercase tracking-wide rounded-xl transition-all text-sm animate-pulse-red"
               >
                 <Zap className="w-4 h-4" />
-                Completar Palpites — {remaining} restante{remaining !== 1 ? 's' : ''}
+                {t('complete_predictions')} — {remaining} {t('remaining')}
                 <ChevronRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
               </Link>
 
               {nextUnpicked && (
                 <Link href={`/arena/evento/${evento.id}`} className="block">
                   <div className="text-[10px] font-display uppercase tracking-widest text-white/30 mb-1">
-                    Proxima luta
+                    {t('next_fight')}
                   </div>
                   <FightPreview luta={nextUnpicked} showDetails />
                 </Link>

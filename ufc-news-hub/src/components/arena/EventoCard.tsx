@@ -4,6 +4,7 @@ import { Link } from '@/i18n/routing';
 import Image from 'next/image';
 import { Evento } from '@/types';
 import { Countdown } from '@/components/calendario/Countdown';
+import { useTranslations } from 'next-intl';
 
 interface EventoCardProps {
   evento: Evento & { total_lutas?: number };
@@ -11,6 +12,7 @@ interface EventoCardProps {
 }
 
 export function EventoCard({ evento, featured = false }: EventoCardProps) {
+  const t = useTranslations('arena');
   const rawDate = evento.data_evento ? new Date(evento.data_evento) : null;
   const dataEvento = rawDate && !isNaN(rawDate.getTime()) ? rawDate : new Date();
   const isPast = dataEvento < new Date();
@@ -49,7 +51,7 @@ export function EventoCard({ evento, featured = false }: EventoCardProps) {
             </span>
             {evento.status === 'finalizado' && (
               <span className="rounded bg-dark-border px-2 py-1 text-xs font-bold uppercase text-dark-textMuted">
-                Finalizado
+                {t('finished')}
               </span>
             )}
             {evento.status === 'ao_vivo' && (
@@ -58,7 +60,7 @@ export function EventoCard({ evento, featured = false }: EventoCardProps) {
                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-white opacity-75"></span>
                   <span className="relative inline-flex h-2 w-2 rounded-full bg-white"></span>
                 </span>
-                AO VIVO
+                {t('live')}
               </span>
             )}
           </div>
@@ -94,7 +96,7 @@ export function EventoCard({ evento, featured = false }: EventoCardProps) {
               <div className="flex items-center gap-4">
                 {evento.total_lutas !== undefined && (
                   <span className="text-sm text-dark-textMuted">
-                    {evento.total_lutas} lutas
+                    {evento.total_lutas} {t('fights')}
                   </span>
                 )}
               </div>
@@ -103,7 +105,7 @@ export function EventoCard({ evento, featured = false }: EventoCardProps) {
 
           {/* CTA */}
           <div className="mt-4 flex items-center gap-2 text-sm font-medium text-ufc-red">
-            {isPast ? 'Ver resultados' : 'Fazer previsoes'}
+            {isPast ? t('see_results') : t('make_predictions_cta')}
             <svg
               className="h-4 w-4 transition-transform group-hover:translate-x-1"
               fill="none"

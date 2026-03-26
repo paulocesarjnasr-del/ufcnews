@@ -9,6 +9,7 @@ import { MinhasLigas } from '@/components/arena/MinhasLigas';
 import { OctagonTexture, type Evento } from '@/components/arena/shared';
 import { EventHeader } from '@/components/arena/EventHeader';
 import { MAX_POR_LUTA } from '@/components/arena/picks-shared';
+import { useTranslations } from 'next-intl';
 
 interface HomeCompleteProps {
   evento: Evento | null;
@@ -16,6 +17,7 @@ interface HomeCompleteProps {
 }
 
 export function HomeComplete({ evento, picks }: HomeCompleteProps) {
+  const t = useTranslations('arena');
   const { usuario } = useArenaAuth();
   const [copied, setCopied] = useState(false);
   const totalPicks = Object.keys(picks).length;
@@ -38,15 +40,15 @@ export function HomeComplete({ evento, picks }: HomeCompleteProps) {
             <EventHeader evento={evento} size="sm" />
           ) : (
             <div className="text-center pt-8">
-              <h2 className="font-display text-2xl text-white uppercase">Nenhum evento agendado</h2>
+              <h2 className="font-display text-2xl text-white uppercase">{t('no_event_scheduled')}</h2>
             </div>
           )}
 
           <div className="rounded-xl border border-ufc-gold/20 bg-ufc-gold/5 p-6 text-center space-y-3">
             <Trophy className="w-10 h-10 text-ufc-gold mx-auto" />
-            <h2 className="font-display text-2xl uppercase text-white">Card Completo!</h2>
+            <h2 className="font-display text-2xl uppercase text-white">{t('card_complete')}</h2>
             <p className="text-sm text-white/50">
-              {totalPicks}/{totalPicks} picks · {pontos.toLocaleString()} pts possiveis
+              {totalPicks}/{totalPicks} {t('picks_label')} · {pontos.toLocaleString()} {t('possible_points')}
             </p>
             {evento && (
               <Link
@@ -54,7 +56,7 @@ export function HomeComplete({ evento, picks }: HomeCompleteProps) {
                 className="inline-flex items-center gap-2 px-5 py-2.5 border border-white/15 text-white/60 hover:text-white hover:border-white/25 rounded-xl transition-colors text-sm"
               >
                 <Pencil className="w-3.5 h-3.5" />
-                Ver/Editar Previsoes
+                {t('view_edit_predictions')}
               </Link>
             )}
           </div>
@@ -62,21 +64,21 @@ export function HomeComplete({ evento, picks }: HomeCompleteProps) {
           <div className="rounded-xl border border-white/10 bg-black/40 backdrop-blur-md p-5 space-y-3">
             <div className="flex items-center gap-2">
               <Share2 className="w-4 h-4 text-white/50" />
-              <span className="text-sm font-medium text-white">Desafie seus amigos!</span>
+              <span className="text-sm font-medium text-white">{t('challenge_friends')}</span>
             </div>
-            <p className="text-xs text-white/40">Crie uma liga e veja quem acerta mais</p>
+            <p className="text-xs text-white/40">{t('league_subtitle')}</p>
             <div className="flex gap-3">
               <Link
                 href="/arena/ligas/criar"
                 className="flex-1 py-2.5 bg-ufc-red hover:bg-ufc-redLight text-white font-display uppercase text-xs tracking-wide rounded-xl transition-all text-center"
               >
-                Criar Liga
+                {t('create_league')}
               </Link>
               <button
                 onClick={handleCopyLink}
                 className="flex-1 py-2.5 border border-white/15 text-white/60 hover:text-white hover:border-white/25 font-display uppercase text-xs tracking-wide rounded-xl transition-colors"
               >
-                {copied ? 'Copiado!' : 'Copiar Link'}
+                {copied ? t('copied') : t('copy_link')}
               </button>
             </div>
           </div>

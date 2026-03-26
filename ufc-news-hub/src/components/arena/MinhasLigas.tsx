@@ -3,6 +3,7 @@
 import useSWR from 'swr';
 import { Link } from '@/i18n/routing';
 import { Users, Plus } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 interface Liga {
   id: string;
@@ -25,6 +26,7 @@ const fetcher = (url: string) => fetch(url).then(res => {
 });
 
 export function MinhasLigas({ showCtaIfEmpty = false }: MinhasLigasProps) {
+  const t = useTranslations('arena');
   const { data, isLoading, error } = useSWR<LigasResponse>(
     '/api/arena/ligas?tipo=minhas',
     fetcher,
@@ -56,9 +58,9 @@ export function MinhasLigas({ showCtaIfEmpty = false }: MinhasLigasProps) {
         </div>
         <div>
           <div className="text-sm font-medium text-white group-hover:text-ufc-gold transition-colors">
-            Crie uma liga e desafie amigos
+            {t('challenge_friends')}
           </div>
-          <div className="text-xs text-white/30">Veja quem acerta mais no proximo card</div>
+          <div className="text-xs text-white/30">{t('league_subtitle')}</div>
         </div>
       </Link>
     );
@@ -67,7 +69,7 @@ export function MinhasLigas({ showCtaIfEmpty = false }: MinhasLigasProps) {
   return (
     <div className="space-y-2">
       <div className="text-xs font-display uppercase tracking-widest text-white/40">
-        Suas Ligas
+        {t('my_leagues')}
       </div>
       <div className="flex gap-3 overflow-x-auto pb-1 -mx-1 px-1">
         {ligas.map(liga => (
@@ -79,7 +81,7 @@ export function MinhasLigas({ showCtaIfEmpty = false }: MinhasLigasProps) {
             <div className="text-sm font-medium text-white truncate">{liga.nome}</div>
             {liga.minha_posicao != null && liga.minha_posicao > 0 && (
               <div className="text-xs text-ufc-gold mt-1">
-                #{liga.minha_posicao} de {liga.total_membros}
+                #{liga.minha_posicao} / {liga.total_membros}
               </div>
             )}
           </Link>
@@ -89,7 +91,7 @@ export function MinhasLigas({ showCtaIfEmpty = false }: MinhasLigasProps) {
           className="shrink-0 rounded-xl border border-dashed border-white/10 bg-black/20 p-4 min-w-[100px] flex flex-col items-center justify-center gap-1 hover:border-ufc-gold/30 transition-colors"
         >
           <Plus className="w-4 h-4 text-white/30" />
-          <span className="text-xs text-white/30">Criar</span>
+          <span className="text-xs text-white/30">{t('create_league')}</span>
         </Link>
       </div>
     </div>

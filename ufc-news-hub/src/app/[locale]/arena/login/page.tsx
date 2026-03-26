@@ -2,18 +2,11 @@
 
 import { Suspense, useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/routing';
 import { Octagon } from 'lucide-react';
 import { OctagonPortalLayout } from '@/components/arena/OctagonPortalLayout';
 import { useArenaAuth } from '@/hooks/useArenaAuth';
-
-const GOOGLE_ERROR_MESSAGES: Record<string, string> = {
-  google_nao_configurado: 'Login com Google nao esta configurado',
-  google_sem_codigo: 'Erro na autorizacao do Google',
-  google_token_falhou: 'Erro ao autenticar com Google',
-  google_perfil_falhou: 'Erro ao buscar perfil do Google',
-  google_erro_interno: 'Erro interno ao fazer login com Google',
-};
 
 export default function ArenaLoginPage() {
   return (
@@ -32,7 +25,16 @@ export default function ArenaLoginPage() {
 function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const t = useTranslations('arena');
   const { login, isAuthenticated, isLoading: authLoading } = useArenaAuth();
+
+  const GOOGLE_ERROR_MESSAGES: Record<string, string> = {
+    google_nao_configurado: t('login_google_not_configured'),
+    google_sem_codigo: t('login_google_auth_error'),
+    google_token_falhou: t('login_google_token_error'),
+    google_perfil_falhou: t('login_google_profile_error'),
+    google_erro_interno: t('login_google_internal_error'),
+  };
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [error, setError] = useState('');
@@ -64,7 +66,7 @@ function LoginContent() {
     if (result.success) {
       router.push(redirectTo);
     } else {
-      setError(result.error || 'Erro ao fazer login');
+      setError(result.error || t('login_error'));
     }
 
     setIsLoading(false);
@@ -89,10 +91,10 @@ function LoginContent() {
             <Octagon className="h-10 w-10" />
           </div>
           <h2 className="font-display text-3xl uppercase tracking-wide text-dark-text">
-            Entrar
+            {t('login_title')}
           </h2>
           <p className="mt-1 text-sm text-dark-textMuted">
-            Acesse suas previsões, ligas e duelos
+            {t('login_subtitle')}
           </p>
         </div>
 
@@ -106,7 +108,7 @@ function LoginContent() {
 
           <div className="slide-up-fade" style={{ animationDelay: '50ms' }}>
             <label htmlFor="email" className="block text-sm font-medium text-dark-textMuted mb-2">
-              Email
+              {t('login_email')}
             </label>
             <input
               type="email"
@@ -121,7 +123,7 @@ function LoginContent() {
 
           <div className="slide-up-fade" style={{ animationDelay: '100ms' }}>
             <label htmlFor="senha" className="block text-sm font-medium text-dark-textMuted mb-2">
-              Senha
+              {t('login_password')}
             </label>
             <input
               type="password"
@@ -140,14 +142,14 @@ function LoginContent() {
               disabled={isLoading}
               className="w-full rounded-xl bg-ufc-red py-3 font-display uppercase text-white hover:bg-ufc-redLight transition-all hover:shadow-[0_0_20px_rgba(210,10,10,0.4)] disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isLoading ? 'Entrando...' : 'Entrar'}
+              {isLoading ? t('login_loading') : t('login_title')}
             </button>
           </div>
 
           {/* Separador */}
           <div className="flex items-center gap-3 my-2 slide-up-fade" style={{ animationDelay: '200ms' }}>
             <div className="flex-1 border-t border-dark-border" />
-            <span className="text-xs text-dark-textMuted">ou</span>
+            <span className="text-xs text-dark-textMuted">{t('login_or')}</span>
             <div className="flex-1 border-t border-dark-border" />
           </div>
 
@@ -166,14 +168,14 @@ function LoginContent() {
                 <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
                 <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
               </svg>
-              Continuar com Google
+              {t('login_continue_google')}
             </a>
           </div>
 
           <div className="text-center text-sm text-dark-textMuted slide-up-fade" style={{ animationDelay: '300ms' }}>
-            Não tem uma conta?{' '}
+            {t('login_no_account')}{' '}
             <Link href={`/arena/registro${redirectTo !== '/arena' ? `?redirect=${encodeURIComponent(redirectTo)}` : ''}`} className="text-ufc-red hover:text-ufc-redLight font-medium">
-              Criar conta
+              {t('login_create_account')}
             </Link>
           </div>
         </form>

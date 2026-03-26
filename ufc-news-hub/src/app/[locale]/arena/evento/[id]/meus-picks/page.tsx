@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, use } from 'react';
 import Image from 'next/image';
 import { Link } from '@/i18n/routing';
 import { Trophy, Target, Clock, Share2, ChevronLeft, Users, Lock } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useArenaAuth } from '@/hooks/useArenaAuth';
 import type { EventoComLutas, LutaComLutadores } from '@/types';
 import { PickCard } from '@/components/arena/PickCard';
@@ -20,11 +21,12 @@ interface PageProps { params: Promise<{ id: string }> }
 // ═══════════════════════════════════════════════════════════
 
 function ShareButton({ eventoNome, picks, totalLutas }: { eventoNome: string; picks: Record<string, PickData>; totalLutas: number }) {
+  const t = useTranslations('arena');
   const [copied, setCopied] = useState(false);
 
   const handleShare = async () => {
     const picksCount = Object.values(picks).filter(p => p.vencedor_id).length;
-    const text = `Fiz ${picksCount}/${totalLutas} previsoes para ${eventoNome} na Arena UFC! Faca as suas tambem.`;
+    const text = t('picks_share_text', { picksCount, totalLutas, eventoNome });
 
     if (navigator.share) {
       try {
@@ -43,7 +45,7 @@ function ShareButton({ eventoNome, picks, totalLutas }: { eventoNome: string; pi
       className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-white/5 border border-white/10 text-xs text-white/40 hover:text-white/70 hover:bg-white/10 transition-all"
     >
       <Share2 className="w-3.5 h-3.5" />
-      {copied ? 'Link copiado!' : 'Compartilhar meus picks'}
+      {copied ? t('copied') : t('picks_share_button')}
     </button>
   );
 }
@@ -54,6 +56,7 @@ function ShareButton({ eventoNome, picks, totalLutas }: { eventoNome: string; pi
 
 export default function MeusPicksPage({ params }: PageProps) {
   const { id } = use(params);
+  const t = useTranslations('arena');
   const { isAuthenticated } = useArenaAuth();
 
   interface MinhaLiga {
@@ -154,8 +157,8 @@ export default function MeusPicksPage({ params }: PageProps) {
   if (!evento) {
     return (
       <div className="container mx-auto px-4 py-16 text-center space-y-4">
-        <p className="font-display text-2xl text-white/40 uppercase">Evento nao encontrado</p>
-        <Link href="/arena" className="text-ufc-red hover:underline text-sm">← Voltar</Link>
+        <p className="font-display text-2xl text-white/40 uppercase">{t('evento_not_found')}</p>
+        <Link href="/arena" className="text-ufc-red hover:underline text-sm">{t('evento_back')}</Link>
       </div>
     );
   }
@@ -199,7 +202,7 @@ export default function MeusPicksPage({ params }: PageProps) {
             className="inline-flex items-center gap-1.5 text-sm text-white/40 hover:text-white transition-colors"
           >
             <ChevronLeft className="w-4 h-4" />
-            Voltar ao evento
+            {t('picks_back_to_event')}
           </Link>
         </div>
 
@@ -210,19 +213,19 @@ export default function MeusPicksPage({ params }: PageProps) {
               <div>
                 <Trophy className="w-5 h-5 text-ufc-gold mx-auto mb-1.5" />
                 <div className="font-display text-2xl text-ufc-gold">{pontos.toLocaleString()}</div>
-                <div className="text-[9px] text-white/30 uppercase tracking-widest">Pts possiveis</div>
+                <div className="text-[9px] text-white/30 uppercase tracking-widest">{t('picks_possible_pts')}</div>
               </div>
               <div>
                 <Target className="w-5 h-5 text-green-400 mx-auto mb-1.5" />
                 <div className="font-display text-2xl text-green-400">{picksCount}/{totalLutas}</div>
-                <div className="text-[9px] text-white/30 uppercase tracking-widest">Picks</div>
+                <div className="text-[9px] text-white/30 uppercase tracking-widest">{t('picks_label')}</div>
               </div>
               <div>
                 <Trophy className="w-5 h-5 text-ufc-red mx-auto mb-1.5" />
                 <div className="font-display text-2xl text-ufc-red">
                   {Object.values(picks).filter(p => p.metodo).length}
                 </div>
-                <div className="text-[9px] text-white/30 uppercase tracking-widest">Com metodo</div>
+                <div className="text-[9px] text-white/30 uppercase tracking-widest">{t('picks_with_method')}</div>
               </div>
             </div>
             {/* Live badge inside stats if live */}
@@ -233,7 +236,7 @@ export default function MeusPicksPage({ params }: PageProps) {
                     <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-white opacity-75" />
                     <span className="relative inline-flex h-2 w-2 rounded-full bg-white" />
                   </span>
-                  <span className="text-xs font-bold text-white uppercase">Ao Vivo</span>
+                  <span className="text-xs font-bold text-white uppercase">{t('live')}</span>
                 </div>
               </div>
             )}
@@ -246,9 +249,7 @@ export default function MeusPicksPage({ params }: PageProps) {
             <div className="rounded-xl bg-ufc-red/5 border border-ufc-red/20 p-4 flex items-center gap-3">
               <Users className="w-5 h-5 text-ufc-red shrink-0" />
               <p className="text-sm text-white/60">
-                Voce esta competindo com{' '}
-                <span className="text-white font-semibold">{totalParticipantes} usuarios</span>{' '}
-                neste evento. Ranking atualiza ao vivo durante o card.
+                {t('picks_competing_with', { count: totalParticipantes })}
               </p>
             </div>
           </div>
@@ -261,12 +262,12 @@ export default function MeusPicksPage({ params }: PageProps) {
             <div className="rounded-xl bg-white/5 border border-white/10 p-3 flex items-center gap-3">
               <Clock className="w-4 h-4 text-ufc-gold shrink-0" />
               <div className="text-xs text-white/50">
-                Edicoes abertas ate{' '}
+                {t('picks_edits_open_until')}{' '}
                 <span className="text-white font-semibold">
                   {deadlineDate.toLocaleDateString('pt-BR', { weekday: 'short', day: 'numeric', month: 'short' })}{' '}
                   {deadlineDate.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
                 </span>
-                {' '}(1h antes do evento)
+                {' '}{t('picks_before_event')}
               </div>
             </div>
           )}
@@ -274,7 +275,7 @@ export default function MeusPicksPage({ params }: PageProps) {
             <div className="rounded-xl bg-ufc-red/5 border border-ufc-red/20 p-3 flex items-center gap-3">
               <Lock className="w-4 h-4 text-ufc-red shrink-0" />
               <div className="text-xs text-white/50">
-                Edicoes encerradas — {isLive ? 'evento ao vivo' : 'deadline passou'}
+                {t('picks_edits_closed')} — {isLive ? t('picks_event_live') : t('picks_deadline_passed')}
               </div>
             </div>
           )}
@@ -284,7 +285,7 @@ export default function MeusPicksPage({ params }: PageProps) {
             <div className="rounded-xl bg-white/5 border border-white/10 p-4 space-y-3">
               <div className="flex items-center gap-2">
                 <Users className="w-4 h-4 text-ufc-gold" />
-                <span className="text-xs font-display uppercase tracking-widest text-white/40">Suas Ligas</span>
+                <span className="text-xs font-display uppercase tracking-widest text-white/40">{t('picks_your_leagues')}</span>
               </div>
               <div className="space-y-2">
                 {minhasLigas.map(liga => (
@@ -297,12 +298,12 @@ export default function MeusPicksPage({ params }: PageProps) {
                       <Trophy className="w-3.5 h-3.5 text-ufc-gold shrink-0" />
                       <span className="text-sm text-white truncate">{liga.nome}</span>
                     </div>
-                    <span className="text-[10px] text-white/25 shrink-0">{liga.total_membros} membros</span>
+                    <span className="text-[10px] text-white/25 shrink-0">{liga.total_membros} {t('members')}</span>
                   </Link>
                 ))}
               </div>
               <div className="text-[10px] text-white/20 text-center">
-                Seus picks valem automaticamente em todas as suas ligas
+                {t('picks_auto_count_leagues')}
               </div>
             </div>
           )}
@@ -314,7 +315,7 @@ export default function MeusPicksPage({ params }: PageProps) {
               className="flex items-center justify-center gap-2 p-3 rounded-xl bg-white/5 border border-white/10 hover:border-ufc-gold/30 transition-colors text-xs text-white/40 hover:text-ufc-gold"
             >
               <Users className="w-3.5 h-3.5" />
-              Crie uma liga e desafie amigos — seus picks valem la tambem
+              {t('picks_create_league_cta')}
             </Link>
           )}
         </div>
@@ -327,7 +328,7 @@ export default function MeusPicksPage({ params }: PageProps) {
             <section>
               <div className="flex items-center gap-3 mb-3">
                 <div className="h-px flex-1 bg-ufc-red/20" />
-                <span className="text-[10px] font-display uppercase tracking-[0.2em] text-ufc-red/50">Main Card</span>
+                <span className="text-[10px] font-display uppercase tracking-[0.2em] text-ufc-red/50">{t('main_card_section')}</span>
                 <div className="h-px flex-1 bg-ufc-red/20" />
               </div>
               <div className="space-y-3">
@@ -341,7 +342,7 @@ export default function MeusPicksPage({ params }: PageProps) {
             <section>
               <div className="flex items-center gap-3 mb-3">
                 <div className="h-px flex-1 bg-white/10" />
-                <span className="text-[10px] font-display uppercase tracking-[0.2em] text-white/25">Card Principal</span>
+                <span className="text-[10px] font-display uppercase tracking-[0.2em] text-white/25">{t('picks_main_card_label')}</span>
                 <div className="h-px flex-1 bg-white/10" />
               </div>
               <div className="space-y-3">
@@ -355,7 +356,7 @@ export default function MeusPicksPage({ params }: PageProps) {
             <section>
               <div className="flex items-center gap-3 mb-3">
                 <div className="h-px flex-1 bg-white/10" />
-                <span className="text-[10px] font-display uppercase tracking-[0.2em] text-white/20">Preliminares</span>
+                <span className="text-[10px] font-display uppercase tracking-[0.2em] text-white/20">{t('picks_prelims_label')}</span>
                 <div className="h-px flex-1 bg-white/10" />
               </div>
               <div className="space-y-3">
@@ -371,7 +372,7 @@ export default function MeusPicksPage({ params }: PageProps) {
               className="flex items-center justify-center gap-2 w-full py-3.5 bg-ufc-red hover:bg-ufc-redLight text-white font-display uppercase tracking-wide rounded-xl transition-all text-sm"
             >
               <ChevronLeft className="w-4 h-4" />
-              Voltar para Home
+              {t('picks_back_to_home')}
             </Link>
 
             <ShareButton eventoNome={evento.nome} picks={picks} totalLutas={totalLutas} />
@@ -380,7 +381,7 @@ export default function MeusPicksPage({ params }: PageProps) {
               href="/arena/ligas"
               className="block text-center text-xs text-white/25 hover:text-white/50 transition-colors"
             >
-              Desafie amigos em uma liga →
+              {t('picks_challenge_friends')}
             </Link>
           </div>
         </div>

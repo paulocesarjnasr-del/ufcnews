@@ -4,6 +4,7 @@ import { useState, useRef, useMemo, useEffect, useCallback } from 'react';
 import useSWR from 'swr';
 import useSWRImmutable from 'swr/immutable';
 import { Calendar, MapPin, ChevronRight, ArrowLeft, Trophy } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { LiveResultCard } from '@/components/arena/LiveResultCard';
 import { LiveLeaderboard } from '@/components/arena/LiveLeaderboard';
 import { LiveCurrentFight } from '@/components/arena/LiveCurrentFight';
@@ -14,6 +15,8 @@ import { LiveChat } from '@/components/arena/LiveChat';
 // ═══════════════════════════════════════════════════════════════
 
 function PickResultOverlay({ type, onDone }: { type: 'win' | 'lose'; onDone: () => void }) {
+  const t = useTranslations('arena');
+
   useEffect(() => {
     const timer = setTimeout(onDone, 2500);
     return () => clearTimeout(timer);
@@ -26,10 +29,10 @@ function PickResultOverlay({ type, onDone }: { type: 'win' | 'lose'; onDone: () 
         <div className="absolute inset-0 bg-gradient-radial from-green-500/20 via-transparent to-transparent" />
         <div className="text-center animate-pick-result-bounce">
           <p className="font-display text-5xl sm:text-7xl uppercase tracking-widest text-green-400 drop-shadow-[0_0_40px_rgba(34,197,94,0.8)]">
-            Você é
+            {t('live_overlay_win_line1')}
           </p>
           <p className="font-display text-6xl sm:text-8xl uppercase tracking-widest text-green-300 mt-2 animate-pulse drop-shadow-[0_0_60px_rgba(34,197,94,1)]">
-            FODAAAAAAAAAA
+            {t('live_overlay_win_line2')}
           </p>
         </div>
       </div>
@@ -44,7 +47,7 @@ function PickResultOverlay({ type, onDone }: { type: 'win' | 'lose'; onDone: () 
       <div className="text-center animate-pick-result-slide">
         <p className="font-display text-5xl sm:text-8xl uppercase tracking-[0.3em] text-red-500 drop-shadow-[0_0_50px_rgba(210,10,10,0.9)]"
            style={{ textShadow: '0 0 30px rgba(210,10,10,0.8), 0 0 60px rgba(210,10,10,0.4), 0 4px 0 rgba(0,0,0,0.5)' }}>
-          Vai perder em!
+          {t('live_overlay_lose')}
         </p>
       </div>
     </div>
@@ -124,14 +127,14 @@ const fetcher = (url: string) => fetch(url).then(r => {
 // Countdown helper
 // ═══════════════════════════════════════════════════════════════
 
-function useCountdown(targetDate: string | undefined) {
+function useCountdown(targetDate: string | undefined, soonLabel = '...') {
   const [timeLeft, setTimeLeft] = useState<string>('');
 
   useEffect(() => {
     if (!targetDate) return;
     function calc() {
       const diff = new Date(targetDate!).getTime() - Date.now();
-      if (diff <= 0) { setTimeLeft('Em breve'); return; }
+      if (diff <= 0) { setTimeLeft(soonLabel); return; }
       const d = Math.floor(diff / (1000 * 60 * 60 * 24));
       const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
       const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
@@ -140,7 +143,7 @@ function useCountdown(targetDate: string | undefined) {
     calc();
     const id = setInterval(calc, 60000);
     return () => clearInterval(id);
-  }, [targetDate]);
+  }, [targetDate, soonLabel]);
 
   return timeLeft;
 }
@@ -158,6 +161,7 @@ function EventResultView({
   onBack?: () => void;
   liga: { id: string; nome: string } | null;
 }) {
+  const t = useTranslations('arena');
   const { isAuthenticated, usuario } = useArenaAuth();
 
   // Smart fetching: SWR polls while ao_vivo, caches forever when finalizado
@@ -247,7 +251,7 @@ function EventResultView({
   if (!data && !error) {
     return (
       <div className="flex min-h-[40vh] items-center justify-center">
-        <p className="text-dark-textMuted">Carregando...</p>
+        <p className="text-dark-textMuted">{t('live_loading')}</p>
       </div>
     );
   }
@@ -281,7 +285,7 @@ function EventResultView({
           className="mb-4 flex items-center gap-1.5 text-sm text-dark-textMuted hover:text-dark-text transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
-          Voltar
+          {t('live_back')}
         </button>
       )}
 
@@ -292,8 +296,8 @@ function EventResultView({
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-white opacity-75" />
             <span className="relative inline-flex h-3 w-3 rounded-full bg-white" />
           </span>
-          <span className="font-display text-lg uppercase text-white tracking-widest">Ao Vivo</span>
-          <span className="text-white/60 text-sm">&middot; {lutas_finalizadas}/{totalLutas} lutas</span>
+          <span className="font-display text-lg uppercase text-white tracking-widest">{t('live')}</span>
+          <span className="text-white/60 text-sm">&middot; {lutas_finalizadas}/{totalLutas} {t('fights')}</span>
           {isValidating && (
             <span className="ml-1 h-1.5 w-1.5 rounded-full bg-white/50 animate-pulse" />
           )}
@@ -330,13 +334,13 @@ function EventResultView({
                     <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-ufc-red" />
                   </span>
                   <span className="font-display text-sm font-bold uppercase tracking-widest text-ufc-red">
-                    Ao Vivo
+                    {t('live')}
                   </span>
                 </div>
               ) : isFinished ? (
                 <div className="flex shrink-0 items-center gap-2 rounded-full bg-green-500/10 px-3 py-1.5">
                   <span className="font-display text-sm font-bold uppercase tracking-widest text-green-400">
-                    Finalizado
+                    {t('finished')}
                   </span>
                 </div>
               ) : null}
@@ -346,7 +350,7 @@ function EventResultView({
             <div className="mt-4">
               <div className="mb-1.5 flex items-center justify-between text-xs text-dark-textMuted">
                 <span>
-                  {lutas_finalizadas}/{totalLutas} lutas finalizadas
+                  {t('live_fights_finished', { done: lutas_finalizadas, total: totalLutas })}
                 </span>
               </div>
               <div className="neu-inset h-2 rounded-full overflow-hidden">
@@ -387,7 +391,7 @@ function EventResultView({
             <div className="flex items-center gap-2 mb-3">
               <Trophy className="w-5 h-5 text-ufc-red" />
               <h2 className="font-display text-lg uppercase tracking-wide text-dark-text">
-                Ranking <span className="text-ufc-red">Ao Vivo</span>
+                {t('ranking')} <span className="text-ufc-red">{t('live')}</span>
               </h2>
             </div>
             <LiveLeaderboard leaderboard={leaderboard} meuUsuarioId={usuario_id} movimentos={movimentos} />
@@ -414,8 +418,9 @@ function EventResultView({
 // ═══════════════════════════════════════════════════════════════
 
 function NoEventView({ onSelectEvento }: { onSelectEvento: (id: string) => void }) {
+  const t = useTranslations('arena');
   const { evento, isLoading: proximoLoading } = useProximoEvento();
-  const countdown = useCountdown(evento?.data_evento);
+  const countdown = useCountdown(evento?.data_evento, t('live_coming_soon'));
 
   // Fetch recent finalized events (immutable — won't re-fetch)
   const { data: recentData } = useSWRImmutable<{ eventos_recentes: EventoRecente[] }>(
@@ -431,13 +436,13 @@ function NoEventView({ onSelectEvento }: { onSelectEvento: (id: string) => void 
       <div className="neu-card rounded-xl p-8 text-center">
         <div className="mb-4 text-5xl">🥊</div>
         <h2 className="mb-2 font-display text-2xl uppercase text-dark-text">
-          Nenhum evento ao vivo agora
+          {t('live_no_event_now')}
         </h2>
         {proximoLoading ? (
           <div className="h-8 w-48 mx-auto bg-dark-card animate-pulse rounded" />
         ) : evento ? (
           <>
-            <p className="mb-1 text-sm text-dark-textMuted">Proximo evento:</p>
+            <p className="mb-1 text-sm text-dark-textMuted">{t('live_next_event')}:</p>
             <p className="font-semibold text-ufc-gold">{evento.nome}</p>
             <p className="mt-3 font-display text-3xl tabular-nums text-ufc-red">
               {countdown}
@@ -445,7 +450,7 @@ function NoEventView({ onSelectEvento }: { onSelectEvento: (id: string) => void 
           </>
         ) : (
           <p className="text-sm text-dark-textMuted">
-            Nenhum evento agendado em breve.
+            {t('live_no_event_scheduled')}
           </p>
         )}
       </div>
@@ -454,7 +459,7 @@ function NoEventView({ onSelectEvento }: { onSelectEvento: (id: string) => void 
       {recentes.length > 0 && (
         <section>
           <h3 className="mb-3 font-display text-sm uppercase tracking-wide text-dark-textMuted">
-            Eventos Recentes
+            {t('live_recent_events')}
           </h3>
           <div className="space-y-3">
             {recentes.map((ev) => {
@@ -487,7 +492,7 @@ function NoEventView({ onSelectEvento }: { onSelectEvento: (id: string) => void 
                         )}
                       </div>
                       <div className="mt-1 text-xs text-dark-textMuted">
-                        {ev.lutas_finalizadas}/{ev.total_lutas} lutas finalizadas
+                        {t('live_fights_finished', { done: ev.lutas_finalizadas, total: ev.total_lutas })}
                       </div>
                     </div>
                     <ChevronRight className="w-5 h-5 text-dark-textMuted group-hover:text-ufc-red transition-colors shrink-0" />
@@ -507,6 +512,7 @@ function NoEventView({ onSelectEvento }: { onSelectEvento: (id: string) => void 
 // ═══════════════════════════════════════════════════════════════
 
 export default function ArenaLivePage() {
+  const t = useTranslations('arena');
   const { evento, isAoVivo, isLoading } = useProximoEvento();
   const [selectedEventoId, setSelectedEventoId] = useState<string | null>(null);
 
@@ -531,7 +537,7 @@ export default function ArenaLivePage() {
   if (isLoading) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
-        <p className="text-dark-textMuted">Carregando...</p>
+        <p className="text-dark-textMuted">{t('live_loading')}</p>
       </div>
     );
   }

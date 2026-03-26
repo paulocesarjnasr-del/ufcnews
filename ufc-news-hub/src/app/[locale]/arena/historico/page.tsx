@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Link } from '@/i18n/routing';
 import Image from 'next/image';
+import { useTranslations } from 'next-intl';
 
 import { useArenaAuth } from '@/hooks/useArenaAuth';
 
@@ -38,6 +39,7 @@ interface HistoricoStats {
 }
 
 export default function HistoricoPage() {
+  const t = useTranslations('arena');
   const router = useRouter();
   const { isAuthenticated, isLoading: authLoading } = useArenaAuth();
   const [previsoes, setPrevisoes] = useState<PrevisaoHistorico[]>([]);
@@ -104,10 +106,10 @@ export default function HistoricoPage() {
       <main className="container mx-auto px-4 py-8 max-w-4xl">
         <div className="mb-8">
           <h1 className="font-display text-3xl uppercase text-white">
-            Meu Historico
+            {t('history_title')}
           </h1>
           <p className="text-dark-textMuted mt-2">
-            Veja todas as suas previsoes passadas
+            {t('history_subtitle')}
           </p>
         </div>
 
@@ -116,19 +118,19 @@ export default function HistoricoPage() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
             <div className="bg-dark-card border border-dark-border rounded-xl p-4 text-center">
               <p className="text-2xl font-bold text-white">{stats.total_previsoes}</p>
-              <p className="text-xs text-dark-textMuted">Total Previsoes</p>
+              <p className="text-xs text-dark-textMuted">{t('history_total_predictions')}</p>
             </div>
             <div className="bg-dark-card border border-dark-border rounded-xl p-4 text-center">
               <p className="text-2xl font-bold text-green-400">{stats.total_acertos}</p>
-              <p className="text-xs text-dark-textMuted">Acertos</p>
+              <p className="text-xs text-dark-textMuted">{t('correct')}</p>
             </div>
             <div className="bg-dark-card border border-dark-border rounded-xl p-4 text-center">
               <p className="text-2xl font-bold text-ufc-gold">{Number(stats.taxa_acerto).toFixed(0)}%</p>
-              <p className="text-xs text-dark-textMuted">Taxa de Acerto</p>
+              <p className="text-xs text-dark-textMuted">{t('accuracy_rate')}</p>
             </div>
             <div className="bg-dark-card border border-dark-border rounded-xl p-4 text-center">
               <p className="text-2xl font-bold text-ufc-red">{stats.pontos_totais}</p>
-              <p className="text-xs text-dark-textMuted">Pontos Totais</p>
+              <p className="text-xs text-dark-textMuted">{t('history_total_points')}</p>
             </div>
           </div>
         )}
@@ -143,7 +145,7 @@ export default function HistoricoPage() {
                 : 'bg-dark-card border border-dark-border text-dark-textMuted hover:text-white'
             }`}
           >
-            Todas
+            {t('history_filter_all')}
           </button>
           <button
             onClick={() => setFiltro('acertos')}
@@ -153,7 +155,7 @@ export default function HistoricoPage() {
                 : 'bg-dark-card border border-dark-border text-dark-textMuted hover:text-white'
             }`}
           >
-            Acertos
+            {t('history_filter_correct')}
           </button>
           <button
             onClick={() => setFiltro('erros')}
@@ -163,7 +165,7 @@ export default function HistoricoPage() {
                 : 'bg-dark-card border border-dark-border text-dark-textMuted hover:text-white'
             }`}
           >
-            Erros
+            {t('history_filter_wrong')}
           </button>
         </div>
 
@@ -177,17 +179,17 @@ export default function HistoricoPage() {
             <div className="text-4xl mb-4">📭</div>
             <p className="text-dark-textMuted">
               {filtro === 'todas'
-                ? 'Voce ainda nao fez nenhuma previsao'
+                ? t('history_no_predictions')
                 : filtro === 'acertos'
-                ? 'Nenhum acerto encontrado'
-                : 'Nenhum erro encontrado'}
+                ? t('history_no_correct')
+                : t('history_no_wrong')}
             </p>
             {filtro === 'todas' && (
               <Link
                 href="/arena"
                 className="inline-block mt-4 px-6 py-2 bg-ufc-red hover:bg-ufc-redLight text-white rounded-lg transition-colors"
               >
-                Fazer primeira previsao
+                {t('history_make_first')}
               </Link>
             )}
           </div>
@@ -276,28 +278,28 @@ export default function HistoricoPage() {
                       {/* Resultado */}
                       <div className="w-20 text-right">
                         {p.acertou_vencedor === null ? (
-                          <span className="text-xs text-dark-textMuted">Pendente</span>
+                          <span className="text-xs text-dark-textMuted">{t('pending')}</span>
                         ) : p.acertou_vencedor ? (
                           <div>
                             <span className="text-green-400 text-sm font-bold">+{p.pontos_ganhos}</span>
                             <div className="flex gap-0.5 justify-end mt-1">
-                              <span className="w-2 h-2 rounded-full bg-green-400" title="Vencedor" />
+                              <span className="w-2 h-2 rounded-full bg-green-400" title={t('winner')} />
                               <span
                                 className={`w-2 h-2 rounded-full ${
                                   p.acertou_metodo ? 'bg-green-400' : 'bg-dark-border'
                                 }`}
-                                title="Metodo"
+                                title={t('history_method')}
                               />
                               <span
                                 className={`w-2 h-2 rounded-full ${
                                   p.acertou_round ? 'bg-green-400' : 'bg-dark-border'
                                 }`}
-                                title="Round"
+                                title={t('history_round')}
                               />
                             </div>
                           </div>
                         ) : (
-                          <span className="text-red-400 text-sm">Errou</span>
+                          <span className="text-red-400 text-sm">{t('history_wrong')}</span>
                         )}
                       </div>
                     </div>

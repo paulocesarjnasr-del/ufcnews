@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Link } from '@/i18n/routing';
 import { Users, Trophy, Plus, Search } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 import { useArenaAuth } from '@/hooks/useArenaAuth';
 
@@ -19,6 +20,7 @@ interface Liga {
 }
 
 export default function LigasPage() {
+  const t = useTranslations('arena');
   const router = useRouter();
   const { isAuthenticated, isLoading: authLoading } = useArenaAuth();
   const [minhasLigas, setMinhasLigas] = useState<Liga[]>([]);
@@ -68,7 +70,7 @@ export default function LigasPage() {
     setError('');
 
     if (!codigoConvite.trim()) {
-      setError('Digite o codigo de convite');
+      setError(t('league_enter_code_required'));
       return;
     }
 
@@ -86,10 +88,10 @@ export default function LigasPage() {
         setError('');
         fetchLigas();
       } else {
-        setError(data.error || 'Erro ao entrar na liga');
+        setError(data.error || t('error_join_league'));
       }
     } catch {
-      setError('Erro de conexao');
+      setError(t('error_connection'));
     }
   }
 
@@ -130,7 +132,7 @@ export default function LigasPage() {
               type="text"
               value={codigoConvite}
               onChange={(e) => setCodigoConvite(e.target.value.toUpperCase())}
-              placeholder="Codigo de convite"
+              placeholder={t('invite_code')}
               maxLength={8}
               className="neu-inset w-full rounded-lg px-4 py-3 font-mono text-sm tracking-wider text-dark-text placeholder-dark-textMuted focus:outline-none focus:ring-2 focus:ring-ufc-gold/50"
             />
@@ -140,7 +142,7 @@ export default function LigasPage() {
             className="neu-button flex items-center gap-2 rounded-lg bg-ufc-gold px-5 py-3 text-sm font-medium text-dark-bg hover:bg-ufc-gold/90 transition-colors"
           >
             <Search className="w-4 h-4" />
-            Entrar
+            {t('enter')}
           </button>
         </form>
         {error && (
@@ -152,7 +154,7 @@ export default function LigasPage() {
       <section className="mb-10">
         <h2 className="font-display text-2xl uppercase text-dark-text mb-4 flex items-center gap-2">
           <Trophy className="w-5 h-5 text-ufc-gold" />
-          Minhas Ligas
+          {t('my_leagues')}
         </h2>
 
         {isLoading ? (
@@ -164,10 +166,10 @@ export default function LigasPage() {
         ) : minhasLigas.length === 0 ? (
           <div className="neu-card rounded-xl p-8 text-center">
             <p className="text-dark-textMuted mb-2">
-              Voce ainda nao participa de nenhuma liga
+              {t('no_leagues')}
             </p>
             <p className="text-sm text-dark-textMuted">
-              Crie uma liga ou entre em uma publica abaixo
+              {t('create_or_join')}
             </p>
           </div>
         ) : (
@@ -186,7 +188,7 @@ export default function LigasPage() {
                     <h3 className="font-medium text-dark-text">{liga.nome}</h3>
                     <p className="text-xs text-dark-textMuted flex items-center gap-1">
                       <Users className="w-3 h-3" />
-                      {liga.total_membros} membros
+                      {liga.total_membros} {t('members')}
                     </p>
                   </div>
                 </div>
@@ -194,7 +196,7 @@ export default function LigasPage() {
                   <p className="font-display text-xl text-ufc-gold">
                     #{liga.minha_posicao || liga.posicao_atual || '-'}
                   </p>
-                  <p className="text-xs text-dark-textMuted">posicao</p>
+                  <p className="text-xs text-dark-textMuted">{t('position')}</p>
                 </div>
               </Link>
             ))}
@@ -206,7 +208,7 @@ export default function LigasPage() {
       <section className="mb-10">
         <h2 className="font-display text-2xl uppercase text-dark-text mb-4 flex items-center gap-2">
           <Users className="w-5 h-5 text-green-400" />
-          Ligas Publicas
+          {t('public_leagues')}
         </h2>
 
         {isLoading ? (
@@ -218,7 +220,7 @@ export default function LigasPage() {
         ) : ligasPublicas.length === 0 ? (
           <div className="neu-card rounded-xl p-8 text-center">
             <p className="text-dark-textMuted">
-              Nenhuma liga publica disponivel no momento
+              {t('no_public_leagues')}
             </p>
           </div>
         ) : (
@@ -238,7 +240,7 @@ export default function LigasPage() {
                     <div>
                       <h3 className="font-medium text-dark-text">{liga.nome}</h3>
                       <p className="text-xs text-dark-textMuted">
-                        {liga.total_membros} membros
+                        {liga.total_membros} {t('members')}
                       </p>
                     </div>
                   </div>
@@ -248,7 +250,7 @@ export default function LigasPage() {
                       href={`/arena/ligas/${liga.id}`}
                       className="neu-button rounded-lg px-4 py-2 text-sm text-dark-textMuted hover:text-ufc-gold transition-colors"
                     >
-                      Ver
+                      {t('see')}
                     </Link>
                   ) : (
                     <button
@@ -256,7 +258,7 @@ export default function LigasPage() {
                       disabled={joiningId === liga.id}
                       className="neu-button rounded-lg bg-ufc-gold px-4 py-2 text-sm font-medium text-dark-bg hover:bg-ufc-gold/90 transition-colors disabled:opacity-50"
                     >
-                      {joiningId === liga.id ? '...' : 'Entrar'}
+                      {joiningId === liga.id ? '...' : t('enter')}
                     </button>
                   )}
                 </div>
@@ -272,7 +274,7 @@ export default function LigasPage() {
         className="neu-button flex items-center justify-center gap-2 w-full rounded-xl bg-ufc-red py-4 font-display uppercase text-white hover:bg-ufc-redLight transition-colors"
       >
         <Plus className="w-5 h-5" />
-        Criar Liga
+        {t('create_league')}
       </Link>
     </div>
   );

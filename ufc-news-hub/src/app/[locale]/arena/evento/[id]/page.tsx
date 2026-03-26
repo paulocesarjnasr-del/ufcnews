@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { Link } from '@/i18n/routing';
 import { useRouter } from 'next/navigation';
 import { ChevronRight, ChevronLeft, Trophy, Clock } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useArenaAuth } from '@/hooks/useArenaAuth';
 import type { EventoComLutas } from '@/types';
 import { SwipeCard } from '@/components/arena/SwipeCard';
@@ -26,6 +27,7 @@ type PageStep = 'swipe' | 'summary' | 'edit';
 
 export default function EventoArenaPage({ params }: PageProps) {
   const { id } = use(params);
+  const t = useTranslations('arena');
   const { isAuthenticated, isLoading: authLoading } = useArenaAuth();
   const router = useRouter();
 
@@ -111,9 +113,9 @@ export default function EventoArenaPage({ params }: PageProps) {
           }],
         }),
       });
-      if (!res.ok) setSaveError('Erro ao salvar. Tente novamente.');
+      if (!res.ok) setSaveError(t('error_save_prediction'));
     } catch {
-      setSaveError('Erro de conexao. Verifique sua internet.');
+      setSaveError(t('error_connection'));
     }
   }, []);
 
@@ -169,8 +171,8 @@ export default function EventoArenaPage({ params }: PageProps) {
   if (!evento) {
     return (
       <div className="container mx-auto px-4 py-16 text-center space-y-4">
-        <p className="font-display text-2xl text-white/40 uppercase">Evento nao encontrado</p>
-        <Link href="/arena" className="text-ufc-red hover:underline text-sm">← Voltar</Link>
+        <p className="font-display text-2xl text-white/40 uppercase">{t('evento_not_found')}</p>
+        <Link href="/arena" className="text-ufc-red hover:underline text-sm">{t('evento_back')}</Link>
       </div>
     );
   }
@@ -204,7 +206,7 @@ export default function EventoArenaPage({ params }: PageProps) {
             className="flex items-center gap-1.5 text-sm text-white/50 hover:text-white transition-colors py-1 px-2 rounded-lg hover:bg-white/5"
           >
             <ChevronLeft className="w-4 h-4" />
-            {step === 'edit' ? 'Resumo' : step === 'summary' ? 'Voltar' : currentIndex > 0 ? 'Anterior' : 'Home'}
+            {step === 'edit' ? t('evento_summary') : step === 'summary' ? t('evento_back_short') : currentIndex > 0 ? t('evento_previous') : 'Home'}
           </button>
 
           {step === 'swipe' && picksCount > 0 && (
@@ -213,7 +215,7 @@ export default function EventoArenaPage({ params }: PageProps) {
               className="flex items-center gap-1.5 text-sm text-ufc-red hover:text-ufc-redLight transition-colors py-1.5 px-3 rounded-lg bg-ufc-red/10 hover:bg-ufc-red/15 border border-ufc-red/20"
             >
               <Trophy className="w-3.5 h-3.5" />
-              Resumo ({picksCount}/{totalLutas})
+              {t('evento_summary')} ({picksCount}/{totalLutas})
             </button>
           )}
         </div>

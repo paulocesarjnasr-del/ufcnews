@@ -4,10 +4,12 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Link } from '@/i18n/routing';
 import { Save, X } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 import { useArenaAuth } from '@/hooks/useArenaAuth';
 
 export default function EditarPerfilPage() {
+  const t = useTranslations('arena');
   const router = useRouter();
   const { usuario, isAuthenticated, isLoading: authLoading, refreshUsuario } = useArenaAuth();
   const [bio, setBio] = useState('');
@@ -42,10 +44,10 @@ export default function EditarPerfilPage() {
         router.push(`/arena/perfil/${usuario?.username}`);
       } else {
         const data = await res.json();
-        setError(data.error || 'Erro ao salvar perfil');
+        setError(data.error || t('profile_error_save'));
       }
     } catch {
-      setError('Erro de conexao. Tente novamente.');
+      setError(t('error_connection'));
     } finally {
       setIsSaving(false);
     }
@@ -64,20 +66,20 @@ export default function EditarPerfilPage() {
       {/* Breadcrumb */}
       <div className="flex items-center gap-2 text-sm text-dark-textMuted mb-6">
         <Link href="/arena" className="hover:text-ufc-red transition-colors">
-          Arena
+          {t('title')}
         </Link>
         <span>/</span>
         <Link
           href={`/arena/perfil/${usuario?.username}`}
           className="hover:text-ufc-red transition-colors"
         >
-          Perfil
+          {t('profile')}
         </Link>
         <span>/</span>
-        <span className="text-dark-text">Editar</span>
+        <span className="text-dark-text">{t('edit')}</span>
       </div>
 
-      <h1 className="font-display text-2xl uppercase text-dark-text mb-6">Editar Perfil</h1>
+      <h1 className="font-display text-2xl uppercase text-dark-text mb-6">{t('edit_profile')}</h1>
 
       <div className="neu-card p-6 space-y-6">
         {/* Username (readonly) */}
@@ -87,7 +89,7 @@ export default function EditarPerfilPage() {
           </label>
           <p className="text-dark-text font-medium">@{usuario?.username}</p>
           <p className="text-xs text-dark-textMuted mt-1">
-            O username nao pode ser alterado
+            {t('profile_username_readonly')}
           </p>
         </div>
 
@@ -105,7 +107,7 @@ export default function EditarPerfilPage() {
             onChange={(e) => setBio(e.target.value)}
             maxLength={200}
             rows={4}
-            placeholder="Escreva algo sobre voce..."
+            placeholder={t('profile_bio_placeholder')}
             className="neu-inset w-full rounded-lg px-4 py-3 text-dark-text placeholder-dark-textMuted resize-none focus:outline-none focus:ring-1 focus:ring-ufc-red"
           />
           <p className="text-xs text-dark-textMuted mt-1 text-right">
@@ -127,7 +129,7 @@ export default function EditarPerfilPage() {
             className="neu-button flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium text-dark-textMuted hover:text-dark-text transition-colors rounded-lg"
           >
             <X className="w-4 h-4" />
-            Cancelar
+            {t('cancel')}
           </Link>
           <button
             onClick={handleSave}
@@ -135,7 +137,7 @@ export default function EditarPerfilPage() {
             className="neu-button flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium bg-ufc-red hover:bg-ufc-redLight disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg transition-colors"
           >
             <Save className="w-4 h-4" />
-            {isSaving ? 'Salvando...' : 'Salvar'}
+            {isSaving ? t('saving') : t('save_changes')}
           </button>
         </div>
       </div>

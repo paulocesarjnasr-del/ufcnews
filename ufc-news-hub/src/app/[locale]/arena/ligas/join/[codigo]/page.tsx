@@ -4,6 +4,7 @@ import { use, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Link } from '@/i18n/routing';
 import { Trophy, Loader2, CheckCircle2, XCircle } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 import { useArenaAuth } from '@/hooks/useArenaAuth';
 
@@ -20,6 +21,7 @@ interface JoinResult {
 }
 
 export default function JoinLigaPage({ params }: PageProps) {
+  const t = useTranslations('arena');
   const { codigo } = use(params);
   const router = useRouter();
   const { isAuthenticated, isLoading: authLoading } = useArenaAuth();
@@ -47,7 +49,7 @@ export default function JoinLigaPage({ params }: PageProps) {
 
         if (!response.ok) {
           setState('error');
-          setResult({ error: data.error ?? 'Não foi possível entrar na liga.' });
+          setResult({ error: data.error ?? t('league_join_error_generic') });
           return;
         }
 
@@ -64,7 +66,7 @@ export default function JoinLigaPage({ params }: PageProps) {
         }, 2000);
       } catch {
         setState('error');
-        setResult({ error: 'Erro de conexão. Tente novamente.' });
+        setResult({ error: t('league_join_error_connection') });
       }
     };
 
@@ -98,10 +100,10 @@ export default function JoinLigaPage({ params }: PageProps) {
           <>
             <Trophy className="w-6 h-6 text-ufc-gold mx-auto mb-3" />
             <h1 className="font-display text-2xl uppercase text-dark-text mb-2">
-              Entrando na Liga
+              {t('league_join_loading_title')}
             </h1>
             <p className="text-dark-text/60 text-sm">
-              Verificando convite <span className="font-mono text-ufc-gold">{codigo}</span>…
+              {t('league_join_verifying', { code: codigo })}
             </p>
           </>
         )}
@@ -109,16 +111,15 @@ export default function JoinLigaPage({ params }: PageProps) {
         {state === 'success' && (
           <>
             <h1 className="font-display text-2xl uppercase text-green-400 mb-2">
-              Bem-vindo!
+              {t('league_join_welcome')}
             </h1>
             {result.liga_nome && (
               <p className="text-dark-text mb-1">
-                Você entrou em{' '}
-                <span className="text-ufc-gold font-semibold">{result.liga_nome}</span>
+                {t('league_join_success', { name: result.liga_nome })}
               </p>
             )}
             <p className="text-dark-text/60 text-sm mt-3">
-              Redirecionando para a liga…
+              {t('league_join_redirecting')}
             </p>
           </>
         )}
@@ -126,17 +127,17 @@ export default function JoinLigaPage({ params }: PageProps) {
         {state === 'error' && (
           <>
             <h1 className="font-display text-2xl uppercase text-ufc-red mb-2">
-              Não foi possível entrar
+              {t('league_join_error_title')}
             </h1>
             <p className="text-dark-text/70 text-sm mb-6">
-              {result.error ?? 'Ocorreu um erro inesperado.'}
+              {result.error ?? t('error_unknown')}
             </p>
             <Link
               href="/arena/ligas"
               className="neu-button inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-dark-text"
             >
               <Trophy className="w-4 h-4 text-ufc-gold" />
-              Ver Ligas
+              {t('league_view_leagues')}
             </Link>
           </>
         )}

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Link } from '@/i18n/routing';
+import { useTranslations } from 'next-intl';
 import {
   Shield,
   Lock,
@@ -54,80 +55,83 @@ interface RoadmapSection {
 // Data
 // ═══════════════════════════════════════════════════════════════
 
-const roadmapSections: RoadmapSection[] = [
-  {
-    id: 'login',
-    title: 'Login & Auth',
-    subtitle: 'Seguranca, tokens, sessoes',
-    icon: <Lock className="h-5 w-5" />,
-    status: 'planning',
-    statusLabel: 'Planejando',
-    priority: 'P0',
-  },
-  {
-    id: 'registro',
-    title: 'Registro',
-    subtitle: 'Validacao, onboarding, UX',
-    icon: <Users className="h-5 w-5" />,
-    status: 'planning',
-    statusLabel: 'Planejando',
-    priority: 'P0',
-  },
-  {
-    id: 'layout',
-    title: 'Layout & Navegacao',
-    subtitle: 'Header, sidebar, mobile',
-    icon: <Layout className="h-5 w-5" />,
-    status: 'planning',
-    statusLabel: 'Planejando',
-    priority: 'P1',
-  },
-  {
-    id: 'previsoes',
-    title: 'Previsoes',
-    subtitle: 'UX de picks, visual cards',
-    icon: <Swords className="h-5 w-5" />,
-    status: 'planning',
-    statusLabel: 'Planejando',
-    priority: 'P1',
-  },
-  {
-    id: 'perfil',
-    title: 'Perfil',
-    subtitle: 'Stats, historico, avatar',
-    icon: <Fingerprint className="h-5 w-5" />,
-    status: 'planning',
-    statusLabel: 'Planejando',
-    priority: 'P2',
-  },
-  {
-    id: 'ligas',
-    title: 'Ligas & Social',
-    subtitle: 'Rankings, amigos, desafios',
-    icon: <Trophy className="h-5 w-5" />,
-    status: 'planning',
-    statusLabel: 'Planejando',
-    priority: 'P2',
-  },
-  {
-    id: 'live',
-    title: 'Live & Resultados',
-    subtitle: 'Real-time, notificacoes',
-    icon: <Zap className="h-5 w-5" />,
-    status: 'planning',
-    statusLabel: 'Planejando',
-    priority: 'P3',
-  },
-  {
-    id: 'analytics',
-    title: 'Analytics & Stats',
-    subtitle: 'Dashboards, metricas',
-    icon: <BarChart3 className="h-5 w-5" />,
-    status: 'planning',
-    statusLabel: 'Planejando',
-    priority: 'P3',
-  },
-];
+function useRoadmapSections(): RoadmapSection[] {
+  const t = useTranslations('arena');
+  return [
+    {
+      id: 'login',
+      title: 'Login & Auth',
+      subtitle: t('roadmap_login_subtitle'),
+      icon: <Lock className="h-5 w-5" />,
+      status: 'planning',
+      statusLabel: t('roadmap_status_planning'),
+      priority: 'P0',
+    },
+    {
+      id: 'registro',
+      title: t('roadmap_registro'),
+      subtitle: t('roadmap_registro_subtitle'),
+      icon: <Users className="h-5 w-5" />,
+      status: 'planning',
+      statusLabel: t('roadmap_status_planning'),
+      priority: 'P0',
+    },
+    {
+      id: 'layout',
+      title: t('roadmap_layout'),
+      subtitle: t('roadmap_layout_subtitle'),
+      icon: <Layout className="h-5 w-5" />,
+      status: 'planning',
+      statusLabel: t('roadmap_status_planning'),
+      priority: 'P1',
+    },
+    {
+      id: 'previsoes',
+      title: t('roadmap_predictions'),
+      subtitle: t('roadmap_predictions_subtitle'),
+      icon: <Swords className="h-5 w-5" />,
+      status: 'planning',
+      statusLabel: t('roadmap_status_planning'),
+      priority: 'P1',
+    },
+    {
+      id: 'perfil',
+      title: t('roadmap_profile'),
+      subtitle: t('roadmap_profile_subtitle'),
+      icon: <Fingerprint className="h-5 w-5" />,
+      status: 'planning',
+      statusLabel: t('roadmap_status_planning'),
+      priority: 'P2',
+    },
+    {
+      id: 'ligas',
+      title: t('roadmap_leagues'),
+      subtitle: t('roadmap_leagues_subtitle'),
+      icon: <Trophy className="h-5 w-5" />,
+      status: 'planning',
+      statusLabel: t('roadmap_status_planning'),
+      priority: 'P2',
+    },
+    {
+      id: 'live',
+      title: t('roadmap_live'),
+      subtitle: t('roadmap_live_subtitle'),
+      icon: <Zap className="h-5 w-5" />,
+      status: 'planning',
+      statusLabel: t('roadmap_status_planning'),
+      priority: 'P3',
+    },
+    {
+      id: 'analytics',
+      title: t('roadmap_analytics'),
+      subtitle: t('roadmap_analytics_subtitle'),
+      icon: <BarChart3 className="h-5 w-5" />,
+      status: 'planning',
+      statusLabel: t('roadmap_status_planning'),
+      priority: 'P3',
+    },
+  ];
+}
 
 // ═══════════════════════════════════════════════════════════════
 // Sub-components
@@ -325,6 +329,7 @@ function LayerSection({
 // ═══════════════════════════════════════════════════════════════
 
 function LoginPlan() {
+  const t = useTranslations('arena');
   return (
     <div className="space-y-8 animate-fade-in">
       {/* Header */}
@@ -336,18 +341,16 @@ function LoginPlan() {
           </h3>
         </div>
         <p className="text-sm text-dark-textMuted leading-relaxed max-w-2xl">
-          Reestruturacao completa do sistema de autenticacao da Arena.
-          Migrar de SHA-256 + base64 tokens para bcrypt + JWT assinado com HMAC.
-          Adicionar rate limiting, validacao robusta e protecao contra brute force.
+          {t('roadmap_login_desc')}
         </p>
         <div className="mt-4 flex flex-wrap gap-2">
-          <StatusBadge status="planning" label="Em Planejamento" />
+          <StatusBadge status="planning" label={t('roadmap_status_in_planning')} />
           <PriorityBadge priority="P0" />
           <span className="rounded-full border border-dark-border/50 px-2.5 py-0.5 text-xs text-dark-textMuted">
-            3 arquivos impactados
+            {t('roadmap_files_impacted', { count: 3 })}
           </span>
           <span className="rounded-full border border-dark-border/50 px-2.5 py-0.5 text-xs text-dark-textMuted">
-            ~400 linhas
+            ~400 {t('roadmap_lines')}
           </span>
         </div>
       </div>
@@ -356,25 +359,25 @@ function LoginPlan() {
       <div className="space-y-3">
         <h4 className="font-display text-lg uppercase text-dark-text flex items-center gap-2">
           <Settings className="h-4 w-4 text-ufc-red" />
-          Ferramentas & Dependencias
+          {t('roadmap_tools_deps')}
         </h4>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           <ToolCard
             name="bcrypt"
-            purpose="Hash de senhas com salt unico automatico. Lento por design — resiste a ataques de forca bruta com GPU."
+            purpose={t('roadmap_bcrypt_purpose')}
             install="npm install bcrypt @types/bcrypt"
             icon={<Key className="h-4 w-4 text-yellow-400" />}
           />
           <ToolCard
             name="jose"
-            purpose="Biblioteca JWT moderna para Node.js. Suporta HMAC-SHA256 (HS256) para assinar e verificar tokens."
+            purpose={t('roadmap_jose_purpose')}
             install="npm install jose"
             icon={<Shield className="h-4 w-4 text-blue-400" />}
           />
           <ToolCard
             name="rate-limiter"
-            purpose="Protecao contra brute force. Limita tentativas de login por IP/email com janela deslizante."
-            install="Implementacao custom com Map + TTL"
+            purpose={t('roadmap_ratelimiter_purpose')}
+            install={t('roadmap_ratelimiter_install')}
             icon={<ShieldAlert className="h-4 w-4 text-red-400" />}
           />
         </div>
@@ -384,52 +387,58 @@ function LoginPlan() {
       <div className="space-y-4">
         <h4 className="font-display text-lg uppercase text-dark-text flex items-center gap-2">
           <ShieldCheck className="h-4 w-4 text-ufc-red" />
-          Medidas de Seguranca
+          {t('roadmap_security_measures')}
         </h4>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {[
             {
-              title: 'Hash bcrypt com salt unico',
-              desc: 'Cada senha gera um salt diferente. Custo computacional alto (10 rounds). Impossivel usar rainbow tables.',
-              severity: 'critico',
+              title: t('roadmap_sec_bcrypt_title'),
+              desc: t('roadmap_sec_bcrypt_desc'),
+              severity: t('roadmap_severity_critical'),
+              severityClass: 'critico',
               icon: <Key className="h-4 w-4" />,
             },
             {
-              title: 'JWT assinado com HMAC-SHA256',
-              desc: 'Token assinado com secret do servidor. Impossivel forjar sem a chave. Payload verificavel.',
-              severity: 'critico',
+              title: t('roadmap_sec_jwt_title'),
+              desc: t('roadmap_sec_jwt_desc'),
+              severity: t('roadmap_severity_critical'),
+              severityClass: 'critico',
               icon: <Shield className="h-4 w-4" />,
             },
             {
-              title: 'Rate limiting por IP + email',
-              desc: '5 tentativas por email a cada 15 minutos. 20 tentativas por IP a cada 15 minutos. Lockout progressivo.',
-              severity: 'alto',
+              title: t('roadmap_sec_ratelimit_title'),
+              desc: t('roadmap_sec_ratelimit_desc'),
+              severity: t('roadmap_severity_high'),
+              severityClass: 'alto',
               icon: <Clock className="h-4 w-4" />,
             },
             {
-              title: 'Cookie Secure + SameSite=Strict',
-              desc: 'Cookie so trafega em HTTPS. SameSite=Strict previne CSRF. HttpOnly ja esta implementado.',
-              severity: 'medio',
+              title: t('roadmap_sec_cookie_title'),
+              desc: t('roadmap_sec_cookie_desc'),
+              severity: t('roadmap_severity_medium'),
+              severityClass: 'medio',
               icon: <Cookie className="h-4 w-4" />,
             },
             {
-              title: 'Validacao de email com regex',
-              desc: 'Regex robusto para formato de email. Rejeita emails invalidos antes de bater no banco.',
-              severity: 'medio',
+              title: t('roadmap_sec_email_title'),
+              desc: t('roadmap_sec_email_desc'),
+              severity: t('roadmap_severity_medium'),
+              severityClass: 'medio',
               icon: <Globe className="h-4 w-4" />,
             },
             {
-              title: 'Senha forte obrigatoria',
-              desc: 'Minimo 8 chars, 1 maiuscula, 1 numero. Indicador visual de forca no formulario.',
-              severity: 'medio',
+              title: t('roadmap_sec_password_title'),
+              desc: t('roadmap_sec_password_desc'),
+              severity: t('roadmap_severity_medium'),
+              severityClass: 'medio',
               icon: <Lock className="h-4 w-4" />,
             },
           ].map((item, i) => (
             <div key={i} className="neu-card p-4 flex gap-3">
               <div className={`mt-0.5 ${
-                item.severity === 'critico' ? 'text-red-400' :
-                item.severity === 'alto' ? 'text-orange-400' : 'text-yellow-400'
+                item.severityClass === 'critico' ? 'text-red-400' :
+                item.severityClass === 'alto' ? 'text-orange-400' : 'text-yellow-400'
               }`}>
                 {item.icon}
               </div>
@@ -437,8 +446,8 @@ function LoginPlan() {
                 <div className="flex items-center gap-2">
                   <span className="text-sm font-medium text-dark-text">{item.title}</span>
                   <span className={`text-[10px] uppercase font-bold px-1.5 py-0.5 rounded ${
-                    item.severity === 'critico' ? 'bg-red-500/20 text-red-400' :
-                    item.severity === 'alto' ? 'bg-orange-500/20 text-orange-400' :
+                    item.severityClass === 'critico' ? 'bg-red-500/20 text-red-400' :
+                    item.severityClass === 'alto' ? 'bg-orange-500/20 text-orange-400' :
                     'bg-yellow-500/20 text-yellow-400'
                   }`}>
                     {item.severity}
@@ -455,7 +464,7 @@ function LoginPlan() {
       <div className="space-y-3">
         <h4 className="font-display text-lg uppercase text-dark-text flex items-center gap-2">
           <Layers className="h-4 w-4 text-ufc-red" />
-          Implementacao por Camada
+          {t('roadmap_implementation_by_layer')}
         </h4>
 
         {/* REACT / FRONTEND */}
@@ -465,10 +474,10 @@ function LoginPlan() {
           color="border-blue-500/20"
         >
           <BeforeAfterBlock
-            title="Formulario de Login"
+            title={t('roadmap_login_form')}
             icon={<Code2 className="h-4 w-4" />}
             before={{
-              label: 'v1.0 — Atual',
+              label: t('roadmap_v1_current'),
               code: `// arena/login/page.tsx (atual)
 const handleSubmit = async (e) => {
   e.preventDefault();
@@ -490,15 +499,15 @@ const handleSubmit = async (e) => {
 <input type="email" ... />
 <input type="password" ... />`,
               issues: [
-                'Zero validacao antes do submit — qualquer input vai pro servidor',
-                'Sem indicador de forca de senha',
-                'Sem feedback visual nos campos (borda verde/vermelho)',
-                'Sem "esqueci minha senha" (nao existe fluxo de recovery)',
-                'Sem "mostrar senha" toggle',
+                t('roadmap_login_issue_1'),
+                t('roadmap_login_issue_2'),
+                t('roadmap_login_issue_3'),
+                t('roadmap_login_issue_4'),
+                t('roadmap_login_issue_5'),
               ],
             }}
             after={{
-              label: 'v2.0 — Planejado',
+              label: t('roadmap_v2_planned'),
               code: `// arena/login/page.tsx (v2.0)
 const [showPassword, setShowPassword] = useState(false);
 const [fieldErrors, setFieldErrors] = useState({});
@@ -531,20 +540,20 @@ const validateField = (field, value) => {
   <CountdownTimer seconds={remaining} />
 )}`,
               benefits: [
-                'Validacao em tempo real com onBlur — feedback instantaneo',
-                'Toggle mostrar/esconder senha com icone Eye/EyeOff',
-                'Borda verde/vermelha nos campos conforme validacao',
-                'Contador de rate limit visivel quando bloqueado',
-                'Mensagens de erro especificas por campo',
+                t('roadmap_login_benefit_1'),
+                t('roadmap_login_benefit_2'),
+                t('roadmap_login_benefit_3'),
+                t('roadmap_login_benefit_4'),
+                t('roadmap_login_benefit_5'),
               ],
             }}
           />
 
           <BeforeAfterBlock
-            title="Hook useArenaAuth"
+            title={t('roadmap_hook_auth')}
             icon={<Code2 className="h-4 w-4" />}
             before={{
-              label: 'v1.0 — Atual',
+              label: t('roadmap_v1_current'),
               code: `// hooks/useArenaAuth.ts (atual)
 const login = async (email, senha) => {
   const res = await fetch('/api/arena/auth/login', {
@@ -567,14 +576,14 @@ const logout = async () => {
   setState({ usuario: null, ... });
 };`,
               issues: [
-                'Sem retry logic para falhas de rede',
-                'Logout swallows errors — usuario nao sabe se falhou',
-                'Sem estado de "rate limited" — so mostra erro generico',
-                'fetchUsuario nao tem cache/dedup — chama a cada mount',
+                t('roadmap_auth_issue_1'),
+                t('roadmap_auth_issue_2'),
+                t('roadmap_auth_issue_3'),
+                t('roadmap_auth_issue_4'),
               ],
             }}
             after={{
-              label: 'v2.0 — Planejado',
+              label: t('roadmap_v2_planned'),
               code: `// hooks/useArenaAuth.ts (v2.0)
 interface AuthState {
   usuario: UsuarioArena | null;
@@ -607,10 +616,10 @@ const { data: usuario, mutate } = useSWR(
     dedupingInterval: 30000 }
 );`,
               benefits: [
-                'Estado rateLimitedUntil para countdown visual',
-                'SWR para cache/dedup de sessao (nao chama /me repetido)',
-                'revalidateOnFocus revalida ao voltar pra aba',
-                'Logout com feedback de erro se falhar',
+                t('roadmap_auth_benefit_1'),
+                t('roadmap_auth_benefit_2'),
+                t('roadmap_auth_benefit_3'),
+                t('roadmap_auth_benefit_4'),
               ],
             }}
           />
@@ -623,41 +632,41 @@ const { data: usuario, mutate } = useSWR(
           color="border-green-500/20"
         >
           <ArchitectureDiagram
-            title="Fluxo de Login v2.0"
+            title={t('roadmap_login_flow')}
             steps={[
               {
                 label: 'POST /api/arena/auth/login',
-                detail: 'Recebe { email, senha }',
+                detail: t('roadmap_flow_receive'),
                 icon: <Globe className="h-4 w-4 text-white" />,
                 color: 'bg-blue-500/30',
               },
               {
                 label: 'Rate Limiter Check',
-                detail: 'Verifica IP + email contra limites (5/15min)',
+                detail: t('roadmap_flow_ratelimit'),
                 icon: <ShieldAlert className="h-4 w-4 text-white" />,
                 color: 'bg-red-500/30',
               },
               {
-                label: 'Validacao de Input',
-                detail: 'Email regex + senha nao vazia',
+                label: t('roadmap_flow_validation'),
+                detail: t('roadmap_flow_validation_detail'),
                 icon: <CheckCircle2 className="h-4 w-4 text-white" />,
                 color: 'bg-yellow-500/30',
               },
               {
-                label: 'Query DB por Email',
+                label: t('roadmap_flow_query_db'),
                 detail: 'queryOne: SELECT * FROM usuarios_arena WHERE email = $1',
                 icon: <Database className="h-4 w-4 text-white" />,
                 color: 'bg-purple-500/30',
               },
               {
                 label: 'bcrypt.compare()',
-                detail: 'Compara senha com hash armazenado (10 rounds)',
+                detail: t('roadmap_flow_bcrypt'),
                 icon: <Key className="h-4 w-4 text-white" />,
                 color: 'bg-orange-500/30',
               },
               {
                 label: 'jose: SignJWT',
-                detail: 'Cria JWT com { sub: id, exp: 7d } assinado HS256',
+                detail: t('roadmap_flow_jwt'),
                 icon: <Shield className="h-4 w-4 text-white" />,
                 color: 'bg-green-500/30',
               },
@@ -671,10 +680,10 @@ const { data: usuario, mutate } = useSWR(
           />
 
           <BeforeAfterBlock
-            title="Hash de Senha"
+            title={t('roadmap_password_hash')}
             icon={<Key className="h-4 w-4" />}
             before={{
-              label: 'v1.0 — SHA-256 + salt fixo',
+              label: t('roadmap_v1_sha256'),
               code: `// lib/arena/auth.ts (atual)
 async function hashSenha(senha: string) {
   const encoder = new TextEncoder();
@@ -693,14 +702,14 @@ async function hashSenha(senha: string) {
     .join('');
 }`,
               issues: [
-                'SHA-256 e rapido — GPU faz bilhoes de hashes/segundo',
-                'Salt fixo — mesma senha = mesmo hash (rainbow table)',
-                'Fallback hardcoded: "arena-ufc-secret"',
-                'Se DB vazar, senhas sao faceis de quebrar',
+                t('roadmap_hash_issue_1'),
+                t('roadmap_hash_issue_2'),
+                t('roadmap_hash_issue_3'),
+                t('roadmap_hash_issue_4'),
               ],
             }}
             after={{
-              label: 'v2.0 — bcrypt com salt unico',
+              label: t('roadmap_v2_bcrypt'),
               code: `// lib/arena/auth.ts (v2.0)
 import bcrypt from 'bcrypt';
 
@@ -725,19 +734,19 @@ async function verificarSenha(
 // Hash resultante (~60 chars):
 // $2b$10$N9qo8uLOickgx2ZMRZoMye...`,
               benefits: [
-                'Salt unico por usuario — gerado automaticamente',
-                '10 rounds = ~100ms por hash (lento por design)',
-                'bcrypt.compare() extrai salt do hash armazenado',
-                'Padrao da industria — usado por GitHub, Stripe, etc.',
+                t('roadmap_hash_benefit_1'),
+                t('roadmap_hash_benefit_2'),
+                t('roadmap_hash_benefit_3'),
+                t('roadmap_hash_benefit_4'),
               ],
             }}
           />
 
           <BeforeAfterBlock
-            title="Token de Sessao"
+            title={t('roadmap_session_token')}
             icon={<Shield className="h-4 w-4" />}
             before={{
-              label: 'v1.0 — Base64 sem assinatura',
+              label: t('roadmap_v1_base64'),
               code: `// lib/arena/auth.ts (atual)
 function gerarToken(usuarioId: string) {
   const payload = {
@@ -760,14 +769,14 @@ function verificarToken(token: string) {
   return { id: payload.id };
 }`,
               issues: [
-                'Base64 NAO e criptografia — e encoding reverso',
-                'Qualquer um pode criar { id: "admin-id", exp: futuro }',
-                'Sem assinatura = sem como verificar autenticidade',
-                'Atacante so precisa saber o formato do JSON',
+                t('roadmap_token_issue_1'),
+                t('roadmap_token_issue_2'),
+                t('roadmap_token_issue_3'),
+                t('roadmap_token_issue_4'),
               ],
             }}
             after={{
-              label: 'v2.0 — JWT com HMAC-SHA256',
+              label: t('roadmap_v2_jwt'),
               code: `// lib/arena/auth.ts (v2.0)
 import { SignJWT, jwtVerify } from 'jose';
 
@@ -798,10 +807,10 @@ async function verificarToken(
   }
 }`,
               benefits: [
-                'HMAC-SHA256 — assinatura criptografica real',
-                'Impossivel forjar sem process.env.JWT_SECRET',
-                'jose verifica expiracao + assinatura automaticamente',
-                'Padrao JWT (RFC 7519) — auditavel e confiavel',
+                t('roadmap_token_benefit_1'),
+                t('roadmap_token_benefit_2'),
+                t('roadmap_token_benefit_3'),
+                t('roadmap_token_benefit_4'),
               ],
             }}
           />
@@ -810,7 +819,7 @@ async function verificarToken(
             title="Rate Limiting"
             icon={<ShieldAlert className="h-4 w-4" />}
             before={{
-              label: 'v1.0 — Nenhum',
+              label: t('roadmap_v1_none'),
               code: `// NADA implementado.
 // Qualquer um pode tentar infinitas
 // combinacoes de email/senha.
@@ -819,14 +828,14 @@ async function verificarToken(
 // 1000 tentativas/segundo = possivel
 // nenhum feedback de bloqueio`,
               issues: [
-                'Zero protecao contra brute force',
-                'Atacante pode testar milhares de senhas automaticamente',
-                'Sem lockout de conta apos tentativas falhas',
-                'Sem log de tentativas suspeitas',
+                t('roadmap_rate_issue_1'),
+                t('roadmap_rate_issue_2'),
+                t('roadmap_rate_issue_3'),
+                t('roadmap_rate_issue_4'),
               ],
             }}
             after={{
-              label: 'v2.0 — Sliding window por IP + email',
+              label: t('roadmap_v2_sliding_window'),
               code: `// lib/arena/rate-limiter.ts (v2.0)
 interface RateLimitEntry {
   count: number;
@@ -862,10 +871,10 @@ export function checkRateLimit(
   return { allowed: true };
 }`,
               benefits: [
-                '5 tentativas por email a cada 15 minutos',
-                '20 tentativas por IP a cada 15 minutos',
-                'Header Retry-After na resposta 429',
-                'Map com auto-cleanup via TTL (sem crescer infinito)',
+                t('roadmap_rate_benefit_1'),
+                t('roadmap_rate_benefit_2'),
+                t('roadmap_rate_benefit_3'),
+                t('roadmap_rate_benefit_4'),
               ],
             }}
           />
@@ -878,7 +887,7 @@ export function checkRateLimit(
           color="border-purple-500/20"
         >
           <BeforeAfterBlock
-            title="Coluna senha_hash"
+            title={t('roadmap_db_column')}
             icon={<Database className="h-4 w-4" />}
             before={{
               label: 'v1.0 — SHA-256 hex (64 chars)',
@@ -894,9 +903,9 @@ WHERE email = 'user@email.com';
 -- Todos os usuarios com mesma senha
 -- tem o MESMO hash (salt fixo)`,
               issues: [
-                'Hash de 64 chars — facil de identificar como SHA-256',
-                'Salt fixo = senhas iguais geram hashes iguais',
-                'Vulneravel a rainbow tables pre-computadas',
+                t('roadmap_db_issue_1'),
+                t('roadmap_db_issue_2'),
+                t('roadmap_db_issue_3'),
               ],
             }}
             after={{
@@ -916,10 +925,10 @@ WHERE email = 'user@email.com';
 -- Migracao: rodar script que re-hash
 -- senhas no proximo login de cada user`,
               benefits: [
-                'Salt embutido no hash — nao precisa coluna extra',
-                'Coluna VARCHAR(255) ja comporta (60 chars)',
-                'Migracao gradual: re-hash no proximo login',
-                'Sem mudanca de schema necessaria',
+                t('roadmap_db_benefit_1'),
+                t('roadmap_db_benefit_2'),
+                t('roadmap_db_benefit_3'),
+                t('roadmap_db_benefit_4'),
               ],
             }}
           />
@@ -927,12 +936,11 @@ WHERE email = 'user@email.com';
           <div className="neu-card p-4 space-y-3">
             <h5 className="text-sm font-medium text-dark-text flex items-center gap-2">
               <ArrowRight className="h-4 w-4 text-purple-400" />
-              Estrategia de Migracao de Hashes
+              {t('roadmap_migration_strategy')}
             </h5>
             <div className="space-y-2 text-xs text-dark-textMuted leading-relaxed">
               <p>
-                <strong className="text-dark-text">Problema:</strong> Nao da pra converter SHA-256 → bcrypt
-                sem a senha original. Precisamos de uma migracao <em>gradual</em>.
+                <strong className="text-dark-text">{t('roadmap_migration_problem_label')}:</strong> {t('roadmap_migration_problem')}
               </p>
               <div className="rounded-lg bg-black/30 p-3 font-mono text-green-400 text-[11px]">
 {`// No login, detectar formato do hash:
@@ -968,9 +976,7 @@ async function loginUsuario(email, senha) {
 }`}
               </div>
               <p>
-                <strong className="text-dark-text">Resultado:</strong> Cada usuario que fizer login
-                tera seu hash automaticamente migrado. Apos 30 dias, rodar script para forcar
-                reset de senha nos usuarios que nao logaram.
+                <strong className="text-dark-text">{t('roadmap_migration_result_label')}:</strong> {t('roadmap_migration_result')}
               </p>
             </div>
           </div>
@@ -981,50 +987,50 @@ async function loginUsuario(email, senha) {
       <div className="space-y-3">
         <h4 className="font-display text-lg uppercase text-dark-text flex items-center gap-2">
           <Code2 className="h-4 w-4 text-ufc-red" />
-          Arquivos Impactados
+          {t('roadmap_files_title')}
         </h4>
         <div className="space-y-2">
           {[
             {
               file: 'src/lib/arena/auth.ts',
-              action: 'Reescrever',
+              action: t('roadmap_action_rewrite'),
               detail: 'hashSenha → bcrypt, gerarToken → jose JWT, verificarToken → jwtVerify, criarCookieToken → +Secure +Strict',
               color: 'text-red-400',
             },
             {
               file: 'src/app/api/arena/auth/login/route.ts',
-              action: 'Modificar',
-              detail: 'Adicionar rate limiting, validacao de input, migracao de hash legacy',
+              action: t('roadmap_action_modify'),
+              detail: t('roadmap_file_login_detail'),
               color: 'text-orange-400',
             },
             {
               file: 'src/app/api/arena/auth/registro/route.ts',
-              action: 'Modificar',
-              detail: 'bcrypt.hash(), validacao de email regex, senha forte obrigatoria',
+              action: t('roadmap_action_modify'),
+              detail: t('roadmap_file_registro_detail'),
               color: 'text-orange-400',
             },
             {
               file: 'src/app/arena/login/page.tsx',
-              action: 'Modificar',
-              detail: 'Validacao client-side, toggle senha, feedback visual, rate limit countdown',
+              action: t('roadmap_action_modify'),
+              detail: t('roadmap_file_login_page_detail'),
               color: 'text-yellow-400',
             },
             {
               file: 'src/app/arena/registro/page.tsx',
-              action: 'Modificar',
-              detail: 'Indicador de forca de senha, validacao em tempo real',
+              action: t('roadmap_action_modify'),
+              detail: t('roadmap_file_registro_page_detail'),
               color: 'text-yellow-400',
             },
             {
               file: 'src/hooks/useArenaAuth.ts',
-              action: 'Modificar',
-              detail: 'Estado rateLimitedUntil, SWR para sessao, error handling melhorado',
+              action: t('roadmap_action_modify'),
+              detail: t('roadmap_file_hook_detail'),
               color: 'text-yellow-400',
             },
             {
               file: 'src/lib/arena/rate-limiter.ts',
-              action: 'Criar',
-              detail: 'Rate limiter com sliding window, Map + TTL, cleanup automatico',
+              action: t('roadmap_action_create'),
+              detail: t('roadmap_file_ratelimiter_detail'),
               color: 'text-green-400',
             },
           ].map((item, i) => (
@@ -1045,20 +1051,20 @@ async function loginUsuario(email, senha) {
       <div className="space-y-3">
         <h4 className="font-display text-lg uppercase text-dark-text flex items-center gap-2">
           <CheckCircle2 className="h-4 w-4 text-ufc-red" />
-          Ordem de Implementacao
+          {t('roadmap_implementation_order')}
         </h4>
         <div className="space-y-2">
           {[
-            { step: 1, task: 'Instalar bcrypt + jose', detail: 'npm install bcrypt @types/bcrypt jose', done: false },
-            { step: 2, task: 'Reescrever auth.ts', detail: 'hashSenha (bcrypt), gerarToken (JWT), verificarToken (jwtVerify), cookie flags', done: false },
-            { step: 3, task: 'Criar rate-limiter.ts', detail: 'Sliding window Map, checkRateLimit(), recordAttempt()', done: false },
-            { step: 4, task: 'Atualizar login route', detail: 'Rate limiting + migracao de hash legacy + validacao', done: false },
-            { step: 5, task: 'Atualizar registro route', detail: 'bcrypt.hash() + validacao email/senha forte', done: false },
-            { step: 6, task: 'Atualizar login page UI', detail: 'Validacao client-side, toggle senha, countdown rate limit', done: false },
-            { step: 7, task: 'Atualizar registro page UI', detail: 'Indicador de forca, validacao real-time', done: false },
-            { step: 8, task: 'Atualizar useArenaAuth hook', detail: 'SWR, rateLimitedUntil, error states', done: false },
-            { step: 9, task: 'Adicionar JWT_SECRET ao .env', detail: 'Gerar secret forte, documentar no .env.example', done: false },
-            { step: 10, task: 'Testar migracao de hash', detail: 'Login com hash antigo → verificar re-hash para bcrypt', done: false },
+            { step: 1, task: t('roadmap_step1_task'), detail: 'npm install bcrypt @types/bcrypt jose', done: false },
+            { step: 2, task: t('roadmap_step2_task'), detail: t('roadmap_step2_detail'), done: false },
+            { step: 3, task: t('roadmap_step3_task'), detail: 'Sliding window Map, checkRateLimit(), recordAttempt()', done: false },
+            { step: 4, task: t('roadmap_step4_task'), detail: t('roadmap_step4_detail'), done: false },
+            { step: 5, task: t('roadmap_step5_task'), detail: t('roadmap_step5_detail'), done: false },
+            { step: 6, task: t('roadmap_step6_task'), detail: t('roadmap_step6_detail'), done: false },
+            { step: 7, task: t('roadmap_step7_task'), detail: t('roadmap_step7_detail'), done: false },
+            { step: 8, task: t('roadmap_step8_task'), detail: t('roadmap_step8_detail'), done: false },
+            { step: 9, task: t('roadmap_step9_task'), detail: t('roadmap_step9_detail'), done: false },
+            { step: 10, task: t('roadmap_step10_task'), detail: t('roadmap_step10_detail'), done: false },
           ].map((item) => (
             <div key={item.step} className="flex items-start gap-3 p-3 rounded-lg hover:bg-white/[0.02] transition-colors">
               <div className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold ${
@@ -1083,18 +1089,18 @@ async function loginUsuario(email, senha) {
       <div className="neu-card p-4 border border-yellow-500/20">
         <div className="flex items-center gap-2 mb-3">
           <AlertTriangle className="h-4 w-4 text-yellow-400" />
-          <span className="text-sm font-bold text-yellow-400 uppercase">Variaveis de Ambiente Novas</span>
+          <span className="text-sm font-bold text-yellow-400 uppercase">{t('roadmap_new_env_vars')}</span>
         </div>
         <div className="space-y-2 font-mono text-xs">
           <div className="flex items-center gap-2">
             <span className="text-green-400">+</span>
             <span className="text-dark-text">JWT_SECRET</span>
-            <span className="text-dark-textMuted">= &quot;gerar com: openssl rand -base64 32&quot;</span>
+            <span className="text-dark-textMuted">= &quot;{t('roadmap_env_generate')}: openssl rand -base64 32&quot;</span>
           </div>
           <div className="flex items-center gap-2">
             <span className="text-yellow-400">~</span>
             <span className="text-dark-text">AUTH_SECRET</span>
-            <span className="text-dark-textMuted">= manter para migracao legacy, remover apos 30 dias</span>
+            <span className="text-dark-textMuted">= {t('roadmap_env_auth_secret_note')}</span>
           </div>
         </div>
       </div>
@@ -1107,6 +1113,7 @@ async function loginUsuario(email, senha) {
 // ═══════════════════════════════════════════════════════════════
 
 function ComingSoonSection({ title }: { title: string }) {
+  const t = useTranslations('arena');
   return (
     <div className="flex flex-col items-center justify-center py-12 text-center animate-fade-in">
       <div className="neu-inset rounded-full p-4 mb-4">
@@ -1116,7 +1123,7 @@ function ComingSoonSection({ title }: { title: string }) {
         {title}
       </h3>
       <p className="text-sm text-dark-textMuted/60">
-        Plano detalhado sera adicionado em breve
+        {t('roadmap_coming_soon')}
       </p>
     </div>
   );
@@ -1127,6 +1134,8 @@ function ComingSoonSection({ title }: { title: string }) {
 // ═══════════════════════════════════════════════════════════════
 
 export default function ArenaV2RoadmapPage() {
+  const t = useTranslations('arena');
+  const roadmapSections = useRoadmapSections();
   const [activeSection, setActiveSection] = useState<string | null>(null);
   const [isExporting, setIsExporting] = useState(false);
 
@@ -1174,27 +1183,25 @@ export default function ArenaV2RoadmapPage() {
               Arena <span className="text-ufc-red">v2.0</span>
             </h1>
             <p className="text-dark-textMuted leading-relaxed max-w-xl">
-              Reestruturacao completa da Arena — seguranca, UX, performance.
-              Clique em cada sessao para ver o plano detalhado com antes/depois,
-              ferramentas e checklist de implementacao.
+              {t('roadmap_hero_desc')}
             </p>
 
             <div className="mt-6 flex flex-wrap gap-3">
               <div className="flex items-center gap-2 text-xs text-dark-textMuted">
                 <span className="h-2 w-2 rounded-full bg-red-400" />
-                P0 — Critico
+                {t('roadmap_p0_critical')}
               </div>
               <div className="flex items-center gap-2 text-xs text-dark-textMuted">
                 <span className="h-2 w-2 rounded-full bg-orange-400" />
-                P1 — Alto
+                {t('roadmap_p1_high')}
               </div>
               <div className="flex items-center gap-2 text-xs text-dark-textMuted">
                 <span className="h-2 w-2 rounded-full bg-blue-400" />
-                P2 — Medio
+                {t('roadmap_p2_medium')}
               </div>
               <div className="flex items-center gap-2 text-xs text-dark-textMuted">
                 <span className="h-2 w-2 rounded-full bg-gray-400" />
-                P3 — Baixo
+                {t('roadmap_p3_low')}
               </div>
             </div>
           </div>
@@ -1254,12 +1261,12 @@ export default function ArenaV2RoadmapPage() {
                 {isExporting ? (
                   <>
                     <Loader2 className="h-4 w-4 animate-spin" />
-                    Gerando PDF...
+                    {t('roadmap_generating_pdf')}
                   </>
                 ) : (
                   <>
                     <Download className="h-4 w-4" />
-                    Exportar PDF
+                    {t('roadmap_export_pdf')}
                   </>
                 )}
               </button>
@@ -1274,7 +1281,7 @@ export default function ArenaV2RoadmapPage() {
 
         {/* Footer */}
         <div className="mt-12 text-center text-xs text-dark-textMuted/50 pb-8">
-          Arena v2.0 Roadmap — UFC News Hub — Atualizado em 13 de Marco, 2026
+          {t('roadmap_footer')}
         </div>
       </div>
     </div>

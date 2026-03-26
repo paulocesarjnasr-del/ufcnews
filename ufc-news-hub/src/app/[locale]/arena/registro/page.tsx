@@ -2,6 +2,7 @@
 
 import { Suspense, useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/routing';
 import { Octagon } from 'lucide-react';
 import { OctagonPortalLayout } from '@/components/arena/OctagonPortalLayout';
@@ -24,6 +25,7 @@ export default function ArenaRegistroPage() {
 function RegistroContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const t = useTranslations('arena');
   const { registro, isAuthenticated, isLoading: authLoading } = useArenaAuth();
   const redirectTo = searchParams.get('redirect') || '/arena';
   const [formData, setFormData] = useState({
@@ -53,22 +55,22 @@ function RegistroContent() {
     setError('');
 
     if (formData.username.length < 3 || formData.username.length > 20) {
-      setError('Username deve ter entre 3 e 20 caracteres');
+      setError(t('registro_error_username_length'));
       return;
     }
 
     if (!/^[a-zA-Z0-9_]+$/.test(formData.username)) {
-      setError('Username pode conter apenas letras, numeros e _');
+      setError(t('registro_error_username_chars'));
       return;
     }
 
     if (formData.senha.length < 6) {
-      setError('Senha deve ter pelo menos 6 caracteres');
+      setError(t('registro_error_password_length'));
       return;
     }
 
     if (formData.senha !== formData.confirmarSenha) {
-      setError('Senhas nao conferem');
+      setError(t('registro_error_password_mismatch'));
       return;
     }
 
@@ -84,7 +86,7 @@ function RegistroContent() {
     if (result.success) {
       router.push(redirectTo);
     } else {
-      setError(result.error || 'Erro ao criar conta');
+      setError(result.error || t('registro_error_generic'));
     }
 
     setIsLoading(false);
@@ -109,10 +111,10 @@ function RegistroContent() {
             <Octagon className="h-10 w-10" />
           </div>
           <h2 className="font-display text-3xl uppercase tracking-wide text-dark-text">
-            Criar Conta
+            {t('registro_title')}
           </h2>
           <p className="mt-1 text-sm text-dark-textMuted">
-            Junte-se à Arena e comece a competir
+            {t('registro_subtitle')}
           </p>
         </div>
 
@@ -126,7 +128,7 @@ function RegistroContent() {
 
           <div className="slide-up-fade" style={{ animationDelay: '50ms' }}>
             <label htmlFor="username" className="block text-sm font-medium text-dark-textMuted mb-2">
-              Username *
+              {t('registro_username')} *
             </label>
             <input
               type="text"
@@ -141,13 +143,13 @@ function RegistroContent() {
               placeholder="seu_username"
             />
             <p className="mt-1 text-xs text-dark-textMuted">
-              3-20 caracteres, apenas letras, numeros e _
+              {t('registro_username_hint')}
             </p>
           </div>
 
           <div className="slide-up-fade" style={{ animationDelay: '100ms' }}>
             <label htmlFor="email" className="block text-sm font-medium text-dark-textMuted mb-2">
-              Email *
+              {t('login_email')} *
             </label>
             <input
               type="email"
@@ -163,7 +165,7 @@ function RegistroContent() {
 
           <div className="slide-up-fade" style={{ animationDelay: '150ms' }}>
             <label htmlFor="senha" className="block text-sm font-medium text-dark-textMuted mb-2">
-              Senha *
+              {t('login_password')} *
             </label>
             <input
               type="password"
@@ -180,7 +182,7 @@ function RegistroContent() {
 
           <div className="slide-up-fade" style={{ animationDelay: '200ms' }}>
             <label htmlFor="confirmarSenha" className="block text-sm font-medium text-dark-textMuted mb-2">
-              Confirmar Senha *
+              {t('registro_confirm_password')} *
             </label>
             <input
               type="password"
@@ -200,14 +202,14 @@ function RegistroContent() {
               disabled={isLoading}
               className="w-full rounded-xl bg-ufc-red py-3 font-display uppercase text-white hover:bg-ufc-redLight transition-all hover:shadow-[0_0_20px_rgba(210,10,10,0.4)] disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isLoading ? 'Criando conta...' : 'Criar Conta'}
+              {isLoading ? t('registro_loading') : t('registro_title')}
             </button>
           </div>
 
           {/* Separador */}
           <div className="flex items-center gap-3 my-2 slide-up-fade" style={{ animationDelay: '300ms' }}>
             <div className="flex-1 border-t border-dark-border" />
-            <span className="text-xs text-dark-textMuted">ou</span>
+            <span className="text-xs text-dark-textMuted">{t('login_or')}</span>
             <div className="flex-1 border-t border-dark-border" />
           </div>
 
@@ -226,14 +228,14 @@ function RegistroContent() {
                 <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
                 <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
               </svg>
-              Continuar com Google
+              {t('login_continue_google')}
             </a>
           </div>
 
           <div className="text-center text-sm text-dark-textMuted slide-up-fade" style={{ animationDelay: '400ms' }}>
-            Já tem uma conta?{' '}
+            {t('registro_has_account')}{' '}
             <Link href="/arena/login" className="text-ufc-red hover:text-ufc-redLight font-medium">
-              Fazer login
+              {t('registro_login_link')}
             </Link>
           </div>
         </form>

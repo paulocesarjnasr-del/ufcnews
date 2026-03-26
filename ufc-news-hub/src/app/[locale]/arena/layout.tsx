@@ -2,6 +2,7 @@
 
 import { Link } from '@/i18n/routing';
 import { Target, Trophy } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { Header } from '@/components/ui/Header';
 import { UserAvatar } from '@/components/arena/UserAvatar';
 import { BottomNav } from '@/components/arena/BottomNav';
@@ -9,6 +10,7 @@ import { useArenaAuth } from '@/hooks/useArenaAuth';
 import { useProximoEvento } from '@/hooks/useProximoEvento';
 
 export default function ArenaLayout({ children }: { children: React.ReactNode }) {
+  const t = useTranslations('arena');
   const { usuario, isAuthenticated, logout } = useArenaAuth();
   const { evento, isAoVivo } = useProximoEvento();
 
@@ -24,7 +26,7 @@ export default function ArenaLayout({ children }: { children: React.ReactNode })
           <Link href="/arena" className="flex items-center gap-2 group">
             <Target className="w-5 h-5 text-ufc-red transition-transform group-hover:scale-110" />
             <span className="font-display text-lg text-white tracking-wide">
-              Arena <span className="text-ufc-red">UFC</span>
+              {t('layout_arena')} <span className="text-ufc-red">UFC</span>
             </span>
           </Link>
 

@@ -3,6 +3,7 @@
 import { useState, useEffect, use } from 'react';
 import { Link } from '@/i18n/routing';
 import { Trophy, Target, TrendingUp, Flame, Zap, Lock, Scale, Star, Share2, Calendar } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 import { useArenaAuth } from '@/hooks/useArenaAuth';
 import { NIVEL_CONFIG, CONQUISTAS_DEFINICOES, type TipoConquista } from '@/types/arena';
@@ -43,6 +44,7 @@ interface PageProps {
 }
 
 export default function PerfilPage({ params }: PageProps) {
+  const t = useTranslations('arena');
   const { username } = use(params);
   const { usuario: usuarioAtual, isAuthenticated } = useArenaAuth();
   const [perfil, setPerfil] = useState<PerfilUsuario | null>(null);
@@ -62,10 +64,10 @@ export default function PerfilPage({ params }: PageProps) {
           setConquistas(data.conquistas || []);
         } else {
           const data = await res.json();
-          setError(data.error || 'Usuario nao encontrado');
+          setError(data.error || t('user_not_found'));
         }
       } catch {
-        setError('Erro ao carregar perfil');
+        setError(t('error_load_profile'));
       } finally {
         setIsLoading(false);
       }
@@ -85,10 +87,10 @@ export default function PerfilPage({ params }: PageProps) {
     return (
       <div className="container mx-auto px-4 py-8 text-center">
         <h1 className="font-display text-2xl text-dark-text mb-4">
-          {error || 'Usuario nao encontrado'}
+          {error || t('user_not_found')}
         </h1>
         <Link href="/arena" className="text-ufc-red hover:text-ufc-redLight">
-          ← Voltar para Arena
+          {t('back_to_arena')}
         </Link>
       </div>
     );
@@ -111,10 +113,10 @@ export default function PerfilPage({ params }: PageProps) {
       {/* Breadcrumb */}
       <div className="flex items-center gap-2 text-sm text-dark-textMuted">
         <Link href="/arena" className="hover:text-ufc-red transition-colors">
-          Arena
+          {t('title')}
         </Link>
         <span>/</span>
-        <span className="text-dark-text">Perfil</span>
+        <span className="text-dark-text">{t('profile')}</span>
       </div>
 
       {/* ═══════════════════════════════════════════════ */}
@@ -161,7 +163,7 @@ export default function PerfilPage({ params }: PageProps) {
                     href="/arena/perfil/editar"
                     className="neu-button px-4 py-2 text-sm text-dark-textMuted hover:text-ufc-red transition-colors"
                   >
-                    Editar Perfil
+                    {t('edit_profile')}
                   </Link>
                 )}
                 <button
@@ -171,7 +173,7 @@ export default function PerfilPage({ params }: PageProps) {
                   className="flex items-center gap-2 px-4 py-2 rounded-lg bg-dark-card border border-dark-border text-sm text-dark-textMuted hover:text-dark-text transition-colors"
                 >
                   <Share2 className="w-4 h-4" />
-                  Compartilhar
+                  {t('share')}
                 </button>
               </div>
             </div>
@@ -209,7 +211,7 @@ export default function PerfilPage({ params }: PageProps) {
             )}
 
             <p className="mt-3 text-xs text-dark-textMuted">
-              Membro desde{' '}
+              {t('member_since')}{' '}
               {perfil.created_at && !isNaN(new Date(perfil.created_at).getTime())
                 ? new Date(perfil.created_at).toLocaleDateString('pt-BR', {
                     month: 'long',
@@ -228,17 +230,17 @@ export default function PerfilPage({ params }: PageProps) {
         <div className="neu-card p-4 text-center">
           <Trophy className="w-5 h-5 text-ufc-red mx-auto mb-1.5" />
           <p className="font-display text-2xl text-ufc-red">{perfil.pontos_totais}</p>
-          <p className="text-xs text-dark-textMuted">Pontos</p>
+          <p className="text-xs text-dark-textMuted">{t('points')}</p>
         </div>
         <div className="neu-card p-4 text-center">
           <Target className="w-5 h-5 text-green-400 mx-auto mb-1.5" />
           <p className="font-display text-2xl text-green-400">{perfil.previsoes_corretas}</p>
-          <p className="text-xs text-dark-textMuted">Acertos</p>
+          <p className="text-xs text-dark-textMuted">{t('correct')}</p>
         </div>
         <div className="neu-card p-4 text-center">
           <TrendingUp className="w-5 h-5 text-ufc-gold mx-auto mb-1.5" />
           <p className="font-display text-2xl text-ufc-gold">{taxaAcerto}%</p>
-          <p className="text-xs text-dark-textMuted">Taxa de Acerto</p>
+          <p className="text-xs text-dark-textMuted">{t('accuracy_rate')}</p>
         </div>
       </div>
 
@@ -248,20 +250,20 @@ export default function PerfilPage({ params }: PageProps) {
       <div className="neu-card p-6">
         <div className="flex items-center gap-2 mb-4">
           <Flame className="w-5 h-5 text-orange-400" />
-          <h2 className="font-display text-lg uppercase text-dark-text">Sequencias</h2>
+          <h2 className="font-display text-lg uppercase text-dark-text">{t('streaks')}</h2>
         </div>
         <div className="grid grid-cols-3 gap-4">
           <div className="neu-inset rounded-lg p-3 text-center">
             <p className="font-display text-2xl text-ufc-gold">{perfil.streak_atual}</p>
-            <p className="text-xs text-dark-textMuted mt-1">Atual</p>
+            <p className="text-xs text-dark-textMuted mt-1">{t('current')}</p>
           </div>
           <div className="neu-inset rounded-lg p-3 text-center">
             <p className="font-display text-2xl text-green-400">{perfil.melhor_streak}</p>
-            <p className="text-xs text-dark-textMuted mt-1">Melhor</p>
+            <p className="text-xs text-dark-textMuted mt-1">{t('best')}</p>
           </div>
           <div className="neu-inset rounded-lg p-3 text-center">
             <p className="font-display text-2xl text-ufc-red">{perfil.streak_main_event}</p>
-            <p className="text-xs text-dark-textMuted mt-1">Main Event</p>
+            <p className="text-xs text-dark-textMuted mt-1">{t('profile_main_event')}</p>
           </div>
         </div>
       </div>
@@ -270,34 +272,34 @@ export default function PerfilPage({ params }: PageProps) {
       {/* 4. Specialties Card */}
       {/* ═══════════════════════════════════════════════ */}
       <div className="neu-card p-6">
-        <h2 className="font-display text-lg uppercase text-dark-text mb-4">Especialidades</h2>
+        <h2 className="font-display text-lg uppercase text-dark-text mb-4">{t('specialties')}</h2>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           <div className="flex items-center gap-3 neu-inset rounded-lg p-3">
             <Zap className="w-5 h-5 text-red-400 flex-shrink-0" />
             <div>
               <p className="font-display text-xl text-red-400">{perfil.kos_acertados}</p>
-              <p className="text-xs text-dark-textMuted">KOs</p>
+              <p className="text-xs text-dark-textMuted">{t('profile_kos')}</p>
             </div>
           </div>
           <div className="flex items-center gap-3 neu-inset rounded-lg p-3">
             <Lock className="w-5 h-5 text-blue-400 flex-shrink-0" />
             <div>
               <p className="font-display text-xl text-blue-400">{perfil.subs_acertados}</p>
-              <p className="text-xs text-dark-textMuted">Subs</p>
+              <p className="text-xs text-dark-textMuted">{t('profile_subs')}</p>
             </div>
           </div>
           <div className="flex items-center gap-3 neu-inset rounded-lg p-3">
             <Scale className="w-5 h-5 text-yellow-400 flex-shrink-0" />
             <div>
               <p className="font-display text-xl text-yellow-400">{perfil.decisoes_acertadas}</p>
-              <p className="text-xs text-dark-textMuted">Decisoes</p>
+              <p className="text-xs text-dark-textMuted">{t('profile_decisions')}</p>
             </div>
           </div>
           <div className="flex items-center gap-3 neu-inset rounded-lg p-3">
             <Star className="w-5 h-5 text-purple-400 flex-shrink-0" />
             <div>
               <p className="font-display text-xl text-purple-400">{perfil.underdogs_acertados}</p>
-              <p className="text-xs text-dark-textMuted">Underdogs</p>
+              <p className="text-xs text-dark-textMuted">{t('profile_underdogs')}</p>
             </div>
           </div>
         </div>
@@ -308,7 +310,7 @@ export default function PerfilPage({ params }: PageProps) {
       {/* ═══════════════════════════════════════════════ */}
       <div>
         <h2 className="font-display text-lg uppercase text-dark-text mb-4">
-          Conquistas ({perfil.total_conquistas} / {CONQUISTAS_DEFINICOES.length})
+          {t('achievements')} ({perfil.total_conquistas} / {CONQUISTAS_DEFINICOES.length})
         </h2>
         <div className="grid gap-3 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4">
           {CONQUISTAS_DEFINICOES.map((conquista) => {
@@ -361,7 +363,7 @@ export default function PerfilPage({ params }: PageProps) {
       <div className="mt-6">
         <h3 className="font-display text-lg uppercase text-white mb-3 flex items-center gap-2">
           <Calendar className="w-5 h-5 text-ufc-red" />
-          Historico de Eventos
+          {t('event_history')}
         </h3>
         <EventoHistorico username={username} />
       </div>

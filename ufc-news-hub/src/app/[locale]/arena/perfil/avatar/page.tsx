@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Link } from '@/i18n/routing';
 import FighterImage from '@/components/ui/FighterImage';
+import { useTranslations } from 'next-intl';
 import { useArenaAuth } from '@/hooks/useArenaAuth';
 
 interface Lutador {
@@ -17,6 +18,7 @@ interface Lutador {
 type AvatarType = 'initials' | 'upload' | 'fighter';
 
 export default function AvatarSelectionPage() {
+  const t = useTranslations('arena');
   const router = useRouter();
   const { usuario, isAuthenticated, isLoading: authLoading, refreshUsuario } = useArenaAuth();
   const [avatarType, setAvatarType] = useState<AvatarType>('initials');
@@ -102,13 +104,13 @@ export default function AvatarSelectionPage() {
       <main className="container mx-auto px-4 py-8 max-w-2xl">
         <div className="mb-8">
           <Link href={`/arena/perfil/${usuario?.username}`} className="text-dark-textMuted hover:text-white text-sm">
-            ← Voltar ao perfil
+            {t('avatar_back_to_profile')}
           </Link>
           <h1 className="font-display text-3xl uppercase text-white mt-4">
-            Escolha seu Avatar
+            {t('avatar_choose_title')}
           </h1>
           <p className="text-dark-textMuted mt-2">
-            Personalize seu perfil com uma imagem unica
+            {t('avatar_choose_subtitle')}
           </p>
         </div>
 
@@ -124,10 +126,10 @@ export default function AvatarSelectionPage() {
           >
             <div className="text-3xl mb-2">🔤</div>
             <p className={`text-sm font-medium ${avatarType === 'initials' ? 'text-ufc-red' : 'text-white'}`}>
-              Iniciais
+              {t('avatar_initials')}
             </p>
             <p className="text-xs text-dark-textMuted mt-1">
-              Suas iniciais do nome
+              {t('avatar_initials_desc')}
             </p>
           </button>
 
@@ -141,10 +143,10 @@ export default function AvatarSelectionPage() {
           >
             <div className="text-3xl mb-2">🥊</div>
             <p className={`text-sm font-medium ${avatarType === 'fighter' ? 'text-ufc-red' : 'text-white'}`}>
-              Lutador
+              {t('avatar_fighter')}
             </p>
             <p className="text-xs text-dark-textMuted mt-1">
-              Seu lutador favorito
+              {t('avatar_fighter_desc')}
             </p>
           </button>
 
@@ -159,17 +161,17 @@ export default function AvatarSelectionPage() {
           >
             <div className="text-3xl mb-2">📷</div>
             <p className={`text-sm font-medium ${avatarType === 'upload' ? 'text-ufc-red' : 'text-white'}`}>
-              Upload
+              {t('avatar_upload')}
             </p>
             <p className="text-xs text-dark-textMuted mt-1">
-              Em breve
+              {t('avatar_coming_soon')}
             </p>
           </button>
         </div>
 
         {/* Preview atual */}
         <div className="bg-dark-card border border-dark-border rounded-xl p-6 mb-8">
-          <p className="text-dark-textMuted text-sm mb-4">Preview:</p>
+          <p className="text-dark-textMuted text-sm mb-4">{t('avatar_preview')}:</p>
           <div className="flex items-center gap-4">
             <div className="w-20 h-20 rounded-full overflow-hidden bg-dark-border flex items-center justify-center border-2 border-ufc-red">
               {avatarType === 'initials' ? (
@@ -202,7 +204,7 @@ export default function AvatarSelectionPage() {
             <div className="mb-4">
               <input
                 type="text"
-                placeholder="Buscar lutador..."
+                placeholder={t('avatar_search_fighter')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full px-4 py-3 bg-dark-bg border border-dark-border rounded-lg text-white placeholder-dark-textMuted focus:outline-none focus:border-ufc-red"
@@ -253,7 +255,7 @@ export default function AvatarSelectionPage() {
             {selectedFighter && (
               <div className="mt-4 pt-4 border-t border-dark-border">
                 <p className="text-sm text-dark-textMuted">
-                  Selecionado: <span className="text-white font-medium">
+                  {t('avatar_selected')}: <span className="text-white font-medium">
                     {lutadores.find(l => l.id === selectedFighter)?.nome}
                   </span>
                 </p>
@@ -268,14 +270,14 @@ export default function AvatarSelectionPage() {
             href={`/arena/perfil/${usuario?.username}`}
             className="flex-1 py-3 px-6 bg-dark-card border border-dark-border text-white font-medium rounded-lg hover:bg-dark-border transition-colors text-center"
           >
-            Cancelar
+            {t('cancel')}
           </Link>
           <button
             onClick={handleSave}
             disabled={isSaving || (avatarType === 'fighter' && !selectedFighter)}
             className="flex-1 py-3 px-6 bg-ufc-red hover:bg-ufc-redLight disabled:bg-dark-border disabled:text-dark-textMuted text-white font-medium rounded-lg transition-colors"
           >
-            {isSaving ? 'Salvando...' : 'Salvar Avatar'}
+            {isSaving ? t('saving') : t('avatar_save')}
           </button>
         </div>
       </main>

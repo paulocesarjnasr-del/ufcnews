@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/routing';
 import { Header } from '@/components/ui/Header';
 import { useArenaAuth } from '@/hooks/useArenaAuth';
@@ -39,6 +40,7 @@ interface Notificacao {
 
 export default function ArenaDashboardPage() {
   const router = useRouter();
+  const t = useTranslations('arena');
   const { usuario, isAuthenticated, isLoading: authLoading, logout } = useArenaAuth();
   const [proximoEvento, setProximoEvento] = useState<ProximoEvento | null>(null);
   const [ligas, setLigas] = useState<Liga[]>([]);
@@ -121,17 +123,17 @@ export default function ArenaDashboardPage() {
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
           <div>
             <h1 className="font-display text-3xl uppercase text-dark-text">
-              Ola, <span className="text-ufc-red">{usuario.display_name || usuario.username}</span>!
+              {t('dashboard_hello', { name: '' })}<span className="text-ufc-red">{usuario.display_name || usuario.username}</span>!
             </h1>
             <p className="text-dark-textMuted">
-              Bem-vindo a sua Arena
+              {t('dashboard_welcome')}
             </p>
           </div>
           <button
             onClick={logout}
             className="text-sm text-dark-textMuted hover:text-ufc-red transition-colors"
           >
-            Sair
+            {t('dashboard_logout')}
           </button>
         </div>
 
@@ -164,7 +166,7 @@ export default function ArenaDashboardPage() {
                   href={`/arena/perfil/${usuario.username}`}
                   className="text-sm text-ufc-red hover:text-ufc-redLight"
                 >
-                  Ver perfil →
+                  {t('dashboard_view_profile')}
                 </Link>
               </div>
 
@@ -185,25 +187,25 @@ export default function ArenaDashboardPage() {
                   <p className="font-display text-2xl text-ufc-red">
                     {usuario.pontos_totais}
                   </p>
-                  <p className="text-xs text-dark-textMuted">Pontos</p>
+                  <p className="text-xs text-dark-textMuted">{t('points')}</p>
                 </div>
                 <div className="text-center p-3 rounded bg-dark-bg">
                   <p className="font-display text-2xl text-ufc-gold">
                     {usuario.previsoes_corretas}
                   </p>
-                  <p className="text-xs text-dark-textMuted">Acertos</p>
+                  <p className="text-xs text-dark-textMuted">{t('correct')}</p>
                 </div>
                 <div className="text-center p-3 rounded bg-dark-bg">
                   <p className="font-display text-2xl text-green-400">
                     {usuario.streak_atual}
                   </p>
-                  <p className="text-xs text-dark-textMuted">Sequencia</p>
+                  <p className="text-xs text-dark-textMuted">{t('dashboard_streak')}</p>
                 </div>
                 <div className="text-center p-3 rounded bg-dark-bg">
                   <p className="font-display text-2xl text-blue-400">
                     {usuario.total_conquistas}
                   </p>
-                  <p className="text-xs text-dark-textMuted">Conquistas</p>
+                  <p className="text-xs text-dark-textMuted">{t('dashboard_achievements')}</p>
                 </div>
               </div>
             </div>
@@ -213,7 +215,7 @@ export default function ArenaDashboardPage() {
               <div className="rounded-lg border border-ufc-red/50 bg-ufc-red/5 p-6">
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="font-display text-xl uppercase text-dark-text">
-                    Proximo Evento
+                    {t('dashboard_next_event')}
                   </h2>
                   <span className={`rounded px-2 py-1 text-xs font-bold uppercase ${
                     proximoEvento.tipo === 'PPV'
@@ -233,13 +235,13 @@ export default function ArenaDashboardPage() {
                     month: 'long',
                   }) : '—'}
                   {' - '}
-                  {proximoEvento.total_lutas} lutas
+                  {t('dashboard_fights_count', { count: proximoEvento.total_lutas })}
                 </p>
                 <Link
                   href={`/arena/evento/${proximoEvento.id}`}
                   className="inline-block rounded bg-ufc-red px-6 py-2 font-display uppercase text-white hover:bg-ufc-redLight transition-colors"
                 >
-                  Fazer Previsoes
+                  {t('make_predictions_cta')}
                 </Link>
               </div>
             )}
@@ -248,13 +250,13 @@ export default function ArenaDashboardPage() {
             <div className="rounded-lg border border-dark-border bg-dark-card p-6">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="font-display text-xl uppercase text-dark-text">
-                  Suas Ligas
+                  {t('dashboard_your_leagues')}
                 </h2>
                 <Link
                   href="/arena/ligas"
                   className="text-sm text-ufc-red hover:text-ufc-redLight"
                 >
-                  Ver todas →
+                  {t('see_all')} →
                 </Link>
               </div>
 
@@ -267,13 +269,13 @@ export default function ArenaDashboardPage() {
               ) : ligas.length === 0 ? (
                 <div className="text-center py-8">
                   <p className="text-dark-textMuted mb-4">
-                    Voce ainda nao participa de nenhuma liga
+                    {t('dashboard_no_leagues')}
                   </p>
                   <Link
                     href="/arena/ligas"
                     className="inline-block rounded border border-ufc-red px-4 py-2 text-sm text-ufc-red hover:bg-ufc-red hover:text-white transition-colors"
                   >
-                    Explorar Ligas
+                    {t('dashboard_explore_leagues')}
                   </Link>
                 </div>
               ) : (
@@ -287,14 +289,14 @@ export default function ArenaDashboardPage() {
                       <div>
                         <p className="font-medium text-dark-text">{liga.nome}</p>
                         <p className="text-xs text-dark-textMuted">
-                          {liga.total_membros} membros
+                          {liga.total_membros} {t('members')}
                         </p>
                       </div>
                       <div className="text-right">
                         <p className="font-display text-xl text-ufc-gold">
                           #{liga.posicao_atual}
                         </p>
-                        <p className="text-xs text-dark-textMuted">posicao</p>
+                        <p className="text-xs text-dark-textMuted">{t('position')}</p>
                       </div>
                     </Link>
                   ))}
@@ -309,7 +311,7 @@ export default function ArenaDashboardPage() {
             {duelosPendentes.length > 0 && (
               <div className="rounded-lg border border-ufc-gold/50 bg-ufc-gold/5 p-4">
                 <h3 className="font-display text-lg uppercase text-ufc-gold mb-3">
-                  Desafios Pendentes
+                  {t('dashboard_pending_challenges')}
                 </h3>
                 <div className="space-y-2">
                   {duelosPendentes.map((duelo) => (
@@ -331,7 +333,7 @@ export default function ArenaDashboardPage() {
                   href="/arena/duelos"
                   className="block mt-3 text-center text-sm text-ufc-gold hover:text-ufc-gold/80"
                 >
-                  Ver todos →
+                  {t('see_all')} →
                 </Link>
               </div>
             )}
@@ -339,7 +341,7 @@ export default function ArenaDashboardPage() {
             {/* Quick Actions */}
             <div className="rounded-lg border border-dark-border bg-dark-card p-4">
               <h3 className="font-display text-lg uppercase text-dark-text mb-4">
-                Acoes Rapidas
+                {t('dashboard_quick_actions')}
               </h3>
               <div className="space-y-2">
                 <Link
@@ -347,21 +349,21 @@ export default function ArenaDashboardPage() {
                   className="flex items-center gap-2 p-3 rounded bg-dark-bg hover:bg-dark-border transition-colors"
                 >
                   <span className="text-ufc-gold">+</span>
-                  <span className="text-dark-text">Criar Liga</span>
+                  <span className="text-dark-text">{t('create_league')}</span>
                 </Link>
                 <Link
                   href="/arena/amigos"
                   className="flex items-center gap-2 p-3 rounded bg-dark-bg hover:bg-dark-border transition-colors"
                 >
                   <span className="text-blue-400">👥</span>
-                  <span className="text-dark-text">Gerenciar Amigos</span>
+                  <span className="text-dark-text">{t('dashboard_manage_friends')}</span>
                 </Link>
                 <Link
                   href="/arena/conquistas"
                   className="flex items-center gap-2 p-3 rounded bg-dark-bg hover:bg-dark-border transition-colors"
                 >
                   <span className="text-purple-400">🏆</span>
-                  <span className="text-dark-text">Ver Conquistas</span>
+                  <span className="text-dark-text">{t('dashboard_view_achievements')}</span>
                 </Link>
               </div>
             </div>
@@ -370,7 +372,7 @@ export default function ArenaDashboardPage() {
             <div className="rounded-lg border border-dark-border bg-dark-card p-4">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-display text-lg uppercase text-dark-text">
-                  Notificacoes
+                  {t('dashboard_notifications')}
                 </h3>
                 {notificacoes.filter(n => !n.lida).length > 0 && (
                   <span className="rounded-full bg-ufc-red px-2 py-0.5 text-xs text-white">
@@ -381,7 +383,7 @@ export default function ArenaDashboardPage() {
 
               {notificacoes.length === 0 ? (
                 <p className="text-sm text-dark-textMuted text-center py-4">
-                  Nenhuma notificacao
+                  {t('dashboard_no_notifications')}
                 </p>
               ) : (
                 <div className="space-y-2">

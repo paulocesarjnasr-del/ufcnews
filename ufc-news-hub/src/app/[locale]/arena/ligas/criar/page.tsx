@@ -7,6 +7,7 @@ import {
   ChevronLeft, Globe, Eye, EyeOff, Swords, BarChart3,
   Trophy, MessageCircle, Skull, DollarSign,
 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useArenaAuth } from '@/hooks/useArenaAuth';
 
 // ═══════════════════════════════════════════════════════════
@@ -95,6 +96,7 @@ function Selector({
 // ═══════════════════════════════════════════════════════════
 
 export default function CriarLigaPage() {
+  const t = useTranslations('arena');
   const router = useRouter();
   const { isAuthenticated, isLoading: authLoading } = useArenaAuth();
 
@@ -126,7 +128,7 @@ export default function CriarLigaPage() {
     setError('');
 
     if (nome.trim().length < 3 || nome.trim().length > 50) {
-      setError('Nome da liga deve ter entre 3 e 50 caracteres');
+      setError(t('error_league_name'));
       return;
     }
 
@@ -152,10 +154,10 @@ export default function CriarLigaPage() {
       if (res.ok) {
         router.push(`/arena/ligas/${data.liga.id}`);
       } else {
-        setError(data.error || 'Erro ao criar liga');
+        setError(data.error || t('error_create_league'));
       }
     } catch {
-      setError('Erro de conexao');
+      setError(t('error_connection'));
     }
     setIsLoading(false);
   };
@@ -176,14 +178,14 @@ export default function CriarLigaPage() {
         className="inline-flex items-center gap-1 text-sm text-white/40 hover:text-white transition-colors mb-6"
       >
         <ChevronLeft className="w-4 h-4" />
-        Voltar
+        {t('league_back')}
       </Link>
 
       <h1 className="font-display text-3xl uppercase text-white mb-2 text-center">
-        Criar <span className="text-ufc-gold">Liga</span>
+        {t('league_create_title')} <span className="text-ufc-gold">{t('league_create_title_accent')}</span>
       </h1>
       <p className="text-xs text-white/30 text-center mb-8">
-        Configure como sua liga vai funcionar
+        {t('league_create_subtitle')}
       </p>
 
       <form onSubmit={handleSubmit} className="space-y-6">
@@ -196,7 +198,7 @@ export default function CriarLigaPage() {
         {/* ── BASICO ── */}
         <div className="space-y-3">
           <div className="text-[10px] font-display uppercase tracking-widest text-white/25">
-            Basico
+            {t('league_create_basic')}
           </div>
 
           {/* Nome */}
@@ -207,19 +209,19 @@ export default function CriarLigaPage() {
             required
             minLength={3}
             maxLength={50}
-            placeholder="Nome da liga"
+            placeholder={t('league_name')}
             className="w-full rounded-xl bg-white/5 border border-white/10 px-4 py-3 text-white placeholder-white/20 focus:outline-none focus:border-ufc-red/50 transition-colors"
           />
 
           {/* Tipo */}
           <Selector
-            label="Tipo"
+            label={t('league_type')}
             icon={Globe}
             value={isPrivada ? 'privada' : 'publica'}
             onChange={v => setIsPrivada(v === 'privada')}
             options={[
-              { key: 'privada', label: 'Privada', desc: 'Somente com convite' },
-              { key: 'publica', label: 'Publica', desc: 'Qualquer um entra' },
+              { key: 'privada', label: t('private'), desc: t('league_create_private_desc') },
+              { key: 'publica', label: t('public'), desc: t('league_create_public_desc') },
             ]}
           />
         </div>
@@ -227,12 +229,12 @@ export default function CriarLigaPage() {
         {/* ── VISIBILIDADE ── */}
         <div className="space-y-3">
           <div className="text-[10px] font-display uppercase tracking-widest text-white/25">
-            Visibilidade dos picks
+            {t('league_create_visibility')}
           </div>
 
           <Toggle
-            label="Mostrar picks antes do evento"
-            description="Amigos podem ver os picks uns dos outros antes de comecar"
+            label={t('show_picks_before')}
+            description={t('show_picks_desc')}
             icon={Eye}
             value={mostrarPicksAntes}
             onChange={setMostrarPicksAntes}
@@ -240,8 +242,8 @@ export default function CriarLigaPage() {
 
           {!mostrarPicksAntes && (
             <Toggle
-              label="Revelar picks ao vivo"
-              description="Picks aparecem conforme cada luta comeca, nao tudo de uma vez"
+              label={t('league_create_reveal_live')}
+              description={t('league_create_reveal_live_desc')}
               icon={EyeOff}
               value={revelarPicksAoVivo}
               onChange={setRevelarPicksAoVivo}
@@ -252,25 +254,25 @@ export default function CriarLigaPage() {
         {/* ── COMPETICAO ── */}
         <div className="space-y-3">
           <div className="text-[10px] font-display uppercase tracking-widest text-white/25">
-            Competicao
+            {t('league_create_competition')}
           </div>
 
           <Toggle
-            label="Apenas main card"
-            description="Competir so nas lutas do card principal (menos picks, mais foco)"
+            label={t('main_card_only')}
+            description={t('main_card_only_desc')}
             icon={Swords}
             value={apenasMainCard}
             onChange={setApenasMainCard}
           />
 
           <Selector
-            label="Ranking por"
+            label={t('ranking_by')}
             icon={BarChart3}
             value={rankingTipo}
             onChange={setRankingTipo}
             options={[
-              { key: 'pontos', label: 'Pontos totais', desc: 'Melhor para grupos grandes' },
-              { key: 'percentual', label: '% de acerto', desc: 'Melhor para grupos pequenos' },
+              { key: 'pontos', label: t('by_points'), desc: t('league_create_points_desc') },
+              { key: 'percentual', label: t('by_percentage'), desc: t('league_create_percentage_desc') },
             ]}
           />
         </div>
@@ -278,20 +280,20 @@ export default function CriarLigaPage() {
         {/* ── DIVERSAO ── */}
         <div className="space-y-3">
           <div className="text-[10px] font-display uppercase tracking-widest text-white/25">
-            Diversao
+            {t('league_create_fun')}
           </div>
 
           {/* Punicao */}
           <div className="space-y-2">
             <div className="flex items-center gap-2 text-sm font-medium text-white/50">
               <Skull className="w-4 h-4" />
-              Prenda do perdedor
+              {t('loser_penalty')}
             </div>
             <input
               type="text"
               value={punicaoTexto}
               onChange={e => setPunicaoTexto(e.target.value)}
-              placeholder="Ex: Ultimo lugar paga o jantar"
+              placeholder={t('league_create_penalty_placeholder')}
               maxLength={200}
               className="w-full rounded-xl bg-white/5 border border-white/10 px-4 py-2.5 text-sm text-white placeholder-white/15 focus:outline-none focus:border-ufc-red/50 transition-colors"
             />
@@ -301,21 +303,21 @@ export default function CriarLigaPage() {
           <div className="space-y-2">
             <div className="flex items-center gap-2 text-sm font-medium text-white/50">
               <DollarSign className="w-4 h-4" />
-              Aposta da rodada
+              {t('round_bet')}
             </div>
             <input
               type="text"
               value={apostaRodada}
               onChange={e => setApostaRodada(e.target.value)}
-              placeholder="Ex: Quem perde paga o acai"
+              placeholder={t('league_create_bet_placeholder')}
               maxLength={100}
               className="w-full rounded-xl bg-white/5 border border-white/10 px-4 py-2.5 text-sm text-white placeholder-white/15 focus:outline-none focus:border-ufc-red/50 transition-colors"
             />
           </div>
 
           <Toggle
-            label="Chat da liga"
-            description="Membros podem conversar dentro da liga"
+            label={t('league_chat')}
+            description={t('chat_desc')}
             icon={MessageCircle}
             value={chatAtivo}
             onChange={setChatAtivo}
@@ -329,7 +331,7 @@ export default function CriarLigaPage() {
           className="w-full flex items-center justify-center gap-2 py-3.5 bg-ufc-red hover:bg-ufc-redLight text-white font-display uppercase tracking-wide rounded-xl transition-all disabled:opacity-40 disabled:cursor-not-allowed text-sm"
         >
           <Trophy className="w-4 h-4" />
-          {isLoading ? 'Criando...' : 'Criar Liga'}
+          {isLoading ? t('creating') : t('create_league')}
         </button>
       </form>
     </div>

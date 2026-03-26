@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, use } from 'react';
 import { Link } from '@/i18n/routing';
 import { useRouter } from 'next/navigation';
 import { Crown } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 import { useArenaAuth } from '@/hooks/useArenaAuth';
 import { LigaChat } from '@/components/arena/LigaChat';
@@ -52,6 +53,7 @@ interface LigaResponse {
 // ═══════════════════════════════════════════════════════════════
 
 export default function LigaPage({ params }: PageProps) {
+  const t = useTranslations('arena');
   const { id } = use(params);
   const router = useRouter();
   const { usuario, isAuthenticated } = useArenaAuth();
@@ -119,10 +121,10 @@ export default function LigaPage({ params }: PageProps) {
       if (res.ok) {
         fetchLiga();
       } else {
-        setError(data.error || 'Erro ao entrar na liga');
+        setError(data.error || t('error_join_league'));
       }
     } catch {
-      setError('Erro de conexao');
+      setError(t('error_connection'));
     } finally {
       setIsJoining(false);
     }
@@ -169,9 +171,9 @@ export default function LigaPage({ params }: PageProps) {
   if (!liga) {
     return (
       <div className="container mx-auto px-4 py-8 text-center">
-        <h1 className="font-display text-2xl text-white">Liga nao encontrada</h1>
+        <h1 className="font-display text-2xl text-white">{t('league_not_found')}</h1>
         <Link href="/arena/ligas" className="mt-4 inline-block text-ufc-red hover:text-ufc-redLight">
-          &larr; Voltar para Ligas
+          &larr; {t('league_back_to_leagues')}
         </Link>
       </div>
     );
@@ -204,7 +206,7 @@ export default function LigaPage({ params }: PageProps) {
             disabled={isJoining}
             className="neu-button w-full rounded-lg bg-ufc-red px-6 py-2.5 text-sm font-medium text-white hover:bg-ufc-redLight transition-colors disabled:opacity-50"
           >
-            {isJoining ? 'Entrando...' : 'Entrar na Liga'}
+            {isJoining ? t('league_joining') : t('league_join_button')}
           </button>
         </div>
       )}
@@ -223,7 +225,7 @@ export default function LigaPage({ params }: PageProps) {
         <div className="px-5 py-4 border-b border-dark-border flex items-center gap-2">
           <Crown className="w-5 h-5 text-ufc-gold" />
           <h2 className="font-display text-lg uppercase text-white">
-            {ultimoEvento ? 'Ranking' : 'Membros'}
+            {ultimoEvento ? t('ranking') : t('league_members_title')}
           </h2>
           {ultimoEvento && (
             <span className="text-xs text-dark-textMuted ml-auto">
@@ -234,7 +236,7 @@ export default function LigaPage({ params }: PageProps) {
 
         {sortedMembros.length === 0 ? (
           <div className="p-8 text-center text-dark-textMuted">
-            Nenhum membro ainda
+            {t('no_members')}
           </div>
         ) : (
           <div className="p-3 space-y-2">
@@ -259,7 +261,7 @@ export default function LigaPage({ params }: PageProps) {
       {/* ── Back link ── */}
       <div className="mt-6 text-center">
         <Link href="/arena/ligas" className="text-sm text-dark-textMuted hover:text-ufc-red">
-          &larr; Voltar para Ligas
+          &larr; {t('league_back_to_leagues')}
         </Link>
       </div>
 

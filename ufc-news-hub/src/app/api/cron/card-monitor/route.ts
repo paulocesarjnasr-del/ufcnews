@@ -77,9 +77,10 @@ async function scrapeNextEvent(): Promise<{ evento_nome: string; evento_data: st
       .text()
       .trim() || '';
 
-    // Extract fights from card listing
+    // Extract fights — multi-strategy approach for resilience
     const fights: ScrapedFight[] = [];
 
+    // Strategy 1: Classic UFC selectors (works for most events)
     $event('.c-listing-fight, .l-listing__item').each(function () {
       const fighters = $(this).find('.c-listing-fight__corner-name, .c-listing-fight__corner');
       if (fighters.length >= 2) {
@@ -89,7 +90,6 @@ async function scrapeNextEvent(): Promise<{ evento_nome: string; evento_data: st
         fighters.eq(0).find('.c-listing-fight__corner-given-name, .c-listing-fight__corner-family-name').each(function () {
           f1Parts.push($(this).text().trim());
         });
-
         fighters.eq(1).find('.c-listing-fight__corner-given-name, .c-listing-fight__corner-family-name').each(function () {
           f2Parts.push($(this).text().trim());
         });
@@ -104,7 +104,44 @@ async function scrapeNextEvent(): Promise<{ evento_nome: string; evento_data: st
       }
     });
 
-    // Deduplicate fights (UFC HTML has redundant elements per fight)
+    // Strategy 2: Extract from athlete links if Strategy 1 missed fights
+    // Collect all /athlete/ links in order, then pair them
+    const athleteLinks: { name: string; href: string }[] = [];
+    $event('a[href*="/athlete/"]').each(function () {
+      const href = $(this).attr('href') || '';
+      const name = $(this).text().trim();
+      if (name && name.length > 1 && name.length < 50 && !href.includes('#')) {
+        athleteLinks.push({ name, href });
+      }
+    });
+
+    // Deduplicate consecutive athlete links (same fighter appears multiple times)
+    const dedupedAthletes: { name: string; href: string }[] = [];
+    for (const link of athleteLinks) {
+      const last = dedupedAthletes[dedupedAthletes.length - 1];
+      if (!last || last.href !== link.href) {
+        dedupedAthletes.push(link);
+      }
+    }
+
+    // Pair consecutive unique athletes as fights
+    for (let i = 0; i < dedupedAthletes.length - 1; i += 2) {
+      const f1 = dedupedAthletes[i].name;
+      const f2 = dedupedAthletes[i + 1].name;
+      if (f1 && f2) {
+        // Check if this fight already exists from Strategy 1
+        const alreadyFound = fights.some(f => {
+          const key1 = [f.fighter1, f.fighter2].sort().join('|').toLowerCase();
+          const key2 = [f1, f2].sort().join('|').toLowerCase();
+          return key1 === key2;
+        });
+        if (!alreadyFound) {
+          fights.push({ fighter1: f1, fighter2: f2, weight_class: '' });
+        }
+      }
+    }
+
+    // Deduplicate all fights
     const seen = new Set<string>();
     const uniqueFights: ScrapedFight[] = [];
     for (const fight of fights) {

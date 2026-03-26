@@ -185,22 +185,60 @@ function EventResultView({
   }, [data?.lutas_finalizadas, data?.leaderboard]);
 
   // ── Pick result overlay (GTA style) ──
+  // Uses previous data comparison (ref) + sessionStorage to survive remounts.
+  // Only shows overlay when acertou_vencedor transitions from null → true/false
+  // between consecutive SWR polls — never on first load or remount.
   const [pickOverlay, setPickOverlay] = useState<'win' | 'lose' | null>(null);
-  const settledPicksRef = useRef<Set<string>>(new Set());
+  const prevLutasRef = useRef<Map<string, boolean | null> | null>(null);
+  const isFirstFetchRef = useRef(true);
   const dismissOverlay = useCallback(() => setPickOverlay(null), []);
 
   useEffect(() => {
     if (!data?.lutas) return;
+
+    // Build current state: luta_id → acertou_vencedor (null if unsettled)
+    const currentState = new Map<string, boolean | null>();
     for (const luta of data.lutas) {
-      if (!luta.userPick || luta.userPick.acertou_vencedor === null) continue;
-      // Already seen this result
-      if (settledPicksRef.current.has(luta.luta_id)) continue;
-      settledPicksRef.current.add(luta.luta_id);
-      // Show overlay
-      setPickOverlay(luta.userPick.acertou_vencedor ? 'win' : 'lose');
-      break; // one at a time
+      if (!luta.userPick) continue;
+      currentState.set(luta.luta_id, luta.userPick.acertou_vencedor);
     }
-  }, [data?.lutas]);
+
+    // Load sessionStorage on first render to know what was already shown
+    const storageKey = `overlay_shown_${eventoId}`;
+    let alreadyShown: Set<string>;
+    try {
+      alreadyShown = new Set(JSON.parse(sessionStorage.getItem(storageKey) || '[]') as string[]);
+    } catch {
+      alreadyShown = new Set();
+    }
+
+    // First fetch: just save baseline, don't show anything
+    if (isFirstFetchRef.current) {
+      isFirstFetchRef.current = false;
+      prevLutasRef.current = currentState;
+      return;
+    }
+
+    // Subsequent polls: compare with previous state
+    const prevState = prevLutasRef.current;
+    if (prevState) {
+      for (const [lutaId, acertou] of currentState) {
+        if (acertou === null) continue; // not settled yet
+        if (alreadyShown.has(lutaId)) continue; // already showed overlay this session
+        const prevValue = prevState.get(lutaId);
+        // Transition: null/undefined → true/false = result JUST came in
+        if (prevValue === null || prevValue === undefined) {
+          setPickOverlay(acertou ? 'win' : 'lose');
+          alreadyShown.add(lutaId);
+          try { sessionStorage.setItem(storageKey, JSON.stringify([...alreadyShown])); } catch { /* noop */ }
+          break; // one at a time
+        }
+      }
+    }
+
+    // Update baseline for next poll
+    prevLutasRef.current = currentState;
+  }, [data?.lutas, eventoId]);
 
   // ── Ranking movement tracking ──
   const prevPositions = useRef<Map<string, number>>(new Map());

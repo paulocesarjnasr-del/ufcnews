@@ -1,5 +1,6 @@
 'use client';
 
+
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Link } from '@/i18n/routing';
@@ -226,7 +227,7 @@ export function SwipeCard({
             onClick={handleNext}
             className="w-full py-4 rounded-xl bg-white/10 border border-white/10 text-base font-display uppercase tracking-wide text-white hover:bg-white/15 transition-all flex items-center justify-center gap-2"
           >
-            {index < total - 1 ? 'Proxima luta' : 'Ver resumo'}
+            {index < total - 1 ? "Next fight" : 'Ver resumo'}
             <ChevronRight className="w-5 h-5" />
           </button>
         </div>

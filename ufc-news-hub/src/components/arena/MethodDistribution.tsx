@@ -1,5 +1,7 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
+
 import { useEffect, useState } from 'react';
 import { useArenaAuth } from '@/hooks/useArenaAuth';
 
@@ -47,6 +49,7 @@ function buildConicGradient(segments: DonutSegment[]): string {
 }
 
 export function MethodDistribution() {
+  const t = useTranslations('arena');
   const { isAuthenticated } = useArenaAuth();
   const [data, setData] = useState<MetodosData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -67,7 +70,7 @@ export function MethodDistribution() {
         const total = metodos.reduce((sum, m) => sum + m.count, 0);
         setData({ metodos, total });
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Erro desconhecido');
+        setError(err instanceof Error ? err.message : t('error_unknown'));
       } finally {
         setIsLoading(false);
       }

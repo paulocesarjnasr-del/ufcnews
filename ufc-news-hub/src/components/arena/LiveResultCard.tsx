@@ -25,9 +25,9 @@ interface LiveResultCardProps {
 function getTipoLabel(tipo: string): string {
   const labels: Record<string, string> = {
     main_event: 'MAIN EVENT',
-    co_main: 'CO-MAIN EVENT',
+    co_main: 'CO-MAIN',
     card_principal: 'MAIN CARD',
-    preliminar: 'PRELIMINAR',
+    preliminar: 'PRELIMINARY',
     early_prelim: 'EARLY PRELIM',
   };
   return labels[tipo] ?? tipo.toUpperCase();

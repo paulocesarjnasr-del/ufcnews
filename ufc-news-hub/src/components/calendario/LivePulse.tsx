@@ -1,11 +1,12 @@
 'use client';
 
+
 interface LivePulseProps {
   variant?: 'default' | 'large' | 'badge';
   text?: string;
 }
 
-export default function LivePulse({ variant = 'default', text = 'AO VIVO' }: LivePulseProps) {
+export default function LivePulse({ variant = 'default', text = 'LIVE' }: LivePulseProps) {
   if (variant === 'badge') {
     return (
       <span className="inline-flex items-center gap-1.5 px-2 py-0.5 bg-ufc-red/10 border border-ufc-red/30 rounded text-xs font-semibold text-ufc-red">

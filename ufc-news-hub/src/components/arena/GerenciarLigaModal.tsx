@@ -279,7 +279,7 @@ export function GerenciarLigaModal({
             )}
 
             {/* Membros tab */}
-            {activeTab === 'membros' && (
+            {activeTab === t('members') && (
               <div className="space-y-2">
                 {membros.length === 0 ? (
                   <p className="text-center text-dark-textMuted py-4">Nenhum membro</p>

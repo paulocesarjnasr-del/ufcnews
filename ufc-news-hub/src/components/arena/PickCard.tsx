@@ -145,7 +145,7 @@ export function PickCard({
         <div className="mt-3 pt-3 border-t border-white/5">
           <div className="flex items-center justify-between text-[10px] mb-1.5">
             <span className={isUnderdog ? 'text-ufc-gold/70' : 'text-white/30'}>
-              {isUnderdog ? t('bold_bet') : isFavorite ? 'Com a maioria' : ''}
+              {isUnderdog ? t('bold_bet') : isFavorite ? t('with_majority') : ''}
             </span>
             <span className="text-white/25">{consensoPct}% da comunidade</span>
           </div>

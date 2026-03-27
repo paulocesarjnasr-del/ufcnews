@@ -10,7 +10,7 @@ const analise: PrelimsAnalise = {
   tactical_breakdown: { stats: [], radarData: [], taleOfTape: { fighter1: { altura: '1,88m', envergadura: '193cm', idade: 25, academia: 'Washington State' }, fighter2: { altura: '1,80m', envergadura: '183cm', idade: 25, academia: 'British Columbia, Canada' } }, pathsToVictory: { fighter1: [], fighter2: [] }, dangerZones: [] },
   num_rounds: 3, is_titulo: false, broadcast: null, analysis_type: 'prelims', created_at: new Date().toISOString(), updated_at: new Date().toISOString(),
   prelims_analysis: {
-    hero: { evento_nome: 'UFC Fight Night: Adesanya vs Pyfer', evento_data: '28 de Marco, 2026', categoria_peso: 'Peso Leve (155 lbs)', num_rounds: 3, is_titulo: false, fighter1: { nome: 'Chase Hooper', record: '16-4-1', ranking: 'N/R' }, fighter2: { nome: 'Lance Gibson Jr.', record: '9-2-0', ranking: 'N/R' } },
+    hero: { evento_nome: 'UFC Fight Night: Adesanya vs Pyfer', evento_data: '28 de Marco, 2026', categoria_peso: 'Peso Leve (155 lbs)', num_rounds: 3, is_titulo: false, fighter1: { nome: 'Chase Hooper', record: '16-4-1', ranking: 'N/R', imagem_url: 'https://ufc.com/images/styles/athlete_bio_full_body/s3/2026-03/HOOPER_CHASE_L_03-28.png?itok=gZvkHJT5' }, fighter2: { nome: 'Lance Gibson Jr.', record: '9-2-0', ranking: 'N/R', imagem_url: 'https://ufc.com/images/styles/athlete_bio_full_body/s3/2025-12/GIBSON_JR_LANCE_R_12-13.png?itok=EdokFOXL' } },
     comparacao_estatistica: {
       stats: [
         { label: 'Sig. Strikes por Minuto', valueA: 3.20, valueB: 4.50, maxVal: 6, format: 'decimal' },
@@ -28,12 +28,17 @@ const analise: PrelimsAnalise = {
     },
     historico_lutas: {
       fighter1: { nome: 'Hooper', recent_fights: [
-        { date: 'Out 2025', opponent: 'Mark Striegl', result: 'W', method: 'Sub R1', opponent_rank: 'N/R', quality_score: 1, quality_label: 'Ruim', note: 'Submissao rapida. O jiu-jitsu de Hooper e de outro nivel.' },
-        { date: 'Jun 2025', opponent: 'Nate Landwehr', result: 'L', method: 'KO R2', opponent_rank: 'N/R', quality_score: 2, quality_label: 'Medio', note: 'Nocauteado. Em pe, Hooper e vulneravel.' },
-        { date: 'Mar 2025', opponent: 'Fernando Padilla', result: 'W', method: 'Sub R2', opponent_rank: 'N/R', quality_score: 2, quality_label: 'Medio', note: 'Submissao solida no R2.' },
+        { date: 'Ago 2025', opponent: 'Alexander Hernandez', result: 'L', method: 'TKO R1 (socos)', opponent_rank: 'N/R', quality_score: 2, quality_label: 'Medio', note: 'Nocauteado no R1. Em pe continua vulneravel.' },
+        { date: 'Abr 2025', opponent: 'Jim Miller', result: 'W', method: 'Decisao Unanime', opponent_rank: 'N/R', quality_score: 2, quality_label: 'Medio', note: 'Venceu lenda do UFC por decisao. UFC 314.' },
+        { date: 'Dez 2024', opponent: 'Clay Guida', result: 'W', method: 'Sub R1 (armbar)', opponent_rank: 'N/R', quality_score: 2, quality_label: 'Medio', note: 'POTN. Armbar contra veterano. UFC 310.' },
+        { date: 'Mai 2024', opponent: 'Viacheslav Borshchev', result: 'W', method: 'Sub R2 (brabo choke)', opponent_rank: 'N/R', quality_score: 1, quality_label: 'Ruim', note: 'Submissao tecnica.' },
+        { date: 'Nov 2023', opponent: 'Jordan Leavitt', result: 'W', method: 'Sub R1 (RNC)', opponent_rank: 'N/R', quality_score: 2, quality_label: 'Medio', note: 'Mata-leao rapido.' },
+        { date: 'Mai 2023', opponent: 'Nick Fiore', result: 'W', method: 'Decisao Unanime', opponent_rank: 'N/R', quality_score: 1, quality_label: 'Ruim', note: 'Decisao.' },
+        { date: 'Out 2022', opponent: 'Steve Garcia', result: 'L', method: 'TKO R1 (socos)', opponent_rank: 'N/R', quality_score: 2, quality_label: 'Medio', note: 'Nocauteado. Vulnerabilidade em pe.' },
+        { date: 'Mai 2022', opponent: 'Felipe Colares', result: 'W', method: 'TKO R3 (socos)', opponent_rank: 'N/R', quality_score: 1, quality_label: 'Ruim', note: 'TKO tardio.' },
       ] },
       fighter2: { nome: 'Gibson Jr.', recent_fights: [
-        { date: 'Nov 2025', opponent: 'King Green', result: 'L', method: 'TKO R1', opponent_rank: 'N/R', quality_score: 2, quality_label: 'Medio', note: 'Debut UFC com derrota por TKO no R1. Luta dificil.' },
+        { date: 'Dez 2025', opponent: 'Bobby Green', result: 'L', method: 'Decisao Dividida', opponent_rank: 'N/R', quality_score: 3, quality_label: 'Bom', note: 'Debut UFC. Decisao apertada contra veterano Bobby Green. Competitivo.' },
       ] },
     },
     perfil_habilidades: {

@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import type { PrelimsAnalise, RecentFight } from '@/types/analise';
 import { getLabels, type Lang } from '@/lib/i18n-labels';
 import { SectionHeader } from './SectionHeader';
@@ -25,9 +26,15 @@ function SimpleHero({ data }: { data: PrelimsAnalise['prelims_analysis']['hero']
           )}
         </div>
 
-        {/* Fighter names */}
+        {/* Fighter names + photos */}
         <div className="flex items-center justify-center gap-6 md:gap-10">
           <div className="text-center">
+            {data.fighter1.imagem_url && (
+              <div className="relative w-32 h-44 md:w-40 md:h-52 mx-auto mb-3">
+                <Image src={data.fighter1.imagem_url} alt={data.fighter1.nome} fill className="object-contain object-top" sizes="(max-width: 768px) 128px, 160px" unoptimized />
+                <div className="absolute inset-x-0 bottom-0 h-1/4 bg-gradient-to-t from-dark-card to-transparent" />
+              </div>
+            )}
             <h1 className="font-display text-3xl uppercase text-ufc-red md:text-5xl">
               {data.fighter1.nome}
             </h1>
@@ -42,6 +49,12 @@ function SimpleHero({ data }: { data: PrelimsAnalise['prelims_analysis']['hero']
           <span className="font-display text-2xl text-dark-textMuted md:text-3xl">VS</span>
 
           <div className="text-center">
+            {data.fighter2.imagem_url && (
+              <div className="relative w-32 h-44 md:w-40 md:h-52 mx-auto mb-3">
+                <Image src={data.fighter2.imagem_url} alt={data.fighter2.nome} fill className="object-contain object-top" sizes="(max-width: 768px) 128px, 160px" unoptimized />
+                <div className="absolute inset-x-0 bottom-0 h-1/4 bg-gradient-to-t from-dark-card to-transparent" />
+              </div>
+            )}
             <h1 className="font-display text-3xl uppercase text-blue-400 md:text-5xl">
               {data.fighter2.nome}
             </h1>

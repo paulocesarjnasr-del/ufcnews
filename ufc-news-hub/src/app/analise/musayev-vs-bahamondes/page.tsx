@@ -40,8 +40,8 @@ const analise: PrelimsAnalise = {
       categoria_peso: 'Peso Leve (155 lbs)',
       num_rounds: 3,
       is_titulo: false,
-      fighter1: { nome: 'Tofiq Musayev', record: '22-6-0', ranking: 'N/R' },
-      fighter2: { nome: 'Ignacio Bahamondes', record: '17-6-0', ranking: 'N/R' },
+      fighter1: { nome: 'Tofiq Musayev', record: '22-6-0', ranking: 'N/R', imagem_url: 'https://ufc.com/images/styles/athlete_bio_full_body/s3/2025-06/MUSAYEV_TOFIQ_L_06-21.png?itok=eEnLq97J' },
+      fighter2: { nome: 'Ignacio Bahamondes', record: '17-6-0', ranking: 'N/R', imagem_url: 'https://ufc.com/images/styles/athlete_bio_full_body/s3/2026-03/BAHAMONDES_IGNACIO_L_03-28.png?itok=SHgs079A' },
     },
     comparacao_estatistica: {
       stats: [
@@ -75,8 +75,13 @@ const analise: PrelimsAnalise = {
         recent_fights: [
           { date: 'Jun 2025', opponent: 'Rafael Fiziev', result: 'L', method: 'Decisao Unanime', opponent_rank: '#8 LW', quality_score: 4, quality_label: 'Muito Bom', note: 'Primeira derrota em 4 lutas. Fiziev e elite.' },
           { date: 'Mar 2025', opponent: 'Jalin Turner', result: 'W', method: 'Sub R1 (triangulo)', opponent_rank: '#12 LW', quality_score: 3, quality_label: 'Bom', note: 'Terceiro finish R1 seguido. Terceiro POTN seguido.' },
-          { date: 'Set 2024', opponent: 'Manuel Torres', result: 'W', method: 'TKO R1', opponent_rank: 'N/R', quality_score: 2, quality_label: 'Medio', note: 'Segundo POTN consecutivo.' },
+          { date: 'Set 2024', opponent: 'Manuel Torres', result: 'W', method: 'TKO R1', opponent_rank: 'N/R', quality_score: 2, quality_label: 'Medio', note: 'Segundo POTN consecutivo. UFC 306.' },
           { date: 'Abr 2024', opponent: 'Christos Giagos', result: 'W', method: 'KO R1 (head kick)', opponent_rank: 'N/R', quality_score: 2, quality_label: 'Medio', note: 'Head kick devastador. Primeiro POTN da sequencia.' },
+          { date: 'Ago 2023', opponent: 'Ludovit Klein', result: 'L', method: 'Decisao Unanime', opponent_rank: 'N/R', quality_score: 2, quality_label: 'Medio', note: 'Perdeu por decisao.' },
+          { date: 'Abr 2023', opponent: 'Trey Ogden', result: 'W', method: 'Decisao Unanime', opponent_rank: 'N/R', quality_score: 1, quality_label: 'Ruim', note: 'UFC 287.' },
+          { date: 'Fev 2022', opponent: 'Zhu Rong', result: 'W', method: 'Sub R3 (brabo choke)', opponent_rank: 'N/R', quality_score: 1, quality_label: 'Ruim', note: 'Submissao.' },
+          { date: 'Ago 2021', opponent: 'Roosevelt Roberts', result: 'W', method: 'KO R3 (spinning wheel kick)', opponent_rank: 'N/R', quality_score: 2, quality_label: 'Medio', note: 'Chute giratorio ICONICA. Um dos KOs mais bonitos do ano.' },
+          { date: 'Abr 2021', opponent: 'John Makdessi', result: 'L', method: 'Decisao Dividida', opponent_rank: 'N/R', quality_score: 2, quality_label: 'Medio', note: 'Debut UFC. Derrota apertada.' },
         ],
       },
     },

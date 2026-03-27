@@ -10,7 +10,7 @@ const analise: PrelimsAnalise = {
   tactical_breakdown: { stats: [], radarData: [], taleOfTape: { fighter1: { altura: '1,63m', envergadura: '163cm', idade: 26, academia: 'Australia/USA' }, fighter2: { altura: '1,60m', envergadura: '160cm', idade: 28, academia: 'Brasil' } }, pathsToVictory: { fighter1: [], fighter2: [] }, dangerZones: [] },
   num_rounds: 3, is_titulo: false, broadcast: null, analysis_type: 'prelims', created_at: new Date().toISOString(), updated_at: new Date().toISOString(),
   prelims_analysis: {
-    hero: { evento_nome: 'UFC Fight Night: Adesanya vs Pyfer', evento_data: '28 de Marco, 2026', categoria_peso: 'Peso Mosca Feminino (125 lbs)', num_rounds: 3, is_titulo: false, fighter1: { nome: 'Casey O\'Neill', record: '10-2-0', ranking: 'N/R' }, fighter2: { nome: 'Gabriella Fernandes', record: '11-3-0', ranking: 'N/R' } },
+    hero: { evento_nome: 'UFC Fight Night: Adesanya vs Pyfer', evento_data: '28 de Marco, 2026', categoria_peso: 'Peso Mosca Feminino (125 lbs)', num_rounds: 3, is_titulo: false, fighter1: { nome: 'Casey O\'Neill', record: '10-2-0', ranking: 'N/R', imagem_url: 'https://ufc.com/images/styles/athlete_bio_full_body/s3/2026-03/ONEILL_CASEY_L_03-28.png?itok=MDa0OiVE' }, fighter2: { nome: 'Gabriella Fernandes', record: '11-3-0', ranking: 'N/R', imagem_url: 'https://ufc.com/images/styles/athlete_bio_full_body/s3/2025-08/FERNANDES_GABRIELLA_L_08-09.png?itok=7Gt6QPap' } },
     comparacao_estatistica: {
       stats: [
         { label: 'Sig. Strikes por Minuto', valueA: 4.50, valueB: 3.80, maxVal: 6, format: 'decimal' },
@@ -25,11 +25,20 @@ const analise: PrelimsAnalise = {
     },
     historico_lutas: {
       fighter1: { nome: 'O\'Neill', recent_fights: [
-        { date: 'Out 2025', opponent: 'Luana Santos', result: 'W', method: 'Decisao Unanime', opponent_rank: 'N/R', quality_score: 2, quality_label: 'Medio', note: 'Retorno apos lesao. Vitoria solida.' },
+        { date: 'Ago 2024', opponent: 'Luana Santos', result: 'W', method: 'Decisao Unanime', opponent_rank: 'N/R', quality_score: 2, quality_label: 'Medio', note: 'UFC 305. Retorno apos lesao no joelho. Vitoria solida.' },
+        { date: 'Dez 2023', opponent: 'Ariane Lipski', result: 'L', method: 'Sub R2 (armbar)', opponent_rank: 'N/R', quality_score: 2, quality_label: 'Medio', note: 'UFC 296. Submetida por armbar.' },
+        { date: 'Mar 2023', opponent: 'Jennifer Maia', result: 'L', method: 'Decisao Unanime', opponent_rank: '#8 WFLW', quality_score: 3, quality_label: 'Bom', note: 'UFC 286. Primeira derrota. Maia controlou.' },
+        { date: 'Fev 2022', opponent: 'Roxanne Modafferi', result: 'W', method: 'Decisao Dividida', opponent_rank: 'N/R', quality_score: 2, quality_label: 'Medio', note: 'UFC 271. Luta apertada.' },
+        { date: 'Out 2021', opponent: 'Antonina Shevchenko', result: 'W', method: 'TKO R2 (socos)', opponent_rank: 'N/R', quality_score: 2, quality_label: 'Medio', note: 'POTN. Irma da campeao.' },
+        { date: 'Jun 2021', opponent: 'Lara Procopio', result: 'W', method: 'Sub R3 (RNC)', opponent_rank: 'N/R', quality_score: 1, quality_label: 'Ruim', note: 'Submissao.' },
+        { date: 'Fev 2021', opponent: 'Shana Dobson', result: 'W', method: 'TKO R2 (socos)', opponent_rank: 'N/R', quality_score: 1, quality_label: 'Ruim', note: 'Debut UFC. TKO.' },
       ] },
       fighter2: { nome: 'Fernandes', recent_fights: [
-        { date: 'Set 2025', opponent: 'Fatima Kline', result: 'L', method: 'Decisao Unanime', opponent_rank: 'N/R', quality_score: 2, quality_label: 'Medio', note: 'Derrota competitiva.' },
-        { date: 'Jun 2025', opponent: 'Silvana Gomez', result: 'W', method: 'Decisao Unanime', opponent_rank: 'N/R', quality_score: 1, quality_label: 'Ruim', note: 'Vitoria por decisao.' },
+        { date: 'Ago 2025', opponent: 'Julija Stoliarenko', result: 'W', method: 'Decisao Unanime', opponent_rank: 'N/R', quality_score: 2, quality_label: 'Medio', note: 'Terceira vitoria seguida.' },
+        { date: 'Nov 2024', opponent: 'Cong Wang', result: 'W', method: 'Sub R2 (RNC)', opponent_rank: 'N/R', quality_score: 2, quality_label: 'Medio', note: 'Upset. Submeteu Wang Cong que era favorita.' },
+        { date: 'Jun 2024', opponent: 'Carli Judice', result: 'W', method: 'Decisao Dividida', opponent_rank: 'N/R', quality_score: 1, quality_label: 'Ruim', note: 'Primeira vitoria UFC. Apertada.' },
+        { date: 'Jun 2023', opponent: 'Tereza Bleda', result: 'L', method: 'Decisao Unanime', opponent_rank: 'N/R', quality_score: 2, quality_label: 'Medio', note: 'Segunda derrota UFC.' },
+        { date: 'Fev 2023', opponent: 'Jasmine Jasudavicius', result: 'L', method: 'Decisao Unanime', opponent_rank: 'N/R', quality_score: 2, quality_label: 'Medio', note: 'Debut UFC. Derrota.' },
       ] },
     },
     perfil_habilidades: {

@@ -603,11 +603,13 @@ export interface PrelimsHeroData {
     nome: string;
     record: string;
     ranking?: string;
+    imagem_url?: string | null;
   };
   fighter2: {
     nome: string;
     record: string;
     ranking?: string;
+    imagem_url?: string | null;
   };
 }
 

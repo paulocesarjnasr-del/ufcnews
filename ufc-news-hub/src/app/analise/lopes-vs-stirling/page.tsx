@@ -5,12 +5,12 @@ const analise: PrelimsAnalise = {
   id: 'lopes-vs-stirling', evento_id: null, slug: 'lopes-vs-stirling', titulo: 'Lopes vs Stirling', subtitulo: null, lutador1_id: null, lutador2_id: null, artigo_conteudo: '',
   evento_nome: 'UFC Fight Night: Adesanya vs Pyfer', evento_data: '28 de Marco, 2026', evento_local: 'Climate Pledge Arena, Seattle, Washington', categoria_peso: 'Peso Meio-Pesado (205 lbs)', status: 'published',
   fight_prediction: { predictedWinner: 'fighter2', predictedMethod: 'Decisao Unanime', confidence: 'MEDIA', fighter1Scenarios: [], fighter2Scenarios: [], keyFactors: [], xFactor: { title: '', description: '' } },
-  fighter1_info: { nome: 'Bruno Lopes', record: '12-2-0', ultimasLutas: [{ result: 'W', opponent: 'William Knight', method: 'TKO R1', event: 'UFC Fight Night' }] },
-  fighter2_info: { nome: 'Navajo Stirling', record: '10-1-0', ultimasLutas: [{ result: 'W', opponent: 'Antonio Trocoli', method: 'Decisao Unanime', event: 'UFC Fight Night' }] },
+  fighter1_info: { nome: 'Bruno Lopes', record: '14-2-0', ultimasLutas: [{ result: 'W', opponent: 'William Knight', method: 'TKO R1', event: 'UFC Fight Night' }] },
+  fighter2_info: { nome: 'Navajo Stirling', record: '8-0-0', ultimasLutas: [{ result: 'W', opponent: 'Antonio Trocoli', method: 'Decisao Unanime', event: 'UFC Fight Night' }] },
   tactical_breakdown: { stats: [], radarData: [], taleOfTape: { fighter1: { altura: '1,88m', envergadura: '193cm', idade: 30, academia: 'Brasil' }, fighter2: { altura: '1,85m', envergadura: '190cm', idade: 28, academia: 'City Kickboxing, Auckland' } }, pathsToVictory: { fighter1: [], fighter2: [] }, dangerZones: [] },
   num_rounds: 3, is_titulo: false, broadcast: null, analysis_type: 'prelims', created_at: new Date().toISOString(), updated_at: new Date().toISOString(),
   prelims_analysis: {
-    hero: { evento_nome: 'UFC Fight Night: Adesanya vs Pyfer', evento_data: '28 de Marco, 2026', categoria_peso: 'Peso Meio-Pesado (205 lbs)', num_rounds: 3, is_titulo: false, fighter1: { nome: 'Bruno Lopes', record: '12-2-0', ranking: 'N/R' }, fighter2: { nome: 'Navajo Stirling', record: '10-1-0', ranking: 'N/R' } },
+    hero: { evento_nome: 'UFC Fight Night: Adesanya vs Pyfer', evento_data: '28 de Marco, 2026', categoria_peso: 'Peso Meio-Pesado (205 lbs)', num_rounds: 3, is_titulo: false, fighter1: { nome: 'Bruno Lopes', record: '14-2-0', ranking: 'N/R', imagem_url: 'https://ufc.com/images/styles/athlete_bio_full_body/s3/2025-01/2/LOPES_BRUNO_L_01-11.png?itok=0ZAo1l_Y' }, fighter2: { nome: 'Navajo Stirling', record: '8-0-0', ranking: 'N/R', imagem_url: 'https://ufc.com/images/styles/athlete_bio_full_body/s3/2026-03/STIRLING_NAVAJO_L_03-28.png?itok=BJ1MVXPh' } },
     comparacao_estatistica: {
       stats: [
         { label: 'Sig. Strikes por Minuto', valueA: 4.20, valueB: 3.50, maxVal: 6, format: 'decimal' },
@@ -26,12 +26,13 @@ const analise: PrelimsAnalise = {
     },
     historico_lutas: {
       fighter1: { nome: 'Lopes', recent_fights: [
-        { date: 'Out 2025', opponent: 'William Knight', result: 'W', method: 'TKO R1', opponent_rank: 'N/R', quality_score: 2, quality_label: 'Medio', note: 'Finish rapido no debut UFC.' },
+        { date: 'Mai 2025', opponent: 'Dustin Jacoby', result: 'L', method: 'KO R1 (socos)', opponent_rank: 'N/R', quality_score: 2, quality_label: 'Medio', note: 'Nocauteado no R1. Vulnerabilidade defensiva exposta.' },
+        { date: 'Jan 2025', opponent: 'Magomed Gadzhiyasulov', result: 'W', method: 'Decisao Unanime', opponent_rank: 'N/R', quality_score: 2, quality_label: 'Medio', note: 'Debut UFC com vitoria solida.' },
       ] },
       fighter2: { nome: 'Stirling', recent_fights: [
-        { date: 'Dez 2025', opponent: 'Antonio Trocoli', result: 'W', method: 'Decisao Unanime', opponent_rank: 'N/R', quality_score: 1, quality_label: 'Ruim', note: 'Terceira decisao consecutiva no UFC. Controle por 3 rounds.' },
-        { date: 'Set 2025', opponent: 'Karl Roberson', result: 'W', method: 'Decisao Unanime', opponent_rank: 'N/R', quality_score: 2, quality_label: 'Medio', note: 'Segunda vitoria UFC por decisao.' },
-        { date: 'Jun 2025', opponent: 'Josh Silveira', result: 'W', method: 'Decisao Unanime', opponent_rank: 'N/R', quality_score: 2, quality_label: 'Medio', note: 'Debut UFC com vitoria por decisao.' },
+        { date: 'Set 2025', opponent: 'Rodolfo Bellato', result: 'W', method: 'Decisao Unanime', opponent_rank: 'N/R', quality_score: 2, quality_label: 'Medio', note: 'Terceira vitoria UFC. Controle por 3 rounds.' },
+        { date: 'Mai 2025', opponent: 'Ivan Erslan', result: 'W', method: 'Decisao Unanime', opponent_rank: 'N/R', quality_score: 2, quality_label: 'Medio', note: 'UFC 315. Segunda vitoria.' },
+        { date: 'Dez 2024', opponent: 'George Tokkos', result: 'W', method: 'Decisao Unanime', opponent_rank: 'N/R', quality_score: 1, quality_label: 'Ruim', note: 'Debut UFC. Controle metodico.' },
       ] },
     },
     perfil_habilidades: {
@@ -44,7 +45,7 @@ const analise: PrelimsAnalise = {
     },
     distribuicao_vitorias: {
       fighter1: { nome: 'Lopes', ko_tko: { count: 8, percent: 67 }, submission: { count: 2, percent: 17 }, decision: { count: 2, percent: 16 }, total_wins: 12 },
-      fighter2: { nome: 'Stirling', ko_tko: { count: 4, percent: 40 }, submission: { count: 3, percent: 30 }, decision: { count: 3, percent: 30 }, total_wins: 10 },
+      fighter2: { nome: 'Stirling', ko_tko: { count: 3, percent: 38 }, submission: { count: 2, percent: 24 }, decision: { count: 3, percent: 38 }, total_wins: 8 },
       insight: 'Lopes e finalizador (67% KO). Stirling e mais equilibrado e tende a decisoes no UFC (3 de 3). Se Stirling controlar, vai pra decisao. Se Lopes conectar, pode acabar rapido.',
     },
     previsao_final: {

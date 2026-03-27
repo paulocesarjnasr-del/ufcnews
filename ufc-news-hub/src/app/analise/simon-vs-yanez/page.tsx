@@ -5,12 +5,12 @@ const analise: PrelimsAnalise = {
   id: 'simon-vs-yanez', evento_id: null, slug: 'simon-vs-yanez', titulo: 'Simon vs Yanez', subtitulo: null, lutador1_id: null, lutador2_id: null, artigo_conteudo: '',
   evento_nome: 'UFC Fight Night: Adesanya vs Pyfer', evento_data: '28 de Marco, 2026', evento_local: 'Climate Pledge Arena, Seattle, Washington', categoria_peso: 'Peso Galo (135 lbs)', status: 'published',
   fight_prediction: { predictedWinner: 'fighter1', predictedMethod: 'Decisao Unanime', confidence: 'MEDIA', fighter1Scenarios: [], fighter2Scenarios: [], keyFactors: [], xFactor: { title: '', description: '' } },
-  fighter1_info: { nome: 'Ricky Simon', record: '22-7-0', ultimasLutas: [{ result: 'L', opponent: 'Raoni Barcelos', method: 'Decisao Unanime', event: 'UFC Fight Night' }, { result: 'W', opponent: 'Vince Morales', method: 'Decisao Unanime', event: 'UFC Fight Night' }] },
-  fighter2_info: { nome: 'Adrian Yanez', record: '17-6-0', ultimasLutas: [{ result: 'L', opponent: 'Daniel Marcos', method: 'Decisao Dividida', event: 'UFC 323' }, { result: 'L', opponent: 'Rob Font', method: 'Decisao Unanime', event: 'UFC Fight Night' }] },
+  fighter1_info: { nome: 'Ricky Simon', record: '22-7-0', ultimasLutas: [{ result: 'L', opponent: 'Raoni Barcelos', method: 'Decisao Unanime', event: 'UFC Fight Night' }, { result: 'W', opponent: 'Cameron Smotherman', method: 'Decisao Unanime', event: 'UFC Fight Night' }, { result: 'W', opponent: 'Javid Basharat', method: 'KO R1', event: 'UFC Fight Night' }] },
+  fighter2_info: { nome: 'Adrian Yanez', record: '17-6-0', ultimasLutas: [{ result: 'L', opponent: 'Daniel Marcos', method: 'Decisao Dividida', event: 'UFC on ESPN' }, { result: 'W', opponent: 'Vinicius Salvador', method: 'TKO R1', event: 'UFC Fight Night' }] },
   tactical_breakdown: { stats: [], radarData: [], taleOfTape: { fighter1: { altura: '1,70m', envergadura: '178cm', idade: 32, academia: 'San Diego' }, fighter2: { altura: '1,73m', envergadura: '178cm', idade: 29, academia: 'Houston, TX' } }, pathsToVictory: { fighter1: [], fighter2: [] }, dangerZones: [] },
   num_rounds: 3, is_titulo: false, broadcast: null, analysis_type: 'prelims', created_at: new Date().toISOString(), updated_at: new Date().toISOString(),
   prelims_analysis: {
-    hero: { evento_nome: 'UFC Fight Night: Adesanya vs Pyfer', evento_data: '28 de Marco, 2026', categoria_peso: 'Peso Galo (135 lbs)', num_rounds: 3, is_titulo: false, fighter1: { nome: 'Ricky Simon', record: '22-7-0', ranking: 'N/R' }, fighter2: { nome: 'Adrian Yanez', record: '17-6-0', ranking: 'N/R' } },
+    hero: { evento_nome: 'UFC Fight Night: Adesanya vs Pyfer', evento_data: '28 de Marco, 2026', categoria_peso: 'Peso Galo (135 lbs)', num_rounds: 3, is_titulo: false, fighter1: { nome: 'Ricky Simon', record: '22-7-0', ranking: 'N/R', imagem_url: 'https://ufc.com/images/styles/athlete_bio_full_body/s3/2026-03/SIMON_RICKY_L_03-28.png?itok=ySattvaZ' }, fighter2: { nome: 'Adrian Yanez', record: '17-6-0', ranking: 'N/R', imagem_url: 'https://ufc.com/images/styles/athlete_bio_full_body/s3/2024-12/YANEZ_ADRIAN_L_12-14.png?itok=SZze8Ne_' } },
     comparacao_estatistica: {
       stats: [
         { label: 'Sig. Strikes por Minuto', valueA: 4.80, valueB: 5.20, maxVal: 7, format: 'decimal', note: 'Yanez com volume de striking ligeiramente maior' },
@@ -29,14 +29,24 @@ const analise: PrelimsAnalise = {
     },
     historico_lutas: {
       fighter1: { nome: 'Simon', recent_fights: [
-        { date: 'Out 2025', opponent: 'Raoni Barcelos', result: 'L', method: 'Decisao Unanime', opponent_rank: 'N/R', quality_score: 3, quality_label: 'Bom', note: 'Perdeu por decisao. Barcelos neutralizou o wrestling.' },
-        { date: 'Jun 2025', opponent: 'Vince Morales', result: 'W', method: 'Decisao Unanime', opponent_rank: 'N/R', quality_score: 1, quality_label: 'Ruim', note: 'Vitoria por controle. Wrestling dominante.' },
-        { date: 'Mar 2025', opponent: 'Marcus McGhee', result: 'W', method: 'Decisao Unanime', opponent_rank: 'N/R', quality_score: 2, quality_label: 'Medio', note: 'Wrestling e controle por 3 rounds.' },
+        { date: 'Nov 2025', opponent: 'Raoni Barcelos', result: 'L', method: 'Decisao Unanime', opponent_rank: 'N/R', quality_score: 3, quality_label: 'Bom', note: 'Perdeu por decisao. Barcelos neutralizou o wrestling.' },
+        { date: 'Jun 2025', opponent: 'Cameron Smotherman', result: 'W', method: 'Decisao Unanime', opponent_rank: 'N/R', quality_score: 1, quality_label: 'Ruim', note: 'Vitoria por controle.' },
+        { date: 'Fev 2025', opponent: 'Javid Basharat', result: 'W', method: 'KO R1 (soco)', opponent_rank: 'N/R', quality_score: 2, quality_label: 'Medio', note: 'Nocaute raro pra Simon. Mostrou poder.' },
+        { date: 'Jun 2024', opponent: 'Vinicius Oliveira', result: 'L', method: 'Decisao Unanime', opponent_rank: 'N/R', quality_score: 2, quality_label: 'Medio', note: 'UFC 303. Perdeu por decisao.' },
+        { date: 'Jan 2024', opponent: 'Mario Bautista', result: 'L', method: 'Decisao Unanime', opponent_rank: 'N/R', quality_score: 3, quality_label: 'Bom', note: 'Bautista neutralizou o wrestling.' },
+        { date: 'Abr 2023', opponent: 'Song Yadong', result: 'L', method: 'TKO R5 (socos)', opponent_rank: '#10 BW', quality_score: 4, quality_label: 'Muito Bom', note: 'Competitivo ate o R5 quando Song finalizou. FOTN.' },
+        { date: 'Jul 2022', opponent: 'Jack Shore', result: 'W', method: 'Sub R2 (arm-triangle)', opponent_rank: 'N/R', quality_score: 2, quality_label: 'Medio', note: 'Submissao solida.' },
+        { date: 'Dez 2021', opponent: 'Raphael Assuncao', result: 'W', method: 'KO R2 (socos)', opponent_rank: 'N/R', quality_score: 3, quality_label: 'Bom', note: 'KO contra ex-top 5. Veterano respeitado.' },
       ] },
       fighter2: { nome: 'Yanez', recent_fights: [
         { date: 'Dez 2024', opponent: 'Daniel Marcos', result: 'L', method: 'Decisao Dividida', opponent_rank: 'N/R', quality_score: 2, quality_label: 'Medio', note: 'Decisao apertada. Yanez teve momentos mas nao fez o suficiente.' },
-        { date: 'Set 2024', opponent: 'Rob Font', result: 'L', method: 'Decisao Unanime', opponent_rank: '#10 BW', quality_score: 3, quality_label: 'Bom', note: 'Font dominou com jab e alcance.' },
-        { date: 'Jun 2024', opponent: 'Vinicius Salvador', result: 'W', method: 'KO R1', opponent_rank: 'N/R', quality_score: 1, quality_label: 'Ruim', note: 'Nocaute rapido. O poder e real.' },
+        { date: 'Mai 2024', opponent: 'Vinicius Salvador', result: 'W', method: 'TKO R1 (socos)', opponent_rank: 'N/R', quality_score: 1, quality_label: 'Ruim', note: 'Nocaute rapido. O poder e real.' },
+        { date: 'Out 2023', opponent: 'Jonathan Martinez', result: 'L', method: 'TKO R2 (leg kicks)', opponent_rank: 'N/R', quality_score: 3, quality_label: 'Bom', note: 'Low kicks destruiram Yanez.' },
+        { date: 'Abr 2023', opponent: 'Rob Font', result: 'L', method: 'TKO R1 (socos)', opponent_rank: '#10 BW', quality_score: 4, quality_label: 'Muito Bom', note: 'Font dominou com jab e alcance. UFC 287.' },
+        { date: 'Jun 2022', opponent: 'Tony Kelley', result: 'W', method: 'TKO R1 (socos)', opponent_rank: 'N/R', quality_score: 2, quality_label: 'Medio', note: 'POTN. Nocaute explosivo.' },
+        { date: 'Nov 2021', opponent: 'Davey Grant', result: 'W', method: 'Decisao Dividida', opponent_rank: 'N/R', quality_score: 2, quality_label: 'Medio', note: 'FOTN. Guerra de 3 rounds.' },
+        { date: 'Jul 2021', opponent: 'Randy Costa', result: 'W', method: 'TKO R2 (socos)', opponent_rank: 'N/R', quality_score: 1, quality_label: 'Ruim', note: 'POTN.' },
+        { date: 'Mar 2021', opponent: 'Gustavo Lopez', result: 'W', method: 'KO R3 (soco)', opponent_rank: 'N/R', quality_score: 1, quality_label: 'Ruim', note: 'POTN.' },
       ] },
     },
     perfil_habilidades: {

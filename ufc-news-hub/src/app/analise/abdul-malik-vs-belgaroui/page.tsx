@@ -80,7 +80,7 @@ const analise: FullSingleAnalise = {
         record: '9-0-1',
         ranking: 'N/R Peso Medio',
         info_extra: 'Columbia, Maryland | 28 anos',
-        imagem_fullbody_url: 'https://ufc.com/images/styles/event_results_athlete_headshot/s3/2025-12/ABDUL-MALIK_MANSUR_12-06.png?itok=pgPkI9c7',
+        imagem_fullbody_url: 'https://ufc.com/images/styles/athlete_bio_full_body/s3/2026-03/ABDUL-MALIK_MANSUR_L_03-28.png?itok=E7MoTnaG',
       },
       fighter2: {
         nome_completo: 'Yousri "Baby Face Assassin" Belgaroui',
@@ -89,7 +89,7 @@ const analise: FullSingleAnalise = {
         record: '11-2-0',
         ranking: 'N/R Peso Medio',
         info_extra: 'Holanda/Tunisia | Glover Teixeira MMA | 31 anos',
-        imagem_fullbody_url: 'https://ufc.com/images/styles/event_results_athlete_headshot/s3/2025-10/BELGAROUI_YOUSRI_10-18.png?itok=a9ZA7eTd',
+        imagem_fullbody_url: 'https://ufc.com/images/styles/athlete_bio_full_body/s3/2025-10/BELGAROUI_YOUSRI_R_10-18.png?itok=g7i7Fdzt',
       },
     },
 
@@ -196,7 +196,7 @@ const analise: FullSingleAnalise = {
           { date: 'Out 2025', opponent: 'Azamat Bekoev', result: 'W', method: 'TKO R3', opponent_rank: 'N/R', quality_score: 2, quality_label: 'Medio', note: 'Debut UFC com nocaute no R3. Bekoev e wrestler forte, e Belgaroui sobreviveu o grappling e nocauteou. Prova que a defesa de takedown esta evoluindo.' },
         ],
         full_fight_history: [
-          { date: 'Out 2025', opponent: 'Azamat Bekoev', result: 'W', method: 'TKO R3', opponent_rank: 'N/R', quality_score: 2, quality_label: 'Medio', note: 'Debut UFC, venceu wrestler' },
+          { date: 'Out 2025', opponent: 'Azamat Bekoev', result: 'W', method: 'TKO R3 (socos, 0:55)', opponent_rank: 'N/R', quality_score: 2, quality_label: 'Medio', note: 'Debut UFC. Venceu wrestler por TKO. Usou kickboxing pra quebrar Bekoev ao longo de 3 rounds.' },
         ],
         momentum_score: 7,
         momentum_label: 'Em Alta',

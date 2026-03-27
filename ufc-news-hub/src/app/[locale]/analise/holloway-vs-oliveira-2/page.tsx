@@ -77,8 +77,7 @@ const analise: FullSingleAnalise = {
         record: '27-8-0',
         ranking: '#4 Peso Leve',
         info_extra: 'Waianae, Hawaii | 34 anos',
-        imagem_fullbody_url:
-          'https://ufc.com/images/styles/athlete_bio_full_body/s3/2025-07/HOLLOWAY_MAX_L_BMF_BELT_07-19.png?itok=9vwP11K9',
+        imagem_fullbody_url: null,
       },
       fighter2: {
         nome_completo: 'Charles "Do Bronx" Oliveira',
@@ -87,8 +86,7 @@ const analise: FullSingleAnalise = {
         record: '36-11-0',
         ranking: '#3 Peso Leve',
         info_extra: 'Guaruja, SP, Brasil | 36 anos',
-        imagem_fullbody_url:
-          'https://ufc.com/images/styles/athlete_bio_full_body/s3/2025-10/OLIVEIRA_CHARLES_L_10-11.png?itok=-8FrNvYo',
+        imagem_fullbody_url: null,
       },
     },
 

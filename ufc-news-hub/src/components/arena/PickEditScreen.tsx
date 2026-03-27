@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { Check } from 'lucide-react';
 import { type PickData, METODOS, tipoLabel, getMaxRounds } from '@/components/arena/picks-shared';
 import { sobrenome } from '@/components/arena/shared';
@@ -20,11 +21,12 @@ export function PickEditScreen({
   onUpdatePick: (lutaId: string, pick: PickData) => void;
   onDone: () => void;
 }) {
+  const t = useTranslations('arena');
   return (
     <div className="w-full max-w-md mx-auto space-y-5 animate-fade-in pb-8">
       <div className="text-center space-y-1">
-        <h2 className="font-display text-xl uppercase text-white">Editar Previsoes</h2>
-        <p className="text-xs text-white/30">Toque para alterar vencedor, metodo ou round</p>
+        <h2 className="font-display text-xl uppercase text-white">{t('edit_predictions_title')}</h2>
+        <p className="text-xs text-white/30">{t('tap_to_change')}</p>
       </div>
 
       <div className="space-y-4">
@@ -143,7 +145,7 @@ export function PickEditScreen({
         className="w-full py-3 bg-ufc-gold/10 border border-ufc-gold/20 text-ufc-gold font-display uppercase tracking-wide rounded-xl transition-all hover:bg-ufc-gold/20 text-sm flex items-center justify-center gap-2"
       >
         <Check className="w-4 h-4" />
-        Salvar alteracoes
+        {t('save_changes')}
       </button>
     </div>
   );

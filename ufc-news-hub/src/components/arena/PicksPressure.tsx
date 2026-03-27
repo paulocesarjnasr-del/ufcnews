@@ -38,12 +38,12 @@ export function PicksPressure({ eventoAtual, membros, mostrarNomesPendentes }: P
           {eventoAtual.nome}
         </span>
         {isLive ? (
-          <span className="text-xs font-display uppercase tracking-widest text-ufc-red">Ao Vivo</span>
+          <span className="text-xs font-display uppercase tracking-widest text-ufc-red">{t('live_label')}</span>
         ) : (
           <span className="text-sm text-dark-textMuted">
             {todosProntos
               ? t('all_ready')
-              : `${membros_com_picks}/${total_membros} fizeram picks`
+              : `${membros_com_picks}/${total_membros} ${t('made_picks')}`
             }
           </span>
         )}
@@ -60,7 +60,7 @@ export function PicksPressure({ eventoAtual, membros, mostrarNomesPendentes }: P
 
       {!todosProntos && mostrarNomesPendentes && pendentes.length > 0 && (
         <p className="text-xs text-dark-textMuted mt-2">
-          Faltam: {pendentes.join(', ')}
+          {t('missing')} {pendentes.join(', ')}
         </p>
       )}
     </div>

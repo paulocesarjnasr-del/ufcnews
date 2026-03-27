@@ -1,3 +1,5 @@
+import { useTranslations } from 'next-intl';
+
 interface LeaderboardEntry {
   usuario_id: string;
   username: string;
@@ -32,10 +34,11 @@ function getPositionStyle(position: number): {
 // ═══════════════════════════════════════════════════════════════
 
 export function LiveLeaderboard({ leaderboard, meuUsuarioId, movimentos }: LiveLeaderboardProps) {
+  const t = useTranslations('arena');
   if (leaderboard.length === 0) {
     return (
       <div className="rounded-lg border border-dark-border/40 bg-black/40 backdrop-blur-md p-4 text-center text-sm text-dark-textMuted">
-        Nenhuma pontuacao registrada ainda.
+        {t('no_scores_yet')}
       </div>
     );
   }
@@ -90,12 +93,12 @@ export function LiveLeaderboard({ leaderboard, meuUsuarioId, movimentos }: LiveL
                   )}
                   {isMe && (
                     <span className="ml-1 text-xs font-normal text-dark-textMuted">
-                      (voce)
+                      ({t('you_label')})
                     </span>
                   )}
                 </p>
                 <p className="text-xs text-dark-textMuted">
-                  {entry.acertos}/{entry.total_lutas} acertos
+                  {entry.acertos}/{entry.total_lutas} {t('correct_count')}
                 </p>
               </div>
 

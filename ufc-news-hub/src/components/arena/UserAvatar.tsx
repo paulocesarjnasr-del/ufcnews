@@ -50,7 +50,7 @@ export function UserAvatar({ usuario, onLogout }: UserAvatarProps) {
         className="flex items-center gap-2 px-4 py-2 rounded-lg border border-ufc-red/60 text-ufc-red hover:bg-ufc-red/10 font-medium text-sm transition-colors"
       >
         <User className="w-4 h-4" />
-        <span>Login</span>
+        <span>{t('login_label')}</span>
       </Link>
     );
   }
@@ -136,7 +136,7 @@ export function UserAvatar({ usuario, onLogout }: UserAvatarProps) {
             <div className="grid grid-cols-2 gap-3 mt-4">
               <div className="bg-dark-bg/50 rounded-lg p-2 text-center">
                 <p className="text-lg font-bold text-ufc-gold">{usuario.pontos_totais.toLocaleString()}</p>
-                <p className="text-xs text-dark-textMuted">Pontos</p>
+                <p className="text-xs text-dark-textMuted">{t('points_label')}</p>
               </div>
               <div className="bg-dark-bg/50 rounded-lg p-2 text-center">
                 <p className="text-lg font-bold text-green-400">
@@ -144,7 +144,7 @@ export function UserAvatar({ usuario, onLogout }: UserAvatarProps) {
                     ? Math.round((usuario.previsoes_corretas / usuario.total_previsoes) * 100)
                     : 0}%
                 </p>
-                <p className="text-xs text-dark-textMuted">Acertos</p>
+                <p className="text-xs text-dark-textMuted">{t('correct_label')}</p>
               </div>
             </div>
           </div>
@@ -157,7 +157,7 @@ export function UserAvatar({ usuario, onLogout }: UserAvatarProps) {
               onClick={() => setIsOpen(false)}
             >
               <User className="w-4 h-4" />
-              <span>Meu Perfil</span>
+              <span>{t('my_profile')}</span>
             </Link>
 
             <Link
@@ -175,7 +175,7 @@ export function UserAvatar({ usuario, onLogout }: UserAvatarProps) {
               onClick={() => setIsOpen(false)}
             >
               <History className="w-4 h-4" />
-              <span>Historico</span>
+              <span>{t('history_label')}</span>
             </Link>
 
             <Link
@@ -184,7 +184,7 @@ export function UserAvatar({ usuario, onLogout }: UserAvatarProps) {
               onClick={() => setIsOpen(false)}
             >
               <ImageIcon className="w-4 h-4" />
-              <span>Mudar Avatar</span>
+              <span>{t('change_avatar')}</span>
             </Link>
           </nav>
 

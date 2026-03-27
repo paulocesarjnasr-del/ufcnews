@@ -61,7 +61,7 @@ export function GlobalRanking() {
   if (error) {
     return (
       <div className="neu-card p-4 text-dark-text text-sm">
-        Erro ao carregar ranking.
+        {t('error_load_ranking_msg')}
       </div>
     );
   }
@@ -69,7 +69,7 @@ export function GlobalRanking() {
   if (!data || data.length === 0) {
     return (
       <div className="neu-card p-6 text-center text-dark-text text-sm">
-        Nenhum dado de ranking disponivel ainda.
+        {t('no_ranking_data_yet')}
       </div>
     );
   }
@@ -92,7 +92,7 @@ export function GlobalRanking() {
               </span>
               <span className={`flex-1 truncate ${isCurrentUser ? 'text-white font-semibold' : 'text-dark-text'}`}>
                 {entry.display_name ?? entry.username}
-                {isCurrentUser && <span className="text-ufc-red text-xs ml-1">(voce)</span>}
+                {isCurrentUser && <span className="text-ufc-red text-xs ml-1">({t('you_label')})</span>}
               </span>
               <span className="text-white font-mono text-xs flex-shrink-0">
                 {entry.pontos_totais.toLocaleString('pt-BR')} pts

@@ -81,7 +81,7 @@ export function GerenciarLigaModal({
         setSaveSuccess(true);
         setTimeout(() => setSaveSuccess(false), 2000);
       } else {
-        setSaveError(data.error || 'Erro ao salvar');
+        setSaveError(data.error || t('error_saving'));
       }
     } catch {
       setSaveError(t('error_connection'));
@@ -115,7 +115,7 @@ export function GerenciarLigaModal({
         >
           {/* Header */}
           <div className="flex items-center justify-between p-5 pb-0">
-            <h2 className="font-display text-xl uppercase text-white">Gerenciar Liga</h2>
+            <h2 className="font-display text-xl uppercase text-white">{t('manage_league')}</h2>
             <button onClick={onClose} className="text-dark-textMuted hover:text-white">
               <X size={20} />
             </button>
@@ -159,7 +159,7 @@ export function GerenciarLigaModal({
               <div className="space-y-4">
                 {/* Nome */}
                 <div>
-                  <label className="text-xs text-dark-textMuted uppercase mb-1 block">Nome da Liga</label>
+                  <label className="text-xs text-dark-textMuted uppercase mb-1 block">{t('league_name_label')}</label>
                   <input
                     type="text"
                     value={nome}
@@ -171,7 +171,7 @@ export function GerenciarLigaModal({
 
                 {/* Descricao */}
                 <div>
-                  <label className="text-xs text-dark-textMuted uppercase mb-1 block">Descricao</label>
+                  <label className="text-xs text-dark-textMuted uppercase mb-1 block">{t('description_label')}</label>
                   <textarea
                     value={descricao}
                     onChange={(e) => setDescricao(e.target.value)}
@@ -184,7 +184,7 @@ export function GerenciarLigaModal({
 
                 {/* Tipo */}
                 <div>
-                  <label className="text-xs text-dark-textMuted uppercase mb-1 block">Tipo</label>
+                  <label className="text-xs text-dark-textMuted uppercase mb-1 block">{t('type_label')}</label>
                   <div className="flex gap-2">
                     {(['publica', 'privada'] as const).map(tipoOpt => (
                       <button
@@ -205,7 +205,7 @@ export function GerenciarLigaModal({
 
                 {/* Max membros */}
                 <div>
-                  <label className="text-xs text-dark-textMuted uppercase mb-1 block">Max Membros (0 = ilimitado)</label>
+                  <label className="text-xs text-dark-textMuted uppercase mb-1 block">{t('max_members')}</label>
                   <input
                     type="number"
                     value={maxMembros}
@@ -217,7 +217,7 @@ export function GerenciarLigaModal({
 
                 {/* Ranking tipo */}
                 <div>
-                  <label className="text-xs text-dark-textMuted uppercase mb-1 block">Ranking</label>
+                  <label className="text-xs text-dark-textMuted uppercase mb-1 block">{t('ranking_label')}</label>
                   <div className="flex gap-2">
                     {([{ value: 'pontos', label: t('by_points'), icon: Trophy }, { value: 'percentual', label: t('by_percentage'), icon: BarChart3 }] as const).map(r => (
                       <button
@@ -266,7 +266,7 @@ export function GerenciarLigaModal({
                   <p className="text-sm text-red-400 bg-red-900/20 border border-red-800 rounded-lg px-3 py-2">{saveError}</p>
                 )}
                 {saveSuccess && (
-                  <p className="text-sm text-green-400 bg-green-900/20 border border-green-800 rounded-lg px-3 py-2">Alteracoes salvas!</p>
+                  <p className="text-sm text-green-400 bg-green-900/20 border border-green-800 rounded-lg px-3 py-2">{t('changes_saved')}</p>
                 )}
                 <button
                   onClick={handleSaveConfigs}
@@ -279,10 +279,10 @@ export function GerenciarLigaModal({
             )}
 
             {/* Membros tab */}
-            {activeTab === t('members') && (
+            {activeTab === 'membros' && (
               <div className="space-y-2">
                 {membros.length === 0 ? (
-                  <p className="text-center text-dark-textMuted py-4">Nenhum membro</p>
+                  <p className="text-center text-dark-textMuted py-4">{t('no_members')}</p>
                 ) : (
                   membros.map(membro => {
                     const nivelConfig = NIVEL_CONFIG[membro.nivel as NivelUsuario];
@@ -320,7 +320,7 @@ export function GerenciarLigaModal({
 
                         {membro.is_admin ? (
                           <span className="text-[10px] font-bold uppercase px-1.5 py-0.5 rounded bg-ufc-red/20 text-ufc-red">
-                            Criador
+                            {t('creator_badge')}
                           </span>
                         ) : (
                           <button
@@ -328,7 +328,7 @@ export function GerenciarLigaModal({
                             className="flex items-center gap-1 px-2 py-1 rounded text-xs text-red-400 hover:bg-red-900/20 transition-colors"
                           >
                             <UserMinus size={14} />
-                            Expulsar
+                            {t('expel')}
                           </button>
                         )}
                       </div>

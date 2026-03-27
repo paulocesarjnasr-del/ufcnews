@@ -23,6 +23,7 @@ interface MembroCardProps {
 // ═══════════════════════════════════════════════════════════════
 
 export function MembroCard({ membro, isCurrentUser, showPicksDetail, posicao }: MembroCardProps) {
+  const t = useTranslations('arena');
   const [expanded, setExpanded] = useState(false);
 
   const nivelKey = (membro.nivel ?? 'iniciante') as keyof typeof NIVEL_CONFIG;
@@ -82,12 +83,12 @@ export function MembroCard({ membro, isCurrentUser, showPicksDetail, posicao }: 
             </span>
             {isCurrentUser && (
               <span className="text-xs bg-dark-card text-dark-textMuted px-1.5 py-0.5 rounded">
-                Voce
+                {t('you_badge')}
               </span>
             )}
             {membro.is_admin && (
               <span className="text-xs bg-ufc-red text-white px-1.5 py-0.5 rounded font-semibold">
-                Criador
+                {t('creator_badge')}
               </span>
             )}
           </div>
@@ -107,7 +108,7 @@ export function MembroCard({ membro, isCurrentUser, showPicksDetail, posicao }: 
             {isOnline ? (
               <span className="flex items-center gap-1 text-xs text-green-400">
                 <span className="w-1.5 h-1.5 rounded-full bg-green-400 inline-block" />
-                Online
+                {t('online_label')}
               </span>
             ) : (
               <span className="text-xs text-dark-textMuted">{accessText}</span>
@@ -120,11 +121,11 @@ export function MembroCard({ membro, isCurrentUser, showPicksDetail, posicao }: 
           <div className="shrink-0">
             {membro.picks_status === 'done' ? (
               <span className="text-xs bg-green-900/50 text-green-400 border border-green-700 px-2 py-0.5 rounded-full">
-                Fez picks
+                {t('picks_done')}
               </span>
             ) : (
               <span className="text-xs bg-yellow-900/50 text-yellow-400 border border-yellow-700 px-2 py-0.5 rounded-full">
-                Pendente
+                {t('pending')}
               </span>
             )}
           </div>
@@ -137,9 +138,9 @@ export function MembroCard({ membro, isCurrentUser, showPicksDetail, posicao }: 
               <span className="text-ufc-gold font-display text-lg leading-none">
                 {membro.evento_pontos}
               </span>
-              <span className="text-dark-textMuted text-xs ml-0.5">pts</span>
+              <span className="text-dark-textMuted text-xs ml-0.5">{t('pts_label')}</span>
               <div className="text-[10px] text-dark-textMuted">
-                {membro.evento_acertos}/{membro.evento_total_lutas} acertos
+                {membro.evento_acertos}/{membro.evento_total_lutas} {t('correct_count')}
               </div>
             </>
           ) : (
@@ -147,7 +148,7 @@ export function MembroCard({ membro, isCurrentUser, showPicksDetail, posicao }: 
               <span className="text-ufc-gold font-display text-lg leading-none">
                 {membro.pontos_temporada}
               </span>
-              <span className="text-dark-textMuted text-xs ml-0.5">pts</span>
+              <span className="text-dark-textMuted text-xs ml-0.5">{t('pts_label')}</span>
             </>
           )}
         </div>

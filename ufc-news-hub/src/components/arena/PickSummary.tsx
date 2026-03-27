@@ -24,6 +24,7 @@ export function PickSummary({
   eventoId: string;
   onGoToEdit: () => void;
 }) {
+  const t = useTranslations('arena');
   const pontos = maxPontos(picks);
   const totalPicks = Object.values(picks).filter(p => p.vencedor_id).length;
 
@@ -31,13 +32,13 @@ export function PickSummary({
     <div className="animate-fade-in space-y-6 w-full max-w-md mx-auto">
       <div className="text-center space-y-3">
         <Trophy className="w-12 h-12 text-ufc-gold mx-auto" />
-        <h2 className="font-display text-2xl sm:text-3xl uppercase text-white">Suas Previsoes</h2>
+        <h2 className="font-display text-2xl sm:text-3xl uppercase text-white">{t('your_picks')}</h2>
         <p className="text-sm text-white/40">{eventoNome}</p>
       </div>
 
       <div className="rounded-xl bg-ufc-gold/5 border border-ufc-gold/20 p-4 text-center">
         <div className="text-xs text-ufc-gold/60 font-display uppercase tracking-widest mb-1">
-          Pontos possiveis se acertar tudo
+          {t('possible_points_if_all')}
         </div>
         <div className="font-display text-3xl text-ufc-gold">{pontos.toLocaleString()} pts</div>
         <div className="text-[10px] text-white/25 mt-1">
@@ -53,7 +54,7 @@ export function PickSummary({
             return (
               <div key={luta.id} className="p-3 rounded-xl bg-white/5 border border-white/10">
                 <span className="text-sm text-white/30">
-                  {sobrenome(luta.lutador1.nome)} vs {sobrenome(luta.lutador2.nome)} — <span className="text-ufc-red">sem pick</span>
+                  {sobrenome(luta.lutador1.nome)} vs {sobrenome(luta.lutador2.nome)} — <span className="text-ufc-red">{t('no_pick')}</span>
                 </span>
               </div>
             );
@@ -77,13 +78,13 @@ export function PickSummary({
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="text-sm text-white font-semibold truncate">
-                    {sobrenome(vencedor.nome)} <span className="text-white/25 font-normal">vence {sobrenome(perdedor.nome)}</span>
+                    {sobrenome(vencedor.nome)} <span className="text-white/25 font-normal">{t('wins_label')} {sobrenome(perdedor.nome)}</span>
                   </div>
                   <div className="flex items-center gap-2 mt-0.5">
                     {pick.metodo ? (
                       <span className="text-[10px] text-ufc-red/70 bg-ufc-red/10 px-1.5 py-0.5 rounded">{metodoLabel(pick.metodo)}</span>
                     ) : (
-                      <span className="text-[10px] text-white/20">sem metodo</span>
+                      <span className="text-[10px] text-white/20">{t('no_method')}</span>
                     )}
                     {pick.round && <span className="text-[10px] text-white/30">R{pick.round}</span>}
                   </div>
@@ -100,14 +101,14 @@ export function PickSummary({
           className="flex items-center justify-center gap-2 w-full py-3 bg-white/10 border border-white/10 text-white font-display uppercase tracking-wide rounded-xl transition-all hover:bg-white/15 text-sm"
         >
           <Pencil className="w-4 h-4" />
-          Editar previsoes
+          {t('edit_predictions')}
         </button>
         <Link
           href={`/arena/evento/${eventoId}/meus-picks`}
           className="flex items-center justify-center gap-2 w-full py-3 bg-ufc-gold/10 border border-ufc-gold/20 text-ufc-gold font-display uppercase tracking-wide rounded-xl transition-all hover:bg-ufc-gold/20 text-sm"
         >
           <Trophy className="w-4 h-4" />
-          Previsoes salvas — Boa sorte!
+          {t('predictions_saved_luck')}
         </Link>
       </div>
     </div>

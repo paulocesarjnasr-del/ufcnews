@@ -2,6 +2,7 @@
 
 
 import { useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/routing';
 import { ChevronRight, Trophy, HelpCircle } from 'lucide-react';
 import { type PickData, METODOS, getMaxRounds, tipoLabel } from '@/components/arena/picks-shared';
@@ -33,6 +34,7 @@ export function SwipeCard({
   onNext: () => void;
   saveError?: string | null;
 }) {
+  const t = useTranslations('arena');
   const [phase, setPhase] = useState<SwipePhase>(pick?.vencedor_id ? 'detail' : 'pick');
   const [justPicked, setJustPicked] = useState<string | null>(null);
   const [selectedMetodo, setSelectedMetodo] = useState<string | undefined>(pick?.metodo);
@@ -98,19 +100,19 @@ export function SwipeCard({
           </h1>
           {luta.is_titulo && (
             <span className="text-xs text-ufc-gold font-bold uppercase bg-ufc-gold/10 border border-ufc-gold/20 px-2.5 py-1 rounded-full flex items-center gap-1">
-              <Trophy className="w-3.5 h-3.5" /> Titulo
+              <Trophy className="w-3.5 h-3.5" /> {t('title_fight_label')}
             </span>
           )}
         </div>
         <div className="text-base sm:text-lg text-white/50 font-medium">{luta.categoria_peso} · {rounds} rounds</div>
-        <div className="text-sm text-white/40 font-display tracking-wide">Luta {index + 1} de {total}</div>
+        <div className="text-sm text-white/40 font-display tracking-wide">{t('fight_x_of_y', { current: index + 1, total })}</div>
       </div>
 
       {/* PHASE 1: Pick the winner */}
       {phase === 'pick' && (
         <>
           <h2 className="font-display text-xl sm:text-2xl uppercase text-white/70 mb-8">
-            Quem vence?
+            {t('who_wins_short')}
           </h2>
           <div className="grid grid-cols-2 gap-5 w-full max-w-lg">
             {[luta.lutador1, luta.lutador2].map((lutador) => {
@@ -167,20 +169,20 @@ export function SwipeCard({
             </div>
             <div>
               <span className="text-lg font-display uppercase font-bold text-white">{sobrenome(pickedFighter.nome)}</span>
-              <span className="text-base text-white/40 ml-2">vence</span>
+              <span className="text-base text-white/40 ml-2">{t('wins_label')}</span>
             </div>
             <button
               onClick={() => setPhase('pick')}
               className="ml-auto text-xs text-white/30 hover:text-white transition-colors px-2 py-1 rounded-lg hover:bg-white/5"
             >
-              mudar
+              {t('change_pick')}
             </button>
           </div>
 
           {/* Method */}
           <div>
             <div className="text-sm font-display uppercase tracking-widest text-white/40 mb-3">
-              Como? <span className="text-ufc-gold/50">(+50 pts)</span>
+              {t('how_method_bonus')} <span className="text-ufc-gold/50">({t('bonus_pts')})</span>
             </div>
             <div className="grid grid-cols-3 gap-3">
               {METODOS.map(m => (
@@ -203,7 +205,7 @@ export function SwipeCard({
           {showRound && (
             <div className="animate-fade-in">
               <div className="text-sm font-display uppercase tracking-widest text-white/40 mb-3">
-                Em qual round? <span className="text-ufc-gold/50">(+50 pts)</span>
+                {t('which_round_bonus')} <span className="text-ufc-gold/50">({t('bonus_pts')})</span>
               </div>
               <div className="flex gap-3 justify-center">
                 {Array.from({ length: rounds }, (_, i) => i + 1).map(r => (
@@ -228,7 +230,7 @@ export function SwipeCard({
             onClick={handleNext}
             className="w-full py-4 rounded-xl bg-white/10 border border-white/10 text-base font-display uppercase tracking-wide text-white hover:bg-white/15 transition-all flex items-center justify-center gap-2"
           >
-            {index < total - 1 ? "Next fight" : 'Ver resumo'}
+            {index < total - 1 ? t('next_fight_btn') : t('see_summary')}
             <ChevronRight className="w-5 h-5" />
           </button>
         </div>
@@ -240,7 +242,7 @@ export function SwipeCard({
         className="flex items-center gap-1.5 mt-6 text-xs text-white/25 hover:text-ufc-red transition-colors"
       >
         <HelpCircle className="w-3.5 h-3.5" />
-        Em duvida? Veja nossa analise
+        {t('doubt_see_analysis')}
       </Link>
     </div>
   );

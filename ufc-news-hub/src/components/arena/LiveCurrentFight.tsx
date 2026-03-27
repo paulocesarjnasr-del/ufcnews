@@ -127,7 +127,7 @@ export function LiveCurrentFight({ luta }: LiveCurrentFightProps) {
                 <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-yellow-400" />
               </span>
               <span className="text-[11px] font-black text-white tracking-widest uppercase">
-                AO VIVO
+                {t('live')}
               </span>
             </button>
           )}
@@ -139,7 +139,7 @@ export function LiveCurrentFight({ luta }: LiveCurrentFightProps) {
             >
               <Trophy className="w-3.5 h-3.5 text-green-400" />
               <span className="text-[11px] font-bold text-green-400 uppercase tracking-widest">
-                Finalizada
+                {t('finished')}
               </span>
             </div>
           )}
@@ -148,7 +148,7 @@ export function LiveCurrentFight({ luta }: LiveCurrentFightProps) {
             <div className="flex items-center gap-1.5 px-3 py-1 rounded-full border border-white/10 bg-transparent">
               <Clock className="w-3 h-3 text-white/30" />
               <span className="text-[10px] font-bold text-white/30 uppercase tracking-widest">
-                Proxima
+                {t('next')}
               </span>
             </div>
           )}
@@ -166,7 +166,7 @@ export function LiveCurrentFight({ luta }: LiveCurrentFightProps) {
             {isFinished && winnerIs1 && (
               <div className="mb-1.5 flex items-center justify-center">
                 <span className="text-[9px] font-black text-green-400 uppercase tracking-[0.2em] px-2 py-0.5 rounded-sm bg-green-500/15 border border-green-400/30">
-                  VENCEDOR
+                  {t('winner')}
                 </span>
               </div>
             )}
@@ -239,7 +239,7 @@ export function LiveCurrentFight({ luta }: LiveCurrentFightProps) {
             {isFinished && winnerIs2 && (
               <div className="mb-1.5 flex items-center justify-center">
                 <span className="text-[9px] font-black text-green-400 uppercase tracking-[0.2em] px-2 py-0.5 rounded-sm bg-green-500/15 border border-green-400/30">
-                  VENCEDOR
+                  {t('winner')}
                 </span>
               </div>
             )}
@@ -324,7 +324,7 @@ export function LiveCurrentFight({ luta }: LiveCurrentFightProps) {
                       : 'text-white/30'
                   }`}
                 >
-                  Seu Pick
+                  {t('your_pick')}
                 </div>
                 <div
                   className={`font-display text-xl uppercase tracking-wide truncate ${
@@ -370,7 +370,7 @@ export function LiveCurrentFight({ luta }: LiveCurrentFightProps) {
                     <span className="relative inline-flex h-2 w-2 rounded-full bg-red-500" />
                   </span>
                   <span className="text-[10px] text-red-400/80 uppercase tracking-widest font-bold">
-                    Ao vivo
+                    {t('live_label')}
                   </span>
                 </div>
               )}
@@ -379,7 +379,7 @@ export function LiveCurrentFight({ luta }: LiveCurrentFightProps) {
         ) : (
           <div className="rounded-xl bg-black/40 border border-white/5 px-4 py-2.5 flex items-center justify-center gap-2">
             <Zap className="w-4 h-4 text-white/15" />
-            <span className="text-xs text-white/20 italic">Sem pick para esta luta</span>
+            <span className="text-xs text-white/20 italic">{t('no_pick_for_fight')}</span>
           </div>
         )}
       </div>

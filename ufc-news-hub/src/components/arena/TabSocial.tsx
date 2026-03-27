@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Link } from '@/i18n/routing';
+import { useTranslations } from 'next-intl';
 import { Trophy, Users, Activity } from 'lucide-react';
 import { useArenaAuth } from '@/hooks/useArenaAuth';
 
@@ -20,6 +21,7 @@ interface Atividade {
 }
 
 export function TabSocial() {
+  const t = useTranslations('arena');
   const { isAuthenticated } = useArenaAuth();
   const [ligas, setLigas] = useState<Liga[]>([]);
   const [atividades, setAtividades] = useState<Atividade[]>([]);
@@ -53,7 +55,7 @@ export function TabSocial() {
     return (
       <div className="neu-card p-6 text-center">
         <Users className="w-10 h-10 text-dark-textMuted mx-auto mb-3" />
-        <p className="text-dark-textMuted">Entre numa liga para competir com amigos!</p>
+        <p className="text-dark-textMuted">{t('join_league_to_compete')}</p>
         <Link href="/arena/login" className="text-ufc-red text-sm mt-2 inline-block hover:underline">Entrar</Link>
       </div>
     );
@@ -66,10 +68,10 @@ export function TabSocial() {
       <div className="neu-card p-4 space-y-3">
         <h4 className="text-sm font-display uppercase text-dark-textMuted flex items-center gap-2">
           <Trophy className="w-4 h-4" />
-          Minhas Ligas
+          {t('my_leagues_title')}
         </h4>
         {ligas.length === 0 ? (
-          <p className="text-sm text-dark-textMuted">Nenhuma liga ainda.</p>
+          <p className="text-sm text-dark-textMuted">{t('no_leagues_yet')}</p>
         ) : (
           <div className="space-y-2">
             {ligas.map(liga => (
@@ -79,23 +81,23 @@ export function TabSocial() {
                 className="flex items-center justify-between p-2.5 rounded-lg bg-dark-bg/50 hover:bg-dark-bg transition-colors"
               >
                 <span className="text-sm text-dark-text font-medium">{liga.nome}</span>
-                <span className="text-xs text-dark-textMuted">{liga.total_membros} membros</span>
+                <span className="text-xs text-dark-textMuted">{liga.total_membros} {t('members')}</span>
               </Link>
             ))}
           </div>
         )}
         <Link href="/arena/ligas" className="block text-center text-sm text-ufc-red hover:underline">
-          Ver todas →
+          {t('see_all_leagues')} →
         </Link>
       </div>
 
       <div className="neu-card p-4 space-y-3">
         <h4 className="text-sm font-display uppercase text-dark-textMuted flex items-center gap-2">
           <Activity className="w-4 h-4" />
-          Atividade Recente
+          {t('recent_activity')}
         </h4>
         {atividades.length === 0 ? (
-          <p className="text-sm text-dark-textMuted">Faca sua primeira previsao para ver atividade aqui!</p>
+          <p className="text-sm text-dark-textMuted">{t('first_prediction_activity')}</p>
         ) : (
           <div className="space-y-2">
             {atividades.map(a => (

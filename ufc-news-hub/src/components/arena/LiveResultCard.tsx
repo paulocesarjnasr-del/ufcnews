@@ -124,21 +124,21 @@ export function LiveResultCard({
                 <span className="relative inline-flex h-2 w-2 rounded-full bg-yellow-400" />
               </span>
               <span className="text-[10px] font-black uppercase tracking-widest text-white">
-                AO VIVO
+                {t('live')}
               </span>
             </button>
           ) : isFinished ? (
             <div className="flex items-center gap-1.5 rounded-full bg-green-500/10 px-2.5 py-1 border border-green-500/30">
               <Trophy className="w-3 h-3 text-green-400" />
               <span className="text-[10px] font-bold uppercase tracking-widest text-green-400">
-                Finalizada
+                {t('finished')}
               </span>
             </div>
           ) : (
             <div className="flex items-center gap-1.5 rounded-full border border-white/10 bg-transparent px-2.5 py-1">
               <Clock className="w-3 h-3 text-white/30" />
               <span className="text-[10px] font-bold uppercase tracking-widest text-white/30">
-                Proxima
+                {t('next')}
               </span>
             </div>
           )}
@@ -175,7 +175,7 @@ export function LiveResultCard({
             {winner1 && (
               <div className="mt-1 flex items-center justify-end">
                 <span className="text-[9px] font-black uppercase tracking-[0.15em] text-green-400">
-                  VENCEDOR
+                  {t('winner')}
                 </span>
               </div>
             )}
@@ -234,7 +234,7 @@ export function LiveResultCard({
             {winner2 && (
               <div className="mt-1">
                 <span className="text-[9px] font-black uppercase tracking-[0.15em] text-green-400">
-                  VENCEDOR
+                  {t('winner')}
                 </span>
               </div>
             )}
@@ -276,7 +276,7 @@ export function LiveResultCard({
 
                 <div className="min-w-0">
                   <span className="text-[10px] uppercase tracking-widest text-white/30 font-medium">
-                    Seu Pick
+                    {t('your_pick')}
                   </span>
                   <div
                     className={`text-sm font-bold truncate ${
@@ -312,7 +312,7 @@ export function LiveResultCard({
                 </span>
               ) : isLive ? (
                 <span className="shrink-0 text-[10px] font-black uppercase tracking-widest text-red-500 animate-pulse">
-                  em andamento
+                  {t('in_progress')}
                 </span>
               ) : null}
             </div>
@@ -326,7 +326,7 @@ export function LiveResultCard({
                   : 'text-white/20'
               }`}
             >
-              {isLive ? 'Em andamento' : 'Aguardando'}
+              {isLive ? t('in_progress') : t('awaiting')}
             </span>
           </div>
         ) : null}

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { useTranslations } from 'next-intl';
 import { MessageCircle, Send } from 'lucide-react';
 import { useArenaAuth } from '@/hooks/useArenaAuth';
 
@@ -28,6 +29,7 @@ interface LigaChatProps {
 // ═══════════════════════════════════════════════════════════════
 
 export function LigaChat({ ligaId }: LigaChatProps) {
+  const t = useTranslations('arena');
   const { usuario, isAuthenticated } = useArenaAuth();
   const [mensagens, setMensagens] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
@@ -149,7 +151,7 @@ export function LigaChat({ ligaId }: LigaChatProps) {
         // Revert optimistic insert and restore input
         setMensagens((prev) => prev.filter((m) => m.id !== optimisticId));
         setInput(texto);
-        setError(data.error ?? 'Erro ao enviar mensagem');
+        setError(data.error ?? t('error_send_message'));
         return;
       }
 
@@ -162,7 +164,7 @@ export function LigaChat({ ligaId }: LigaChatProps) {
     } catch {
       setMensagens((prev) => prev.filter((m) => m.id !== optimisticId));
       setInput(texto);
-      setError('Erro de conexao. Tente novamente.');
+      setError(t('error_connection_retry'));
     } finally {
       setIsSending(false);
     }
@@ -179,7 +181,7 @@ export function LigaChat({ ligaId }: LigaChatProps) {
   if (!isAuthenticated) {
     return (
       <div className="neu-card p-4 text-center text-sm text-dark-textMuted">
-        Faca login para participar do chat da liga.
+        {t('login_to_chat')}
       </div>
     );
   }
@@ -190,7 +192,7 @@ export function LigaChat({ ligaId }: LigaChatProps) {
       <div className="flex items-center gap-2 border-b border-dark-border px-4 py-3">
         <MessageCircle className="h-4 w-4 text-ufc-red" />
         <span className="font-display text-sm uppercase tracking-wide text-dark-text">
-          Chat da Liga
+          {t('league_chat_title')}
         </span>
       </div>
 
@@ -202,11 +204,11 @@ export function LigaChat({ ligaId }: LigaChatProps) {
       >
         {isLoading ? (
           <div className="flex h-full items-center justify-center text-sm text-dark-textMuted">
-            Carregando mensagens...
+            {t('loading_messages')}
           </div>
         ) : mensagens.length === 0 ? (
           <div className="flex h-full items-center justify-center text-sm text-dark-textMuted">
-            Seja o primeiro a mandar mensagem!
+            {t('be_first_message')}
           </div>
         ) : (
           mensagens.map((msg) => {
@@ -256,7 +258,7 @@ export function LigaChat({ ligaId }: LigaChatProps) {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="Escreva uma mensagem..."
+          placeholder={t('write_message')}
           maxLength={500}
           disabled={isSending}
           className="neu-inset flex-1 rounded-lg px-3 py-2 text-sm text-dark-text placeholder-dark-textMuted focus:outline-none disabled:opacity-50"

@@ -90,7 +90,7 @@ export function MethodDistribution() {
   if (error) {
     return (
       <div className="neu-card p-4 text-dark-text text-sm">
-        Erro ao carregar distribuicao.
+        {t('error_load_distribution')}
       </div>
     );
   }
@@ -98,7 +98,7 @@ export function MethodDistribution() {
   if (!data || data.total === 0 || data.metodos.length === 0) {
     return (
       <div className="neu-card p-6 text-center text-dark-text text-sm">
-        Acerte previsoes para ver sua distribuicao de metodos
+        {t('correct_to_see_distribution')}
       </div>
     );
   }

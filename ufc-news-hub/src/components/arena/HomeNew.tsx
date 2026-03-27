@@ -58,7 +58,7 @@ export function HomeNew({ evento }: HomeNewProps) {
                 {[
                   { value: '+100', label: t('correct'), color: 'text-ufc-red' },
                   { value: '+50', label: t('method_of_victory'), color: 'text-ufc-gold' },
-                  { value: '+50', label: 'round', color: 'text-green-400' },
+                  { value: '+50', label: t('round_label'), color: 'text-green-400' },
                 ].map(pill => (
                   <div key={pill.label} className="rounded-xl border border-white/10 bg-black/40 p-3 text-center">
                     <div className={`font-display text-xl ${pill.color}`}>{pill.value}</div>

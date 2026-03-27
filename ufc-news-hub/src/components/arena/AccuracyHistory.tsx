@@ -49,7 +49,7 @@ export function AccuracyHistory() {
   if (error) {
     return (
       <div className="neu-card p-4 text-dark-text text-sm">
-        Erro ao carregar historico.
+        {t('error_load_history_msg')}
       </div>
     );
   }
@@ -57,7 +57,7 @@ export function AccuracyHistory() {
   if (historico.length === 0) {
     return (
       <div className="neu-card p-6 text-center text-dark-text text-sm">
-        Participe de eventos para ver seu historico
+        {t('participate_to_see_history')}
       </div>
     );
   }

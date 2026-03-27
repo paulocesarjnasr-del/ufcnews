@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import useSWR from 'swr';
+import { useTranslations } from 'next-intl';
 import { Send, MessageCircle } from 'lucide-react';
 
 interface ChatMessage {
@@ -40,6 +41,7 @@ function timeAgo(dateStr: string): string {
 }
 
 export function LiveChat({ eventoId, ligaId, ligaNome, currentUserId }: LiveChatProps) {
+  const t = useTranslations('arena');
   const [activeTab, setActiveTab] = useState<'geral' | 'liga'>('geral');
   const [input, setInput] = useState('');
   const [isSending, setIsSending] = useState(false);
@@ -145,7 +147,7 @@ export function LiveChat({ eventoId, ligaId, ligaNome, currentUserId }: LiveChat
                   activeTab === 'geral' ? 'bg-ufc-red text-white' : 'text-white/40 hover:text-white/60'
                 }`}
               >
-                Geral
+                {t('general_tab')}
               </button>
               <button
                 onClick={() => setActiveTab('liga')}
@@ -157,7 +159,7 @@ export function LiveChat({ eventoId, ligaId, ligaNome, currentUserId }: LiveChat
               </button>
             </div>
           ) : (
-            <span className="text-xs font-display uppercase text-white/50">Chat ao Vivo</span>
+            <span className="text-xs font-display uppercase text-white/50">{t('live_chat_title')}</span>
           )}
         </div>
         {onlineCount > 0 && (
@@ -168,7 +170,7 @@ export function LiveChat({ eventoId, ligaId, ligaNome, currentUserId }: LiveChat
       <div ref={scrollContainerRef} className="h-72 overflow-y-auto px-4 py-3 space-y-2.5">
         {localMessages.length === 0 && (
           <div className="flex items-center justify-center h-full text-sm text-white/20">
-            Nenhuma mensagem ainda. Comece a conversa!
+            {t('no_messages_yet')}
           </div>
         )}
         {localMessages.map(msg => {
@@ -208,7 +210,7 @@ export function LiveChat({ eventoId, ligaId, ligaNome, currentUserId }: LiveChat
           value={input}
           onChange={e => setInput(e.target.value)}
           onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
-          placeholder="Digite sua mensagem..."
+          placeholder={t('type_your_message')}
           maxLength={280}
           className="flex-1 neu-inset rounded-lg px-3 py-2 text-sm text-dark-text placeholder:text-dark-textMuted focus:outline-none focus:ring-1 focus:ring-ufc-red/50"
         />

@@ -19,6 +19,7 @@ interface EventoHistoricoProps {
 }
 
 export function EventoHistorico({ username }: EventoHistoricoProps) {
+  const t = useTranslations('arena');
   const [historico, setHistorico] = useState<HistoricoItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -42,8 +43,8 @@ export function EventoHistorico({ username }: EventoHistoricoProps) {
     return (
       <div className="neu-card p-4 text-center">
         <Calendar className="w-8 h-8 text-dark-textMuted mx-auto mb-2" />
-        <p className="text-sm text-dark-textMuted">Nenhum evento no historico ainda.</p>
-        <p className="text-xs text-dark-textMuted mt-1">Participe de um evento para ver seus resultados aqui!</p>
+        <p className="text-sm text-dark-textMuted">{t('no_event_history')}</p>
+        <p className="text-xs text-dark-textMuted mt-1">{t('participate_to_see_results')}</p>
       </div>
     );
   }

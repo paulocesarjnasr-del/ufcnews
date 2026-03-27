@@ -40,7 +40,7 @@ export function PickCard({
     return (
       <div className="rounded-xl border border-white/10 bg-black/30 backdrop-blur-sm p-4">
         <div className="text-sm text-white/30 text-center">
-          {sobrenome(luta.lutador1.nome)} vs {sobrenome(luta.lutador2.nome)} — sem pick
+          {sobrenome(luta.lutador1.nome)} vs {sobrenome(luta.lutador2.nome)} — {t('no_pick')}
         </div>
       </div>
     );
@@ -73,17 +73,17 @@ export function PickCard({
         </span>
         {luta.is_titulo && (
           <span className="text-[9px] text-ufc-gold font-bold uppercase bg-ufc-gold/10 border border-ufc-gold/20 px-1.5 py-0.5 rounded-full flex items-center gap-1">
-            <Trophy className="w-2.5 h-2.5" /> Titulo
+            <Trophy className="w-2.5 h-2.5" /> {t('title_fight_label')}
           </span>
         )}
         {acertou && (
           <span className="flex items-center gap-1 text-[9px] text-green-400 font-bold uppercase">
-            <Check className="w-3 h-3" /> Acertou
+            <Check className="w-3 h-3" /> {t('correct_pick')}
           </span>
         )}
         {errou && (
           <span className="flex items-center gap-1 text-[9px] text-red-400 font-bold uppercase">
-            <X className="w-3 h-3" /> Errou
+            <X className="w-3 h-3" /> {t('wrong_pick')}
           </span>
         )}
       </div>
@@ -106,7 +106,7 @@ export function PickCard({
 
         <div className="flex-1 min-w-0">
           <div className="text-sm font-semibold text-white truncate">
-            {sobrenome(vencedor.nome)} <span className="text-white/25 font-normal">vence {sobrenome(perdedor.nome)}</span>
+            {sobrenome(vencedor.nome)} <span className="text-white/25 font-normal">{t('wins_label')} {sobrenome(perdedor.nome)}</span>
           </div>
           <div className="flex items-center gap-2 mt-1 flex-wrap">
             {pick.metodo ? (
@@ -114,7 +114,7 @@ export function PickCard({
                 {metodoLabel(pick.metodo)}
               </span>
             ) : (
-              <span className="text-[10px] text-white/20">vitoria simples</span>
+              <span className="text-[10px] text-white/20">{t('simple_victory')}</span>
             )}
             {pick.round && (
               <span className="text-[10px] text-white/40 bg-white/5 px-2 py-0.5 rounded-full">
@@ -148,7 +148,7 @@ export function PickCard({
             <span className={isUnderdog ? 'text-ufc-gold/70' : 'text-white/30'}>
               {isUnderdog ? t('bold_bet') : isFavorite ? t('with_majority') : ''}
             </span>
-            <span className="text-white/25">{consensoPct}% da comunidade</span>
+            <span className="text-white/25">{consensoPct}% {t('of_community')}</span>
           </div>
           <div className="h-1 rounded-full bg-white/10 overflow-hidden">
             <div
@@ -169,21 +169,21 @@ export function PickCard({
                 className="flex items-center gap-1 text-[10px] text-white/20 hover:text-ufc-red transition-colors"
               >
                 <ExternalLink className="w-3 h-3" />
-                Ver analise
+                {t('see_analysis')}
               </Link>
               <button
                 onClick={() => setEditing(true)}
                 className="flex items-center gap-1 text-[10px] text-white/30 hover:text-ufc-red transition-colors px-2 py-1 rounded-lg hover:bg-white/5"
               >
                 <Pencil className="w-3 h-3" />
-                Editar
+                {t('edit')}
               </button>
             </div>
           ) : (
             <div className="space-y-3 animate-fade-in">
               {/* Swap vencedor */}
               <div>
-                <div className="text-[9px] text-white/30 font-display uppercase tracking-widest mb-2">Vencedor</div>
+                <div className="text-[9px] text-white/30 font-display uppercase tracking-widest mb-2">{t('winner')}</div>
                 <div className="grid grid-cols-2 gap-2">
                   {[luta.lutador1, luta.lutador2].map(lutador => {
                     const isSelected = vencedorId === lutador.id;
@@ -220,7 +220,7 @@ export function PickCard({
               {/* Metodo */}
               <div>
                 <div className="text-[9px] text-white/30 font-display uppercase tracking-widest mb-2">
-                  Como? <span className="text-ufc-gold/50">(+50 pts)</span>
+                  {t('how_method_bonus')} <span className="text-ufc-gold/50">({t('bonus_pts')})</span>
                 </div>
                 <div className="flex flex-wrap gap-1.5">
                   {METODOS.map(m => (
@@ -271,7 +271,7 @@ export function PickCard({
                 onClick={() => setEditing(false)}
                 className="w-full py-2 rounded-lg bg-white/5 text-[11px] text-white/40 hover:text-white/70 transition-colors"
               >
-                Fechar edição
+                {t('close_editing')}
               </button>
             </div>
           )}
@@ -285,7 +285,7 @@ export function PickCard({
           className="flex items-center gap-1 mt-3 text-[10px] text-white/20 hover:text-ufc-red transition-colors"
         >
           <ExternalLink className="w-3 h-3" />
-          Ver analise desta luta
+          {t('see_fight_analysis')}
         </Link>
       )}
     </div>

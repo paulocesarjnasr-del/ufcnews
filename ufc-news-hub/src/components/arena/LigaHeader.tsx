@@ -35,6 +35,7 @@ export function LigaHeader({
   onSairClick,
   onGerenciarClick,
 }: LigaHeaderProps) {
+  const t = useTranslations('arena');
   const [copied, setCopied] = useState(false);
 
   // ── Invite copy ──
@@ -95,12 +96,12 @@ export function LigaHeader({
               {liga.tipo === 'privada' ? (
                 <>
                   <Lock size={12} className="text-dark-textMuted" />
-                  Privada
+                  {t('private')}
                 </>
               ) : (
                 <>
                   <Globe size={12} className="text-dark-textMuted" />
-                  Publica
+                  {t('public')}
                 </>
               )}
             </span>
@@ -109,13 +110,13 @@ export function LigaHeader({
 
             {/* Member count */}
             <span className="text-xs text-dark-textMuted">
-              {liga.total_membros} / {liga.max_membros} membros
+              {liga.total_membros} / {liga.max_membros} {t('members')}
             </span>
 
             <span className="text-dark-textMuted text-xs">·</span>
 
             {/* Created year */}
-            <span className="text-xs text-dark-textMuted">Desde {createdYear}</span>
+            <span className="text-xs text-dark-textMuted">{t('since')} {createdYear}</span>
           </div>
         </div>
       </div>
@@ -137,12 +138,12 @@ export function LigaHeader({
               {copied ? (
                 <>
                   <Check size={14} className="text-green-400" />
-                  <span className="text-green-400">Copiado!</span>
+                  <span className="text-green-400">{t('copied')}</span>
                 </>
               ) : (
                 <>
                   <Copy size={14} />
-                  Copiar convite
+                  {t('copy_invite')}
                 </>
               )}
             </button>
@@ -155,7 +156,7 @@ export function LigaHeader({
               className="flex items-center gap-2 px-4 py-2 rounded-xl border border-dark-border text-dark-textMuted hover:text-white hover:border-ufc-red/50 transition-all text-sm"
             >
               <Settings size={14} />
-              Editar
+              {t('edit')}
             </button>
           )}
 
@@ -166,7 +167,7 @@ export function LigaHeader({
               className="flex items-center gap-2 px-4 py-2 rounded-xl border border-red-700/50 text-red-400 hover:bg-red-900/20 transition-all text-sm"
             >
               <LogOut size={14} />
-              Sair
+              {t('leave')}
             </button>
           )}
         </div>

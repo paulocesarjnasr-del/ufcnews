@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
+import { useTranslations } from 'next-intl';
 
 // ═══════════════════════════════════════════════════════════════
 // Types
@@ -93,6 +94,7 @@ function FighterAvatar({
 // ═══════════════════════════════════════════════════════════════
 
 export function FloatingReactions({ currentFight, eventoId: _eventoId, isAuthenticated, username }: FloatingReactionsProps) {
+  const t = useTranslations('arena');
   const [reactions, setReactions] = useState<FloatingReaction[]>([]);
   const [counts, setCounts] = useState<Record<string, number>>({});
   const [cooldown, setCooldown] = useState(false);
@@ -308,7 +310,7 @@ export function FloatingReactions({ currentFight, eventoId: _eventoId, isAuthent
       {/* Login hint */}
       {showLoginHint && (
         <div className="absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap bg-dark-card border border-dark-border rounded-lg px-3 py-1.5 text-xs text-dark-textMuted shadow-lg">
-          Faca login para reagir
+          {t('login_to_react')}
         </div>
       )}
     </div>

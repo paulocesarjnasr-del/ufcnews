@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
-import Image from 'next/image';
 
 // ═══════════════════════════════════════════════════════════════
 // Types
@@ -75,14 +74,15 @@ function FighterAvatar({
       className={`rounded-full overflow-hidden border-2 ${borderColor}`}
       style={{ width: size, height: size }}
     >
-      <Image
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
         src={foto}
         alt={nome}
         width={size}
         height={size}
         className="object-cover w-full h-full"
         onError={() => setImgError(true)}
-        unoptimized
+        referrerPolicy="no-referrer"
       />
     </div>
   );

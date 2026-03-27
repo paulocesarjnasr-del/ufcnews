@@ -3,6 +3,9 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import Image from 'next/image';
 
+// Note: Image from next/image is still used for OctagonTexture poster.
+// Fighter photos use <img> with referrerPolicy="no-referrer" to bypass UFC.com hotlink protection.
+
 // ═══════════════════════════════════════════════════════════
 // Types
 // ═══════════════════════════════════════════════════════════
@@ -225,7 +228,8 @@ export function FightPreview({ luta, showDetails = false }: { luta: Luta; showDe
           <div className="flex items-center gap-3 flex-1 min-w-0">
             <div className="w-10 h-10 rounded-full bg-dark-card border border-dark-border flex items-center justify-center text-xs font-bold text-dark-textMuted overflow-hidden shrink-0">
               {luta.lutador1.imagem_url ? (
-                <Image src={luta.lutador1.imagem_url} alt={luta.lutador1.nome} width={40} height={40} className="w-full h-full object-cover" />
+                /* eslint-disable-next-line @next/next/no-img-element */
+                <img src={luta.lutador1.imagem_url} alt={luta.lutador1.nome} width={40} height={40} referrerPolicy="no-referrer" className="w-full h-full object-cover" />
               ) : (
                 sobrenome(luta.lutador1.nome).slice(0, 2).toUpperCase()
               )}
@@ -237,7 +241,8 @@ export function FightPreview({ luta, showDetails = false }: { luta: Luta; showDe
             <span className="text-base font-semibold text-white truncate text-right">{sobrenome(luta.lutador2.nome)}</span>
             <div className="w-10 h-10 rounded-full bg-dark-card border border-dark-border flex items-center justify-center text-xs font-bold text-dark-textMuted overflow-hidden shrink-0">
               {luta.lutador2.imagem_url ? (
-                <Image src={luta.lutador2.imagem_url} alt={luta.lutador2.nome} width={40} height={40} className="w-full h-full object-cover" />
+                /* eslint-disable-next-line @next/next/no-img-element */
+                <img src={luta.lutador2.imagem_url} alt={luta.lutador2.nome} width={40} height={40} referrerPolicy="no-referrer" className="w-full h-full object-cover" />
               ) : (
                 sobrenome(luta.lutador2.nome).slice(0, 2).toUpperCase()
               )}
@@ -254,7 +259,8 @@ export function FightPreview({ luta, showDetails = false }: { luta: Luta; showDe
       <div className="flex items-center gap-3 flex-1 min-w-0">
         <div className="w-8 h-8 rounded-full bg-dark-card border border-dark-border flex items-center justify-center text-[10px] font-bold text-dark-textMuted overflow-hidden shrink-0">
           {luta.lutador1.imagem_url ? (
-            <Image src={luta.lutador1.imagem_url} alt={luta.lutador1.nome} width={32} height={32} className="w-full h-full object-cover" />
+            /* eslint-disable-next-line @next/next/no-img-element */
+            <img src={luta.lutador1.imagem_url} alt={luta.lutador1.nome} width={32} height={32} referrerPolicy="no-referrer" className="w-full h-full object-cover" />
           ) : (
             sobrenome(luta.lutador1.nome).slice(0, 2).toUpperCase()
           )}
@@ -266,7 +272,8 @@ export function FightPreview({ luta, showDetails = false }: { luta: Luta; showDe
         <span className="text-sm font-semibold text-white truncate text-right">{sobrenome(luta.lutador2.nome)}</span>
         <div className="w-8 h-8 rounded-full bg-dark-card border border-dark-border flex items-center justify-center text-[10px] font-bold text-dark-textMuted overflow-hidden shrink-0">
           {luta.lutador2.imagem_url ? (
-            <Image src={luta.lutador2.imagem_url} alt={luta.lutador2.nome} width={32} height={32} className="w-full h-full object-cover" />
+            /* eslint-disable-next-line @next/next/no-img-element */
+            <img src={luta.lutador2.imagem_url} alt={luta.lutador2.nome} width={32} height={32} referrerPolicy="no-referrer" className="w-full h-full object-cover" />
           ) : (
             sobrenome(luta.lutador2.nome).slice(0, 2).toUpperCase()
           )}

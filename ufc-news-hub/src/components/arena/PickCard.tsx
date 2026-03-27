@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import Image from 'next/image';
 import { Link } from '@/i18n/routing';
 import { Trophy, Pencil, Check, X, ExternalLink } from 'lucide-react';
 import { type PickData, METODOS, metodoLabel, getMaxRounds, tipoLabel } from '@/components/arena/picks-shared';
@@ -96,7 +95,8 @@ export function PickCard({
           acertou ? 'border-green-500' : errou ? 'border-red-500/50' : 'border-ufc-red/60'
         }`}>
           {vencedor.imagem_url ? (
-            <Image src={vencedor.imagem_url} alt={vencedor.nome} width={48} height={48} className="w-full h-full object-cover object-top" />
+            /* eslint-disable-next-line @next/next/no-img-element */
+            <img src={vencedor.imagem_url} alt={vencedor.nome} width={48} height={48} referrerPolicy="no-referrer" className="w-full h-full object-cover object-top" />
           ) : (
             <div className="w-full h-full flex items-center justify-center bg-white/5 text-[10px] font-display text-white/30">
               {sobrenome(vencedor.nome).slice(0, 2).toUpperCase()}
@@ -131,7 +131,8 @@ export function PickCard({
         {/* Loser photo — smaller, dimmed */}
         <div className="w-8 h-8 rounded-full overflow-hidden border border-white/10 shrink-0 opacity-30">
           {perdedor.imagem_url ? (
-            <Image src={perdedor.imagem_url} alt={perdedor.nome} width={32} height={32} className="w-full h-full object-cover object-top" />
+            /* eslint-disable-next-line @next/next/no-img-element */
+            <img src={perdedor.imagem_url} alt={perdedor.nome} width={32} height={32} referrerPolicy="no-referrer" className="w-full h-full object-cover object-top" />
           ) : (
             <div className="w-full h-full flex items-center justify-center bg-white/5 text-[8px] font-display text-white/30">
               {sobrenome(perdedor.nome).slice(0, 2).toUpperCase()}
@@ -198,7 +199,8 @@ export function PickCard({
                       >
                         <div className={`w-7 h-7 rounded-full overflow-hidden shrink-0 border ${isSelected ? 'border-ufc-red' : 'border-white/10'}`}>
                           {lutador.imagem_url ? (
-                            <Image src={lutador.imagem_url} alt={lutador.nome} width={28} height={28} className="w-full h-full object-cover object-top" />
+                            /* eslint-disable-next-line @next/next/no-img-element */
+                            <img src={lutador.imagem_url} alt={lutador.nome} width={28} height={28} referrerPolicy="no-referrer" className="w-full h-full object-cover object-top" />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center bg-white/5 text-[8px] font-display text-white/30">
                               {sobrenome(lutador.nome).slice(0, 2).toUpperCase()}

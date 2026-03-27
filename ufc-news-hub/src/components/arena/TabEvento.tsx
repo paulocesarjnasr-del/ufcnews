@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import Image from 'next/image';
 import { Calendar, Clock, Swords, Check, ChevronLeft, ChevronRight, Radio, Trophy } from 'lucide-react';
 import { useArenaAuth } from '@/hooks/useArenaAuth';
 
@@ -280,7 +279,8 @@ export function TabEvento() {
             )}
             <div className="w-14 h-14 rounded-full overflow-hidden bg-dark-card border-2 border-dark-border">
               {currentLuta.lutador1.imagem_url ? (
-                <Image src={currentLuta.lutador1.imagem_url} alt={currentLuta.lutador1.nome} width={56} height={56} className="w-full h-full object-cover" />
+                /* eslint-disable-next-line @next/next/no-img-element */
+                <img src={currentLuta.lutador1.imagem_url} alt={currentLuta.lutador1.nome} width={56} height={56} referrerPolicy="no-referrer" className="w-full h-full object-cover" />
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-lg font-bold text-dark-textMuted">
                   {currentLuta.lutador1.nome.split(' ').map(w => w[0]).join('').slice(0, 2)}
@@ -313,7 +313,8 @@ export function TabEvento() {
             )}
             <div className="w-14 h-14 rounded-full overflow-hidden bg-dark-card border-2 border-dark-border">
               {currentLuta.lutador2.imagem_url ? (
-                <Image src={currentLuta.lutador2.imagem_url} alt={currentLuta.lutador2.nome} width={56} height={56} className="w-full h-full object-cover" />
+                /* eslint-disable-next-line @next/next/no-img-element */
+                <img src={currentLuta.lutador2.imagem_url} alt={currentLuta.lutador2.nome} width={56} height={56} referrerPolicy="no-referrer" className="w-full h-full object-cover" />
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-lg font-bold text-dark-textMuted">
                   {currentLuta.lutador2.nome.split(' ').map(w => w[0]).join('').slice(0, 2)}

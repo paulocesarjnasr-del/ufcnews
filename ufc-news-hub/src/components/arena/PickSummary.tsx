@@ -1,7 +1,6 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import Image from 'next/image';
 import { Link } from '@/i18n/routing';
 import { Trophy, Pencil } from 'lucide-react';
 import { type PickData, maxPontos, metodoLabel } from '@/components/arena/picks-shared';
@@ -68,7 +67,8 @@ export function PickSummary({
               <div className="flex items-center gap-3">
                 <div className="w-9 h-9 rounded-full overflow-hidden border-2 border-ufc-red/50 shrink-0">
                   {vencedor.imagem_url ? (
-                    <Image src={vencedor.imagem_url} alt={vencedor.nome} width={36} height={36} className="w-full h-full object-cover object-top" />
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img src={vencedor.imagem_url} alt={vencedor.nome} width={36} height={36} referrerPolicy="no-referrer" className="w-full h-full object-cover object-top" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center bg-white/5 text-[9px] font-display text-white/30">
                       {sobrenome(vencedor.nome).slice(0, 2).toUpperCase()}

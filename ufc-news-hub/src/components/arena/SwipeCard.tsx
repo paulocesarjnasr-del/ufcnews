@@ -2,7 +2,6 @@
 
 
 import { useState, useEffect } from 'react';
-import Image from 'next/image';
 import { Link } from '@/i18n/routing';
 import { ChevronRight, Trophy, HelpCircle } from 'lucide-react';
 import { type PickData, METODOS, getMaxRounds, tipoLabel } from '@/components/arena/picks-shared';
@@ -130,7 +129,8 @@ export function SwipeCard({
                   {isJust && <div className="absolute inset-0 bg-ufc-red/15 rounded-2xl animate-fade-in pointer-events-none" />}
                   <div className={`relative w-28 h-28 sm:w-32 sm:h-32 rounded-full overflow-hidden border-2 ${isJust ? 'border-ufc-red' : 'border-white/10'}`}>
                     {lutador.imagem_url ? (
-                      <Image src={lutador.imagem_url} alt={lutador.nome} fill className="object-cover object-top" sizes="128px" />
+                      /* eslint-disable-next-line @next/next/no-img-element */
+                      <img src={lutador.imagem_url} alt={lutador.nome} referrerPolicy="no-referrer" className="object-cover object-top" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }} />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center bg-white/5 text-2xl font-display text-white/30">
                         {sobrenome(lutador.nome).slice(0, 2).toUpperCase()}
@@ -157,7 +157,8 @@ export function SwipeCard({
           <div className="flex items-center justify-center gap-4 py-4 px-5 rounded-2xl bg-ufc-red/10 border border-ufc-red/30">
             <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-ufc-red shrink-0">
               {pickedFighter.imagem_url ? (
-                <Image src={pickedFighter.imagem_url} alt={pickedFighter.nome} width={56} height={56} className="w-full h-full object-cover object-top" />
+                /* eslint-disable-next-line @next/next/no-img-element */
+                <img src={pickedFighter.imagem_url} alt={pickedFighter.nome} width={56} height={56} referrerPolicy="no-referrer" className="w-full h-full object-cover object-top" />
               ) : (
                 <div className="w-full h-full flex items-center justify-center bg-white/5 text-sm font-display text-white/30">
                   {sobrenome(pickedFighter.nome).slice(0, 2).toUpperCase()}

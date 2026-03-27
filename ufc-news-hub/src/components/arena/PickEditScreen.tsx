@@ -1,6 +1,5 @@
 'use client';
 
-import Image from 'next/image';
 import { Check } from 'lucide-react';
 import { type PickData, METODOS, tipoLabel, getMaxRounds } from '@/components/arena/picks-shared';
 import { sobrenome } from '@/components/arena/shared';
@@ -65,7 +64,8 @@ export function PickEditScreen({
                     >
                       <div className={`w-8 h-8 rounded-full overflow-hidden shrink-0 border ${isSelected ? 'border-ufc-red' : 'border-white/10'}`}>
                         {lutador.imagem_url ? (
-                          <Image src={lutador.imagem_url} alt={lutador.nome} width={32} height={32} className="w-full h-full object-cover object-top" />
+                          /* eslint-disable-next-line @next/next/no-img-element */
+                          <img src={lutador.imagem_url} alt={lutador.nome} width={32} height={32} referrerPolicy="no-referrer" className="w-full h-full object-cover object-top" />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center bg-white/5 text-[8px] font-display text-white/30">
                             {sobrenome(lutador.nome).slice(0, 2).toUpperCase()}

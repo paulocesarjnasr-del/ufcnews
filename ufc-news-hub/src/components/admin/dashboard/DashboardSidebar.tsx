@@ -37,7 +37,7 @@ const NAV_ITEMS: NavItem[] = [
   { id: 'overview', label: 'Overview', icon: LayoutDashboard },
   { id: 'clientes', label: 'Clientes', icon: Users },
   { id: 'card-monitor', label: 'Card Monitor', icon: Shield },
-  { id: 'pipeline', label: 'Pipeline', icon: GitBranch },
+  { id: 'pipeline', label: 'Pipeline Clientes', icon: GitBranch },
   { id: 'ai-company', label: 'AI Company', icon: Bot },
   { id: 'landing-page', label: 'Landing Page', icon: Earth },
   { id: 'site-vercel', label: 'Site / Vercel', icon: Server },

@@ -1,110 +1,118 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { useAdminAuth } from '../../AdminAuthContext';
 import {
   GitBranch,
   CheckCircle2,
   Circle,
-  Loader2,
-  RefreshCw,
-  AlertCircle,
-  Search,
-  Swords,
-  ShieldCheck,
   FileText,
+  Swords,
+  Scale,
+  Trophy,
+  RotateCcw,
   type LucideIcon,
 } from 'lucide-react';
 
-interface PipelineStep {
+interface PipelineItem {
   id: string;
-  nome: string;
-  status: 'completed' | 'running' | 'pending' | 'failed';
-  detalhes: string;
+  label: string;
+  descricao: string;
+  icon: LucideIcon;
+  done: boolean;
 }
 
-interface PipelineData {
-  evento: {
-    id: string;
-    nome: string;
-    data: string;
-    status: string;
-  } | null;
-  steps: PipelineStep[];
-  message?: string;
+const PIPELINE_STEPS: Omit<PipelineItem, 'done'>[] = [
+  {
+    id: 'analise',
+    label: 'Analise Pre-Fight',
+    descricao: 'Analise completa do card enviada ao cliente',
+    icon: FileText,
+  },
+  {
+    id: 'arena',
+    label: 'Abertura do Arena',
+    descricao: 'Liga aberta para espectadores do cliente',
+    icon: Swords,
+  },
+  {
+    id: 'weighins',
+    label: 'Analise Weigh-Ins',
+    descricao: 'Analise pos pesagem enviada ao cliente',
+    icon: Scale,
+  },
+  {
+    id: 'pos_card',
+    label: 'Analise Pos Card',
+    descricao: 'Analise pos evento + Creator Kit enviados',
+    icon: Trophy,
+  },
+];
+
+const STORAGE_KEY = 'pipeline-clientes-checklist';
+
+function getSegundaDaSemana(): string {
+  const d = new Date();
+  const day = d.getDay();
+  const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+  d.setDate(diff);
+  return d.toISOString().split('T')[0];
 }
 
-const STEP_ICONS: Record<string, LucideIcon> = {
-  'card-scraper': Search,
-  'fight-analyst-main': Swords,
-  'fight-analyst-prelims': Swords,
-  'card-validator': ShieldCheck,
-  'event-page': FileText,
-};
-
-function getStatusColor(status: PipelineStep['status']) {
-  switch (status) {
-    case 'completed': return 'text-emerald-400 border-emerald-400/30 bg-emerald-400/5';
-    case 'running': return 'text-blue-400 border-blue-400/30 bg-blue-400/5';
-    case 'pending': return 'text-gray-500 border-[#1e1e2e] bg-transparent';
-    case 'failed': return 'text-red-400 border-red-400/30 bg-red-400/5';
+function loadState(): Record<string, boolean> {
+  if (typeof window === 'undefined') return {};
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return {};
+    const parsed = JSON.parse(raw) as { semana: string; checks: Record<string, boolean> };
+    // Reset if it's a new week
+    if (parsed.semana !== getSegundaDaSemana()) return {};
+    return parsed.checks;
+  } catch {
+    return {};
   }
 }
 
-function getStatusIcon(status: PipelineStep['status']) {
-  switch (status) {
-    case 'completed': return <CheckCircle2 className="w-5 h-5 text-emerald-400" />;
-    case 'running': return <Loader2 className="w-5 h-5 text-blue-400 animate-spin" />;
-    case 'pending': return <Circle className="w-5 h-5 text-gray-600" />;
-    case 'failed': return <AlertCircle className="w-5 h-5 text-red-400" />;
-  }
+function saveState(checks: Record<string, boolean>) {
+  if (typeof window === 'undefined') return;
+  localStorage.setItem(STORAGE_KEY, JSON.stringify({
+    semana: getSegundaDaSemana(),
+    checks,
+  }));
 }
 
 export function PipelineSection() {
-  const { authFetch } = useAdminAuth();
-  const [data, setData] = useState<PipelineData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const fetchPipeline = useCallback(async () => {
-    try {
-      const res = await authFetch('/api/admin/pipeline');
-      if (!res.ok) throw new Error('Falha ao buscar pipeline');
-      const result: PipelineData = await res.json();
-      setData(result);
-      setError(null);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro desconhecido');
-    } finally {
-      setLoading(false);
-    }
-  }, [authFetch]);
+  const [checks, setChecks] = useState<Record<string, boolean>>({});
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    fetchPipeline();
-  }, [fetchPipeline]);
+    setChecks(loadState());
+    setMounted(true);
+  }, []);
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <Loader2 className="w-6 h-6 animate-spin text-ufc-red" />
-      </div>
-    );
-  }
+  const toggle = useCallback((id: string) => {
+    setChecks((prev) => {
+      const next = { ...prev, [id]: !prev[id] };
+      saveState(next);
+      return next;
+    });
+  }, []);
 
-  if (error) {
-    return (
-      <div className="text-center py-12">
-        <p className="text-red-400 mb-4">{error}</p>
-        <button onClick={() => { setLoading(true); fetchPipeline(); }} className="neu-button px-4 py-2 text-sm text-ufc-red">
-          Tentar novamente
-        </button>
-      </div>
-    );
-  }
+  const resetAll = useCallback(() => {
+    const empty: Record<string, boolean> = {};
+    saveState(empty);
+    setChecks(empty);
+  }, []);
 
-  const completedCount = data?.steps.filter(s => s.status === 'completed').length || 0;
-  const totalSteps = data?.steps.length || 0;
+  const items: PipelineItem[] = PIPELINE_STEPS.map((step) => ({
+    ...step,
+    done: checks[step.id] || false,
+  }));
+
+  const completedCount = items.filter((i) => i.done).length;
+  const totalSteps = items.length;
+  const percentual = Math.round((completedCount / totalSteps) * 100);
+
+  if (!mounted) return null;
 
   return (
     <div className="space-y-6">
@@ -113,102 +121,122 @@ export function PipelineSection() {
         <div>
           <div className="flex items-center gap-3 mb-2">
             <GitBranch className="h-5 w-5 text-ufc-red" />
-            <h2 className="font-display text-2xl text-white tracking-wide">Pipeline Semanal</h2>
+            <h2 className="font-display text-2xl text-white tracking-wide">Pipeline Clientes</h2>
           </div>
           <p className="text-sm text-gray-500">
-            Status do pipeline de analises para o proximo evento.
+            Checklist semanal de entregas para clientes. Reseta automaticamente toda segunda.
           </p>
         </div>
         <button
-          onClick={() => { setLoading(true); fetchPipeline(); }}
+          onClick={resetAll}
           className="neu-button px-3 py-2 text-sm text-gray-400 hover:text-ufc-red transition-colors flex items-center gap-2"
+          title="Resetar checklist"
         >
-          <RefreshCw className="w-4 h-4" />
+          <RotateCcw className="w-4 h-4" />
         </button>
       </div>
 
-      {/* Event Info */}
-      {data?.evento ? (
-        <div className="neu-card p-5 border border-ufc-red/10">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs text-gray-500 uppercase mb-1">Evento Alvo</p>
-              <p className="text-white font-semibold">{data.evento.nome}</p>
-              <p className="text-xs text-gray-400 mt-1">
-                {new Date(data.evento.data).toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })}
-              </p>
-            </div>
-            <div className="text-right">
-              <p className="text-sm text-gray-400">{completedCount}/{totalSteps} etapas</p>
-              <div className="w-32 h-2 bg-[#1e1e2e] rounded-full mt-2 overflow-hidden">
-                <div
-                  className="h-full bg-ufc-red rounded-full transition-all duration-500"
-                  style={{ width: totalSteps > 0 ? `${(completedCount / totalSteps) * 100}%` : '0%' }}
-                />
-              </div>
-            </div>
+      {/* Progress */}
+      <div className="neu-card p-5 border border-ufc-red/10">
+        <div className="flex items-center justify-between mb-3">
+          <div>
+            <p className="text-xs text-gray-500 uppercase mb-1">Semana Atual</p>
+            <p className="text-white font-semibold">
+              {new Date(getSegundaDaSemana() + 'T12:00:00').toLocaleDateString('pt-BR', { day: 'numeric', month: 'long' })}
+              {' - '}
+              {(() => {
+                const d = new Date(getSegundaDaSemana() + 'T12:00:00');
+                d.setDate(d.getDate() + 6);
+                return d.toLocaleDateString('pt-BR', { day: 'numeric', month: 'long' });
+              })()}
+            </p>
+          </div>
+          <div className="text-right">
+            <p className="text-2xl font-bold text-white">{completedCount}/{totalSteps}</p>
+            <p className="text-xs text-gray-500">concluidos</p>
           </div>
         </div>
-      ) : (
-        <div className="neu-card p-8 text-center">
-          <p className="text-gray-500">{data?.message || 'Nenhum evento proximo encontrado'}</p>
+        <div className="w-full h-3 bg-[#1e1e2e] rounded-full overflow-hidden">
+          <div
+            className={`h-full rounded-full transition-all duration-500 ${
+              percentual === 100 ? 'bg-emerald-500' : 'bg-ufc-red'
+            }`}
+            style={{ width: `${percentual}%` }}
+          />
         </div>
-      )}
+        {percentual === 100 && (
+          <p className="text-xs text-emerald-400 font-semibold mt-2 text-center">
+            Todas as entregas da semana concluidas!
+          </p>
+        )}
+      </div>
 
-      {/* Pipeline Steps */}
-      {data?.steps && data.steps.length > 0 && (
-        <div className="space-y-3">
-          {data.steps.map((step, index) => {
-            const Icon = STEP_ICONS[step.id] || Circle;
-            const colorClasses = getStatusColor(step.status);
+      {/* Checklist */}
+      <div className="space-y-3">
+        {items.map((item, index) => {
+          const Icon = item.icon;
+          const isDone = item.done;
 
-            return (
-              <div key={step.id} className="flex items-start gap-4">
-                {/* Connector line */}
-                <div className="flex flex-col items-center">
-                  <div className={`w-10 h-10 rounded-lg border flex items-center justify-center shrink-0 ${colorClasses}`}>
-                    {step.status === 'completed' || step.status === 'failed'
-                      ? getStatusIcon(step.status)
-                      : step.status === 'running'
-                      ? getStatusIcon(step.status)
-                      : <Icon className="w-5 h-5" />
-                    }
-                  </div>
-                  {index < data.steps.length - 1 && (
-                    <div className={`w-0.5 h-8 mt-1 ${
-                      step.status === 'completed' ? 'bg-emerald-400/30' : 'bg-[#1e1e2e]'
-                    }`} />
-                  )}
-                </div>
-
-                {/* Step content */}
-                <div className={`neu-card p-4 flex-1 border ${
-                  step.status === 'completed' ? 'border-emerald-400/10' :
-                  step.status === 'running' ? 'border-blue-400/20' :
-                  step.status === 'failed' ? 'border-red-400/20' :
-                  'border-[#1e1e2e]'
+          return (
+            <button
+              key={item.id}
+              onClick={() => toggle(item.id)}
+              className={`w-full text-left flex items-start gap-4 transition-all ${
+                isDone ? 'opacity-80' : ''
+              }`}
+            >
+              {/* Step indicator */}
+              <div className="flex flex-col items-center">
+                <div className={`w-12 h-12 rounded-xl border-2 flex items-center justify-center shrink-0 transition-all duration-300 ${
+                  isDone
+                    ? 'border-emerald-500/40 bg-emerald-500/10'
+                    : 'border-[#2a2a3a] bg-[#12121a] hover:border-ufc-red/30'
                 }`}>
-                  <div className="flex items-center justify-between mb-1">
-                    <h4 className="text-sm font-semibold text-white">{step.nome}</h4>
-                    <span className={`text-[10px] font-bold uppercase ${
-                      step.status === 'completed' ? 'text-emerald-400' :
-                      step.status === 'running' ? 'text-blue-400' :
-                      step.status === 'failed' ? 'text-red-400' :
-                      'text-gray-600'
-                    }`}>
-                      {step.status === 'completed' ? 'CONCLUIDO' :
-                       step.status === 'running' ? 'EM ANDAMENTO' :
-                       step.status === 'failed' ? 'FALHOU' :
-                       'PENDENTE'}
-                    </span>
-                  </div>
-                  <p className="text-xs text-gray-400">{step.detalhes}</p>
+                  {isDone
+                    ? <CheckCircle2 className="w-6 h-6 text-emerald-400" />
+                    : <Icon className="w-5 h-5 text-gray-500" />
+                  }
                 </div>
+                {index < items.length - 1 && (
+                  <div className={`w-0.5 h-6 mt-1 transition-colors ${
+                    isDone ? 'bg-emerald-500/30' : 'bg-[#1e1e2e]'
+                  }`} />
+                )}
               </div>
-            );
-          })}
-        </div>
-      )}
+
+              {/* Content */}
+              <div className={`neu-card p-4 flex-1 border transition-all duration-300 ${
+                isDone
+                  ? 'border-emerald-500/20 bg-emerald-500/5'
+                  : 'border-[#1e1e2e] hover:border-ufc-red/20'
+              }`}>
+                <div className="flex items-center justify-between mb-1">
+                  <h4 className={`text-sm font-semibold transition-colors ${
+                    isDone ? 'text-emerald-300' : 'text-white'
+                  }`}>
+                    {item.label}
+                  </h4>
+                  <span className={`text-[10px] font-bold uppercase ${
+                    isDone ? 'text-emerald-400' : 'text-gray-600'
+                  }`}>
+                    {isDone ? 'CONCLUIDO' : 'PENDENTE'}
+                  </span>
+                </div>
+                <p className={`text-xs ${isDone ? 'text-gray-500 line-through' : 'text-gray-400'}`}>
+                  {item.descricao}
+                </p>
+              </div>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Info */}
+      <div className="neu-inset p-4 text-center">
+        <p className="text-[10px] text-gray-600 uppercase tracking-wider">
+          Clique em cada etapa para marcar como concluida. O checklist reseta automaticamente toda segunda-feira.
+        </p>
+      </div>
     </div>
   );
 }

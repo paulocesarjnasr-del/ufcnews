@@ -151,9 +151,9 @@ export default function EnterprisePage() {
                 <p className="mt-1 text-[10px] uppercase tracking-wider text-neutral-400">Sections Per Fight</p>
               </div>
               <div className="text-center">
-                <p className="font-display text-3xl text-amber-400 md:text-4xl">71%</p>
+                <p className="font-display text-3xl text-amber-400 md:text-4xl">78%</p>
                 <p className="mt-1 text-[10px] uppercase tracking-wider text-neutral-400">Prediction Accuracy</p>
-                <p className="mt-0.5 text-[9px] text-neutral-500">Tracked and audited publicly after every event</p>
+                <p className="mt-0.5 text-[9px] text-neutral-500">21/27 winners across 2 events, tracked and audited publicly</p>
               </div>
               <div className="text-center">
                 <p className="font-display text-3xl text-emerald-400 md:text-4xl">0h</p>
@@ -299,7 +299,7 @@ export default function EnterprisePage() {
           <div>
             <PipelineStep num="05" icon={Brain} title="Analysis Generation" description="15 modular sections per fight: hero, narrative, stats comparison, skill profiles, win distribution, danger zones, victory paths, prediction, and more." detail="Each section has its own data contract and validation schema" />
             <PipelineStep num="06" icon={Shield} title="Mechanical Validation" description="7 automated checks per analysis: file exists, fighter names match, view type correct, event consistency, no duplicates." detail="If validation fails, the specific fight is re-analyzed automatically" />
-            <PipelineStep num="07" icon={Target} title="Prediction Tracking" description="Every prediction is tracked against real results. Our accuracy is audited publicly after every event." detail="71% winner accuracy on the last card. Full transparency, no cherry-picking." />
+            <PipelineStep num="07" icon={Target} title="Prediction Tracking" description="Every prediction is tracked against real results. Our accuracy is audited publicly after every event." detail="78% winner accuracy across 27 fights (2 events). Full transparency, no cherry-picking." />
             <PipelineStep num="08" icon={FileText} title="Creator Kit Generation" description="Ready-to-publish content for 5 platforms: Instagram, Twitter/X, YouTube, TikTok, Podcast. Copy, paste, post." detail="Each platform gets format-optimized content with character counts and B-roll suggestions" />
           </div>
         </div>
@@ -713,7 +713,7 @@ export default function EnterprisePage() {
           />
           <FAQ
             q="How accurate are the predictions?"
-            a="71% winner accuracy on the last card (UFC Vegas 114). We track and publish our accuracy after every event in the Model Autopsy section. When we're wrong, we explain exactly why and how we're improving the model. Full transparency, no cherry-picking."
+            a="78% winner accuracy across our last 2 events (21 of 27 fights correct). UFC London: 85% (11/13). UFC Vegas 114: 71% (10/14). We track and publish our accuracy after every event in the Model Autopsy section. When we're wrong, we explain exactly why. Full transparency, no cherry-picking."
           />
           <FAQ
             q="Can I use this content as if it were my own?"

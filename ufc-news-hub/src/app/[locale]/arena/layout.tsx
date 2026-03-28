@@ -3,7 +3,6 @@
 import { Link } from '@/i18n/routing';
 import { Target, Trophy } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { Header } from '@/components/ui/Header';
 import { UserAvatar } from '@/components/arena/UserAvatar';
 import { BottomNav } from '@/components/arena/BottomNav';
 import { useArenaAuth } from '@/hooks/useArenaAuth';
@@ -16,11 +15,8 @@ export default function ArenaLayout({ children }: { children: React.ReactNode })
 
   return (
     <>
-      {/* Global Header */}
-      <Header />
-
-      {/* Arena Sub-Header */}
-      <div className="sticky top-16 z-40 w-full bg-dark-bg/80 backdrop-blur-md border-b border-dark-border/50">
+      {/* Arena Header */}
+      <div className="sticky top-0 z-40 w-full bg-dark-bg/80 backdrop-blur-md border-b border-dark-border/50">
         <div className="container mx-auto flex h-12 items-center justify-between px-4">
           {/* Left: Arena UFC logo */}
           <Link href="/arena" className="flex items-center gap-2 group">

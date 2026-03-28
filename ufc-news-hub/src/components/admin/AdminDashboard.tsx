@@ -26,7 +26,7 @@ const VIEWS = [
   { id: 'logs' as ViewType, label: 'Tasks', icon: ScrollText },
 ];
 
-export function AdminDashboard() {
+export function AICompanyContent() {
   const { authFetch } = useAdminAuth();
   const [agents, setAgents] = useState<Record<string, Agent>>({});
   const [selectedAgent, setSelectedAgent] = useState<string | null>(null);
@@ -575,4 +575,9 @@ export function AdminDashboard() {
       )}
     </div>
   );
+}
+
+// Backward-compatible wrapper
+export function AdminDashboard() {
+  return <AICompanyContent />;
 }

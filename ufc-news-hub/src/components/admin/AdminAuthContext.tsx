@@ -43,9 +43,11 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
       .then((res) => {
         if (res.ok) {
           tokenRef.current = saved;
+          document.cookie = `admin_token=${saved}; path=/; max-age=28800; SameSite=Lax`;
           setToken(saved);
         } else {
           sessionStorage.removeItem('admin_token');
+          document.cookie = 'admin_token=; path=/; max-age=0';
         }
       })
       .catch(() => {
@@ -70,6 +72,7 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
 
       tokenRef.current = data.token;
       sessionStorage.setItem('admin_token', data.token);
+      document.cookie = `admin_token=${data.token}; path=/; max-age=28800; SameSite=Lax`;
       setToken(data.token);
       return { ok: true };
     } catch {
@@ -87,6 +90,7 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
     }
     tokenRef.current = null;
     sessionStorage.removeItem('admin_token');
+    document.cookie = 'admin_token=; path=/; max-age=0';
     setToken(null);
   }, []);
 

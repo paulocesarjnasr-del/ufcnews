@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import type { FullSingleAnalise } from '@/types/analise';
 import { getLabels, type Lang } from '@/lib/i18n-labels';
 import { HeroSection } from './HeroSection';
@@ -30,7 +31,7 @@ export function FullAnalysisView({ analise, lang = 'pt' }: { analise: FullSingle
       {/* Breadcrumb */}
       <div className="mx-auto max-w-5xl px-4 pt-6">
         <div className="mb-6 flex items-center gap-2 text-xs text-white/30">
-          <a href="/" className="hover:text-ufc-red transition-colors">Home</a>
+          <Link href="/" className="hover:text-ufc-red transition-colors">Home</Link>
           <span className="text-white/10">/</span>
           <span className="text-white/50">{f1Name} vs {f2Name}</span>
         </div>
@@ -43,7 +44,7 @@ export function FullAnalysisView({ analise, lang = 'pt' }: { analise: FullSingle
 
       <div className="mx-auto max-w-5xl px-4 py-16 space-y-20">
         {/* Section 2: Narrativa */}
-        <NarrativaSection data={d.narrativa} fighter1Name={f1Name} fighter2Name={f2Name} lang={lang} />
+        <NarrativaSection data={d.narrativa} fighter1Name={f1Name} fighter2Name={f2Name} />
 
         {/* Section 3: Momento Atual */}
         <MomentoAtualSection data={d.momento_atual} lang={lang} />
@@ -52,7 +53,7 @@ export function FullAnalysisView({ analise, lang = 'pt' }: { analise: FullSingle
         <NivelCompeticaoSection data={d.nivel_competicao} lang={lang} />
 
         {/* Section 5: Oponente em Comum (optional) */}
-        {d.oponente_comum && <OponenteComumSection data={d.oponente_comum} lang={lang} />}
+        {d.oponente_comum && <OponenteComumSection data={d.oponente_comum} />}
 
         {/* Section 6: Comparacao Estatistica */}
         <ComparacaoEstatisticaSection data={d.comparacao_estatistica} fighter1Name={f1Name} fighter2Name={f2Name} lang={lang} />
@@ -64,7 +65,7 @@ export function FullAnalysisView({ analise, lang = 'pt' }: { analise: FullSingle
         <DistribuicaoVitoriasSection data={d.distribuicao_vitorias} lang={lang} />
 
         {/* Section 9: Danger Zones */}
-        <DangerZonesSection data={d.danger_zones} lang={lang} />
+        <DangerZonesSection data={d.danger_zones} />
 
         {/* Section 10: Fatores Invisiveis & Red Flags */}
         <IntangiveisSection data={d.intangiveis} lang={lang} />
@@ -76,7 +77,7 @@ export function FullAnalysisView({ analise, lang = 'pt' }: { analise: FullSingle
         <PrevisaoFinalSection data={d.previsao_final} lang={lang} />
 
         {/* Section 13: O Que Observar */}
-        <OQueObservarSection data={d.o_que_observar} lang={lang} />
+        <OQueObservarSection data={d.o_que_observar} />
 
         {/* Section 14: Creator Kit */}
         <CreatorKitSection data={d.creator_kit} lang={lang} />
